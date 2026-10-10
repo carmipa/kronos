@@ -408,8 +408,15 @@ public class ValidadorTraducaoService {
     // No 08th custou 1 das 10 falas vazias da rodada de 2026-07-28. Note que o sujeito vem
     // ANTES do verbo ("Eles disseram"), então o padrão precisa aceitar o pronome opcional —
     // casar só o verbo deixaria os dois casos reais de fora.
+    //
+    // A ASPA DE ABERTURA também não muda nada (10/10/2026, medido nas 116 recusas reais do console):
+    //   EN "\"Warning \" A large number of Gauna Pods..."  PT "\"Aviso: Um grande número de pods..."
+    //   EN "\"Warning \" The Large Gauna Cluster..."       PT "\"Atenção: O Grande Aglomerado..."
+    // "Aviso:" e "Atenção:" já eram aceitos; a âncora ^ é que não deixava a aspa vir antes. E o
+    // "Eu repito:" de "I say again," caía porque "repito" estava aqui e o pronome só na lista de
+    // verbos — o mesmo verbo já valia como "repetiu" com pronome.
     private static final Pattern PADRAO_CONECTIVO_DISCURSO = Pattern.compile(
-        "^(?:repito|aten[çc][ãa]o|aviso|nota|observa[çc][ãa]o|ou seja|isto|isso|ent[ãa]o|bem|sim|"
+        "^[\"'“”«‘’]?\\s*(?:repito|aten[çc][ãa]o|aviso|nota|observa[çc][ãa]o|ou seja|isto|isso|ent[ãa]o|bem|sim|"
             + "n[ãa]o|mas|ah|oh|ei|olha|escuta|escute|veja|ora"
             + "|(?:(?:ele|ela|eles|elas|voc[êe]|voc[êe]s|eu|n[óo]s)\\s+)?"
             // Pronome oblíquo OPCIONAL entre sujeito e verbo: "Ela O saudara com", "Ele ME
@@ -418,7 +425,7 @@ public class ValidadorTraducaoService {
             + "(?:(?:o|a|os|as|lhe|lhes|me|te|nos|vos)\\s+)?"
             + "(?:disse|disseram|dizia|diziam|falou|falaram|respondeu|responderam|"
             + "gritou|gritaram|perguntou|perguntaram|avisou|avisaram|contou|contaram|"
-            + "explicou|explicaram|repetiu|repetiram|pensou|pensaram"
+            + "explicou|explicaram|repetiu|repetiram|repito|repetimos|pensou|pensaram"
             // Terceira leva, 14/08/2026, medida no 86: duas falas viraram pendência por aqui,
             // e as duas eram tradução CORRETA de conectivo que existe no original.
             //   ep 07  EN "She means, ..."          PT "Ela quer dizer: \"Depois que fomos mortos.\""
@@ -876,8 +883,104 @@ public class ValidadorTraducaoService {
         if (ehDiscursoRelatadoDoOriginal(m.group(1), original)) {
             return false;
         }
+        if (soAcrescentouPontuacao(original, traduzido)) {
+            return false;
+        }
+        if (ehCartaoDeTituloNumerado(m.group(1), m.group(2), original)) {
+            return false;
+        }
         boolean temConteudoDepois = !m.group(2).trim().isEmpty();
         return temConteudoDepois || !prefixoVemDoOriginal(m.group(1), original);
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: aceita a fala em que a tradução NÃO acrescentou palavra nenhuma — só
+     * pontuação. {@code "Próximo Episódio Partida"} revisado como {@code "Próximo Episódio:
+     * Partida"} era recusado como locutor inventado (medido nas 116 recusas reais do console, em
+     * 10/10/2026) e a fala voltava ao texto anterior. Sem palavra nova, não há locutor inventado.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: exige a MESMA sequência de palavras, na mesma ordem, depois da
+     * normalização de ancoragem (sem acento, sem caixa, sem pontuação). Reordenar não conta: {@code
+     * "Os Olhos de Scirocco"} virado em {@code "Scirocco: \"Olhos de Scirocco\""} tem só palavras
+     * do original e INVENTA o falante — é recusado, como {@code "Sombra de Reccoa"} → {@code
+     * "Reccoa: Sombra"}.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: texto que normaliza para vazio devolve {@code false} (a
+     * regra de cima decide); nunca lança.
+     */
+    private boolean soAcrescentouPontuacao(String original, String traduzido) {
+        String o = normalizarParaAncoragem(original);
+        return !o.isEmpty() && o.equals(normalizarParaAncoragem(traduzido));
+    }
+
+    /**
+     * Rótulos de cartão de título, PAREADOS português → inglês. Lista fechada de propósito: rótulo
+     * fora dela continua recusado (o comportamento de antes), nunca aceito por engano.
+     */
+    private static final java.util.Map<String, String> ROTULO_DE_TITULO_PT_EN = java.util.Map.of(
+        "livro", "book", "capitulo", "chapter", "parte", "part", "episodio", "episode",
+        "volume", "volume", "ato", "act", "fase", "phase", "missao", "mission");
+
+    /** Numerais de 1 a 12, por extenso (PT e EN, já sem acento) e em romano. */
+    private static final java.util.Map<String, Integer> NUMERAL_POR_EXTENSO = java.util.Map.ofEntries(
+        java.util.Map.entry("um", 1), java.util.Map.entry("uma", 1), java.util.Map.entry("one", 1),
+        java.util.Map.entry("dois", 2), java.util.Map.entry("duas", 2), java.util.Map.entry("two", 2),
+        java.util.Map.entry("tres", 3), java.util.Map.entry("three", 3),
+        java.util.Map.entry("quatro", 4), java.util.Map.entry("four", 4),
+        java.util.Map.entry("cinco", 5), java.util.Map.entry("five", 5),
+        java.util.Map.entry("seis", 6), java.util.Map.entry("six", 6),
+        java.util.Map.entry("sete", 7), java.util.Map.entry("seven", 7),
+        java.util.Map.entry("oito", 8), java.util.Map.entry("eight", 8),
+        java.util.Map.entry("nove", 9), java.util.Map.entry("nine", 9),
+        java.util.Map.entry("dez", 10), java.util.Map.entry("ten", 10),
+        java.util.Map.entry("onze", 11), java.util.Map.entry("eleven", 11),
+        java.util.Map.entry("doze", 12), java.util.Map.entry("twelve", 12),
+        java.util.Map.entry("i", 1), java.util.Map.entry("ii", 2), java.util.Map.entry("iii", 3),
+        java.util.Map.entry("iv", 4), java.util.Map.entry("v", 5), java.util.Map.entry("vi", 6),
+        java.util.Map.entry("vii", 7), java.util.Map.entry("viii", 8), java.util.Map.entry("ix", 9),
+        java.util.Map.entry("x", 10), java.util.Map.entry("xi", 11), java.util.Map.entry("xii", 12));
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: aceita o CARTÃO DE TÍTULO numerado — {@code "Book One The Time of
+     * Awakening"} traduzido como {@code "Livro Um: O Tempo do Despertar"}. O inglês do cartão não
+     * tem pontuação entre rótulo e título; o português pede os dois-pontos, e a regra lia isso como
+     * falante inventado. Medido nas 116 recusas reais do console (10/10/2026): {@code Livro Um} e
+     * {@code Livro Três}, as duas voltando ao inglês na legenda.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: exige as TRÊS âncoras no original — o rótulo inglês pareado com o
+     * do prefixo como 1ª palavra, o MESMO número como 2ª, e ao menos uma palavra de título depois.
+     * Por isso {@code "Episode 2"} traduzido como {@code "Episódio 2: Eu não entendo..."} continua
+     * recusado (o original não tem título: a fala foi inventada), {@code "Livro Dois:"} para
+     * {@code "Book One"} também, e {@code "Gryps 2: Energia crítica!"} não é cartão (o rótulo não
+     * é de título).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: qualquer âncora ausente devolve {@code false} — a acusação
+     * permanece; nunca lança.
+     */
+    private boolean ehCartaoDeTituloNumerado(String prefixo, String depois, String original) {
+        if (depois == null || depois.isBlank()) {
+            return false;
+        }
+        String[] p = normalizarParaAncoragem(prefixo).split(" ");
+        String[] o = normalizarParaAncoragem(original).split(" ");
+        if (p.length != 2 || o.length < 3) {
+            return false;
+        }
+        String rotuloEn = ROTULO_DE_TITULO_PT_EN.get(p[0]);
+        Integer numero = valorDoNumeral(p[1]);
+        return rotuloEn != null && rotuloEn.equals(o[0]) && numero != null
+            && numero.equals(valorDoNumeral(o[1]));
+    }
+
+    /**
+     * Valor de um numeral já normalizado (dígitos, extenso PT/EN ou romano); {@code null} quando a
+     * palavra não é numeral — e {@code null} nunca casa com nada.
+     */
+    private static Integer valorDoNumeral(String palavra) {
+        if (palavra.matches("\\d{1,3}")) {
+            return Integer.valueOf(palavra);
+        }
+        return NUMERAL_POR_EXTENSO.get(palavra);
     }
 
     /** Prefixo de DUAS palavras: um nome e um verbo de elocução em português ("Rygart exclamou"). */

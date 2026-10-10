@@ -114,4 +114,66 @@ class OracaoNaoEhRotuloDeFalanteTest {
             () -> validador.validarPar("Chuchumy is here.", "Chuchumy diz: Estou aqui."),
             "CONTROLE: o nome esta no original sem verbo de elocucao — o 'diz' foi inventado");
     }
+
+    /**
+     * As seis traduções CORRETAS que ainda eram recusadas entre as 116 recusas reais do console
+     * (10/10/2026, {@code MedicaoRecusaLocutorNoLogIT}), byte a byte como o log as registrou — e,
+     * para cada classe, o controle com o MESMO sinal que tem de continuar recusado. Critério
+     * declarado antes da mudança: virar exatamente estas seis e nenhuma das outras 71.
+     */
+    @Test
+    @DisplayName("as seis recusas legítimas do console passam; o mesmo sinal inventado continua recusado")
+    void asSeisRecusasLegitimasDoConsole() {
+        // Conectivo depois da aspa de abertura.
+        assertDoesNotThrow(() -> validador.validarPar(
+            "\"Warning \" A large number of Gauna Pods are heading for Lem!",
+            "\"Aviso: Um grande número de pods Gauna está dirigindo-se para Lem!\""));
+        assertDoesNotThrow(() -> validador.validarPar(
+            "\"Warning \" The Large Gauna Cluster is sending Gauna to Lem!",
+            "\"Atenção: O Grande Aglomerado Gauna está enviando Gaunas para Lem!\""));
+        recusadoPorLocutor(
+            () -> validador.validarPar("Fire the cannon now!", "\"Narrador: Dispare o canhão agora!\""),
+            "CONTROLE: a aspa de abertura nao transforma rotulo em conectivo");
+
+        // Pronome + verbo de repetição.
+        assertDoesNotThrow(() -> validador.validarPar("I say again,", "Eu repito:"));
+        recusadoPorLocutor(
+            () -> validador.validarPar("Amuro logo vai acabar morto.", "Eu Kamille: Logo Amuro vai acabar morto."),
+            "CONTROLE: 'Eu' seguido de nome nao e conectivo");
+
+        // Só pontuação acrescentada, mesma sequência de palavras.
+        assertDoesNotThrow(() -> validador.validarPar("Próximo Episódio Partida", "Próximo Episódio: Partida"));
+        recusadoPorLocutor(
+            () -> validador.validarPar("Os Olhos de Scirocco", "Scirocco: \"Olhos de Scirocco\""),
+            "CONTROLE (log real): as palavras sao do original, mas reordenadas para inventar o falante");
+        recusadoPorLocutor(
+            () -> validador.validarPar("Sombra de Reccoa", "Reccoa: Sombra"),
+            "CONTROLE (log real): idem");
+
+        // Cartão de título numerado.
+        assertDoesNotThrow(() -> validador.validarPar(
+            "Book One The Time of Awakening", "Livro Um: O Tempo do Despertar"));
+        assertDoesNotThrow(() -> validador.validarPar(
+            "Book Three Scars from an Assassin's Blade", "Livro Três: Cicatrizes da Lâmina do Assassino"));
+        recusadoPorLocutor(
+            () -> validador.validarPar("Episode 2", "Episódio 2: Eu não entendo... Por que eles estão lutando?"),
+            "CONTROLE: o original nao tem titulo depois do numero — a fala foi inventada");
+        recusadoPorLocutor(
+            () -> validador.validarPar("Book One The Time of Awakening", "Livro Dois: O Tempo do Despertar"),
+            "CONTROLE: numero diferente nao e o mesmo cartao");
+        recusadoPorLocutor(
+            () -> validador.validarPar("Gryps 2 energia em estado crítico!", "Gryps 2: Energia crítica!"),
+            "CONTROLE (log real): numero no original e no prefixo, mas 'Gryps' nao e rotulo de titulo");
+    }
+
+    /**
+     * O controle só vale se a recusa vier DESTA regra: outra guarda disparando antes deixaria o
+     * teste verde sem provar nada sobre o locutor inventado.
+     */
+    private static void recusadoPorLocutor(org.junit.jupiter.api.function.Executable chamada, String motivo) {
+        RuntimeException recusa = assertThrows(RuntimeException.class, chamada, motivo);
+        org.junit.jupiter.api.Assertions.assertTrue(
+            recusa.getMessage() != null && recusa.getMessage().startsWith("Locutor/narração inventado"),
+            motivo + " — recusado por OUTRA causa: " + recusa.getMessage());
+    }
 }
