@@ -371,9 +371,15 @@ public class ValidadorTraducaoService {
      * Pergunta que o PT legítimo pode verter SEM "?": retórica de forma imperativa ("Would you
      * calm down?!" -> "Acalme-se!"), auxiliar negativo retórico ("Didn't I tell you...?!"),
      * suposição ("I suppose...?") e "I wonder" (vertido como "Eu me pergunto...").
+     *
+     * <p>"How about you" + VERBO é a mesma ordem disfarçada de "Why don't you": {@code "How about
+     * you GET THE HELL OFF?!"} vertido como {@code "E aí, você vai sair daqui agora mesmo!"} ficava
+     * pendente e saía em INGLÊS (Break Blade 3, 10/10/2026). Sem verbo depois, {@code "How about
+     * you?"} é pergunta de verdade ("E você?") e continua cobrada.
      */
     private static final Pattern PERGUNTA_RETORICA_EN = Pattern.compile(
         "^\\W*(?:would|will|could|can|won'?t)\\s+you\\b|^\\W*why\\s+don'?t\\s+you\\b|\\bI\\s+wonder\\b"
+            + "|^\\W*how\\s+about\\s+you\\s+\\p{L}"
             + "|^\\W*(?:didn'?t|don'?t|won'?t|wouldn'?t|can'?t|couldn'?t|isn'?t|aren'?t|wasn'?t|weren'?t"
             + "|haven'?t|hasn'?t|shouldn'?t|doesn'?t)\\b|^\\W*I\\s+(?:suppose|take\\s+it|guess)\\b",
         Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CHARACTER_CLASS);

@@ -114,6 +114,23 @@ class VerificadorIdentificadorNumericoTest {
             "numeralizar quantidade escrita por extenso é tradução legítima, não corrupção");
     }
 
+    /**
+     * Break Blade, filme 2 (10/10/2026): {@code "2,000 soldiers"} vertido como {@code "2 mil
+     * soldados"} ficava pendente e a fala saía em INGLÊS. Os dois lados da fronteira têm o mesmo
+     * sinal (algarismo + "mil"); só a conta separa.
+     */
+    @Test
+    @DisplayName("multiplicador por extenso: 2,000 -> 2 mil aceito; 3 mil e '2 soldados' reprovados")
+    void multiplicadorPorExtensoConfereAConta() {
+        assertNull(verificador.divergencia("We've already lost 2,000 soldiers.", "Já perdemos 2 mil soldados."));
+        assertNull(verificador.divergencia("1,500 Golems.", "1,5 mil Golems."));
+        assertNull(verificador.divergencia("2,000,000 people.", "2 milhões de pessoas."));
+        assertNotNull(verificador.divergencia("We've already lost 2,000 soldiers.", "Já perdemos 3 mil soldados."),
+            "CONTROLE: a conta nao fecha (3 x 1000 != 2000)");
+        assertNotNull(verificador.divergencia("We've already lost 2,000 soldiers.", "Já perdemos 2 soldados."),
+            "CONTROLE: sem o multiplicador, 2 continua sendo outro valor");
+    }
+
     @Test
     @DisplayName("sobrevive(): 500 não pode ser dado como presente dentro de 12500")
     void fronteiraDeDigitoValeNasDuasPontas() {

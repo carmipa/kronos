@@ -67,7 +67,8 @@ class ValidadorSentidoDaFalaTest {
         "\"His\"?|Dele.",
         "3:30? Only 30 minutes left!|Ainda faltam apenas 30 minutos!",
         "What good will creating Cyber-Newtypes do anyway?!|Criar Cyber-Newtypes só trará mais sofrimento!",
-        "A date? Be glad to!|Que bom, sim!"
+        "A date? Be glad to!|Que bom, sim!",
+        "How about you?|E você."
     })
     void perguntaPerdidaReprova(String original, String traduzido) {
         AlucinacaoDetectadaException e = assertThrows(AlucinacaoDetectadaException.class,
@@ -86,7 +87,8 @@ class ValidadorSentidoDaFalaTest {
         "Why are you allied with a Frankish warship?!|Por que você está aliado a um navio franco!",
         "I wonder if she made it to Earth all right?|Eu me pergunto se ela chegou à Terra bem.",
         "I suppose that means I'm not a fit commander?|Suponho que isso signifique que não sou um comandante à altura.",
-        "You're an accomplice, remember?!|Você é cúmplice, lembre-se!"
+        "You're an accomplice, remember?!|Você é cúmplice, lembre-se!",
+        "How about you GET THE HELL OFF?!|E aí, você vai sair daqui agora mesmo!"
     })
     void perguntaVertidaLegitimamentePassa(String original, String traduzido) {
         assertDoesNotThrow(() -> validador.validarPar(original, traduzido));

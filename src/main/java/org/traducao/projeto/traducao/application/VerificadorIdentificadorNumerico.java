@@ -154,7 +154,8 @@ public class VerificadorIdentificadorNumerico {
         List<String> perdidosReais = new ArrayList<>();
         for (String valor : perdidos) {
             if (!explicadoPorHorario(valor, original, naTraducao)
-                && !explicadoPorZeroDeOrdinal(valor, original, traduzido)) {
+                && !explicadoPorZeroDeOrdinal(valor, original, traduzido)
+                && !explicadoPorMultiplicadorPorExtenso(valor, traduzido)) {
                 perdidosReais.add(valor);
             }
         }
@@ -335,6 +336,53 @@ public class VerificadorIdentificadorNumerico {
             }
         }
         return true;
+    }
+
+    /** Algarismo seguido do multiplicador por extenso: {@code 2 mil}, {@code 1,5 milhão}, {@code 3 bilhões}. */
+    private static final Pattern MULTIPLICADOR_POR_EXTENSO = Pattern.compile(
+        "(?<![\\d.,])(\\d+(?:[.,]\\d+)?)\\s*(mil|milh[ãa]o|milh[õo]es|bilh[ãa]o|bilh[õo]es)(?!\\p{L})",
+        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: decide se um número que sumiu da tradução foi apenas escrito com o
+     * multiplicador POR EXTENSO — {@code "2,000 soldiers"} virando {@code "2 mil soldados"} —, que
+     * é o português corrente, e não substituído por outro valor.
+     *
+     * <h2>O prejuízo medido — 10/10/2026</h2>
+     * Break Blade, filme 2: {@code "We've already lost 2,000 soldiers."} ficou pendente com
+     * "original tem [2000], tradução tem [2]" e a fala foi publicada em INGLÊS. A guarda lia o
+     * {@code 2} de {@code "2 mil"} como valor estranho.
+     *
+     * <h2>Invariantes do domínio</h2>
+     * <ul>
+     *   <li>A equivalência é ARITMÉTICA e conferida: {@code 2 × 1000 == 2000}. {@code "3 mil"}
+     *       para {@code 2,000} não casa e continua reprovando.</li>
+     *   <li>Só vale com o multiplicador escrito colado ao algarismo ({@code mil}, {@code milhão},
+     *       {@code bilhão} e plurais). {@code "2 soldados"} para {@code 2,000} continua reprovando.</li>
+     * </ul>
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: valor não numérico ou qualquer dúvida devolve
+     * {@code false}, e o valor volta a contar como perdido. Não lança.
+     */
+    private static boolean explicadoPorMultiplicadorPorExtenso(String perdido, String traduzido) {
+        java.math.BigDecimal alvo;
+        try {
+            alvo = new java.math.BigDecimal(perdido);
+        } catch (NumberFormatException naoNumerico) {
+            return false;
+        }
+        java.util.regex.Matcher achado = MULTIPLICADOR_POR_EXTENSO.matcher(traduzido);
+        while (achado.find()) {
+            String palavra = achado.group(2).toLowerCase(java.util.Locale.ROOT);
+            java.math.BigDecimal fator = palavra.startsWith("bilh") ? java.math.BigDecimal.TEN.pow(9)
+                : palavra.startsWith("milh") ? java.math.BigDecimal.TEN.pow(6)
+                : java.math.BigDecimal.TEN.pow(3);
+            java.math.BigDecimal base = new java.math.BigDecimal(achado.group(1).replace(',', '.'));
+            if (base.multiply(fator).compareTo(alvo) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** A tradução traz o valor em algarismos, com ou sem zero à esquerda? */
