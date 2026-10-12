@@ -12,6 +12,8 @@ import org.traducao.projeto.traducaoKaraoke.domain.FontesDoVideo;
 import org.traducao.projeto.traducaoKaraoke.domain.ports.FontesEmbutidasPort;
 
 import java.awt.Font;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -36,6 +39,11 @@ import java.util.stream.Stream;
  * O leitor do Java deu, nas fontes do Unicorn e do 86 Parte 2, o mesmo resultado que o fontTools:
  * Dash Horizon sem {@code á à â ã é ê í ó ô õ ú ç ? ! . ,} e Conformity sem {@code á à â ã é ê í ó
  * ô õ ú ç}; Gandhi Sans, Althea, Androgyne e Fertigo Pro completas.
+ *
+ * <p><b>O que o {@code canDisplay} não vê, medido no mesmo dia:</b> a "Complete in Him" do
+ * encerramento do Guilty Crown MAPEIA as letras acentuadas — só que para glifos sem contorno. O
+ * leitor dizia "desenha", e a tela mostrava um buraco no lugar do acento. Por isso "sem desenho"
+ * também é glifo mapeado e vazio.
  *
  * <p>INVARIANTES DO DOMÍNIO: só lê o vídeo. A pasta temporária é apagada no fim de toda chamada,
  * com sucesso ou não. Cada fonte é indexada pela FAMÍLIA e pelo NOME completo, em minúscula —
@@ -163,7 +171,9 @@ public class FontesEmbutidasMkvAdapter implements FontesEmbutidasPort {
 
     /** A cobertura respondida pelas fontes que o Java conseguiu abrir. */
     static final class CoberturaAwt implements CoberturaDeFontes {
+        private static final FontRenderContext SEM_TELA = new FontRenderContext(null, false, false);
         private final Map<String, Font> porNome;
+        private final Map<String, Boolean> contornoVazio = new ConcurrentHashMap<>();
 
         CoberturaAwt(Map<String, Font> porNome) {
             this.porNome = Map.copyOf(porNome);
@@ -184,11 +194,47 @@ public class FontesEmbutidasMkvAdapter implements FontesEmbutidasPort {
             }
             StringBuilder faltam = new StringBuilder();
             texto.codePoints().distinct().forEach(cp -> {
-                if (!Character.isWhitespace(cp) && !Character.isISOControl(cp) && !fonte.canDisplay(cp)) {
+                if (!Character.isWhitespace(cp) && !Character.isISOControl(cp) && semDesenho(fonte, cp)) {
                     faltam.appendCodePoint(cp);
                 }
             });
             return Optional.of(faltam.toString());
+        }
+
+        /**
+         * PROPÓSITO DE NEGÓCIO: responde se a fonte deixa um buraco no lugar do caractere — porque
+         * não o mapeia, ou porque o mapeia para um glifo SEM CONTORNO. Medido em 12/10/2026 no
+         * encerramento do Guilty Crown: a "Complete in Him" aponta á, ã, ê, ç... para glifos vazios
+         * (0 contornos, largura normal), o {@code canDisplay} respondia "desenha", a fonte não era
+         * trocada e a tela mostrava "prezado por voc ." no lugar de "você".
+         *
+         * <p>INVARIANTES DO DOMÍNIO: caractere invisível por natureza (separador, formatação como o
+         * U+200B) nunca conta como falta, mesmo com glifo vazio. Cada (fonte, caractere) é medido
+         * uma vez por leitura do vídeo.
+         *
+         * <p>COMPORTAMENTO EM CASO DE FALHA: se o contorno não puder ser medido, vale a resposta do
+         * {@code canDisplay} — a dúvida não autoriza trocar a fonte (A8).
+         */
+        private boolean semDesenho(Font fonte, int cp) {
+            if (!fonte.canDisplay(cp)) {
+                return true;
+            }
+            if (Character.isSpaceChar(cp) || Character.getType(cp) == Character.FORMAT) {
+                return false;
+            }
+            return contornoVazio.computeIfAbsent(fonte.getFontName(Locale.ROOT) + '\u0000' + cp,
+                k -> contornoVazio(fonte, cp));
+        }
+
+        private static boolean contornoVazio(Font fonte, int cp) {
+            try {
+                GlyphVector glifo = fonte.deriveFont(64f).createGlyphVector(SEM_TELA, new String(Character.toChars(cp)));
+                return glifo.getOutline().getBounds2D().isEmpty();
+            } catch (RuntimeException e) {
+                log.debug("Contorno do glifo U+{} nao medido em {}: {}", Integer.toHexString(cp),
+                    fonte.getFontName(Locale.ROOT), e.getMessage());
+                return false;
+            }
         }
     }
 }
