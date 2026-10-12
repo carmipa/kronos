@@ -7,9 +7,11 @@ import org.traducao.projeto.traducaoKaraoke.domain.SinaisDeKaraoke;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -69,11 +71,18 @@ public final class PlanoDeClassificacao {
     private final List<ClasseLinhaKaraoke> classePorPosicao;
     /** Janelas [início, fim] em centésimos das camadas com a letra ORIGINAL preservada. */
     private final List<long[]> janelasComOriginalPreservada;
+    /**
+     * Posição da FRASE inteira → posições das sílabas/palavras do KFX que a pintam por cima. Só
+     * entra frase cujos pedaços reconstroem o texto dela (ver {@link #posicoesDeSilaba}).
+     */
+    private final Map<Integer, List<Integer>> silabasPorFrase;
 
     private PlanoDeClassificacao(List<ClasseLinhaKaraoke> classePorPosicao,
-                                 List<long[]> janelasComOriginalPreservada) {
+                                 List<long[]> janelasComOriginalPreservada,
+                                 Map<Integer, List<Integer>> silabasPorFrase) {
         this.classePorPosicao = List.copyOf(classePorPosicao);
         this.janelasComOriginalPreservada = List.copyOf(janelasComOriginalPreservada);
+        this.silabasPorFrase = Map.copyOf(silabasPorFrase);
     }
 
     /**
@@ -126,7 +135,7 @@ public final class PlanoDeClassificacao {
                                               ClassificadorLetraKaraokeService classificador,
                                               org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda corretor) {
         if (documento == null || documento.eventos() == null) {
-            return new PlanoDeClassificacao(List.of(), List.of());
+            return new PlanoDeClassificacao(List.of(), List.of(), Map.of());
         }
         List<EventoLegenda> eventos = documento.eventos();
 
@@ -139,7 +148,8 @@ public final class PlanoDeClassificacao {
         // o ingles original, e a abertura saia so em PT (2 de 16 frases). A original de verdade
         // (romaji do ED) e FRASE, nunca fragmento, entao continua contando: o scar das 22/23
         // linhas do ED single-layer segue protegido.
-        Set<Integer> silabas = posicoesDeSilaba(eventos);
+        Map<Integer, List<Integer>> silabasPorFrase = new HashMap<>();
+        Set<Integer> silabas = posicoesDeSilaba(eventos, silabasPorFrase);
 
         // Duas perguntas diferentes, com réguas diferentes de propósito:
         //  - "há romaji no MESMO instante?" é EVIDÊNCIA DE MÚSICA para linhas cujo estilo não diz
@@ -188,7 +198,7 @@ public final class PlanoDeClassificacao {
             }
             janelasComRomaji.removeIf(j -> todaInglesa.contains((int) j[2]));
         }
-        return new PlanoDeClassificacao(classes, janelasComRomaji);
+        return new PlanoDeClassificacao(classes, janelasComRomaji, silabasPorFrase);
     }
 
     /** Mínimo de palavras que SÓ o inglês reconhece — ver o Javadoc de {@link #montar(DocumentoLegenda, ClassificadorLetraKaraokeService, org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda)}. */
@@ -333,6 +343,27 @@ public final class PlanoDeClassificacao {
         return evento != null && temJanelaDoMesmoMomento(janelasComOriginalPreservada, evento);
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: as sílabas/palavras do KFX que pintam ESTA frase por cima, no mesmo
+     * lugar da tela.
+     *
+     * <h2>O prejuízo que originou, medido em 12/10/2026</h2>
+     * Na abertura do Unicorn ({@code OPL2}) a frase "Do you feel alone" e as palavras "Do", "you",
+     * "feel", "a", "lone" são desenhadas em {@code \pos(960,1050)}. Empilhar
+     * {@code inglês\Nportuguês} na frase fazia o português ocupar a altura 1050 e as palavras
+     * continuarem lá, escrevendo o inglês EM CIMA do português — visto na TV (Kodi) e no PC
+     * (MPC-HC e libass), 336 frases em 21 dos 22 episódios.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: lista vazia quando a frase não tem pedaços que a reconstroem; a
+     * resposta é por POSIÇÃO no documento, como o resto do plano.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: posição desconhecida devolve lista vazia — o lado que não
+     * silencia nada.
+     */
+    public List<Integer> silabasDaFrase(int posicao) {
+        return silabasPorFrase.getOrDefault(posicao, List.of());
+    }
+
     /** Quantos eventos o plano decidiu — para o resumo por arquivo. */
     public int total() {
         return classePorPosicao.size();
@@ -378,12 +409,15 @@ public final class PlanoDeClassificacao {
      * <b>ZERO</b> no Zeta, no 86 Part 1 e no 86 Part 2 — nenhuma obra saudável é tocada.
      *
      * <p>INVARIANTES DO DOMÍNIO: a comparação é dentro do MESMO estilo. Camadas irmãs têm estilos
-     * diferentes por definição, e cruzá-las faria a letra em inglês "reconstruir" o romaji.
+     * diferentes por definição, e cruzá-las faria a letra em inglês "reconstruir" o romaji. Cada
+     * frase que se reconstrói deixa em {@code silabasPorFrase} QUAIS pedaços são os dela — é o que
+     * permite silenciar exatamente esses pedaços quando a frase vira português (12/10/2026).
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: prefixo ilegível devolve tempo negativo e o evento fica
      * de fora — o lado que NÃO veta, preservando o viés de traduzir o que não se entendeu.
      */
-    private static Set<Integer> posicoesDeSilaba(List<EventoLegenda> eventos) {
+    private static Set<Integer> posicoesDeSilaba(List<EventoLegenda> eventos,
+                                                 Map<Integer, List<Integer>> silabasPorFrase) {
         // Tempo, texto visível e número de palavras são calculados UMA vez por evento. A versão
         // anterior refazia o parse do prefixo e a limpeza de tags a cada PAR de eventos e comparava
         // cada frase com TODOS os candidatos: O(n²) com string no laço. Medido em 24/09/2026: o
@@ -485,6 +519,7 @@ public final class PlanoDeClassificacao {
             }
             if (normalizar(reconstruido.toString()).equals(normalizar(textoFrase))) {
                 silabas.addAll(irmas);
+                silabasPorFrase.put(idFrase, List.copyOf(irmas));
             }
         }
         return silabas;

@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **20** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **498** |
-| classes em `src/test` | **466** |
+| classes em `src/main` | **505** |
+| classes em `src/test` | **471** |
 
 ---
 
@@ -38,7 +38,7 @@ graph TB
     G0["<b>Preparação</b><br/>analisadorMidia (21)<br/>legendasExtracao (25)<br/>trocaTipoLegenda (24)<br/>auditorConteudoLegendas (25)"]:::fatia
     G1["<b>Tradução</b><br/>traducao (79)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
-    G3["<b>Karaokê</b><br/>traducaoKaraoke (25)<br/>novoKaraoke (11)"]:::fatia
+    G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (15)<br/>renomearArquivos (6)"]:::fatia
     G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (2)"]:::fatia
     PEERS["<b>🧱 peers</b><br/><i>importáveis por qualquer fatia</i><br/>cachetraducao (5)<br/>legenda (15)<br/>llm (4)<br/>lore (24)<br/>qualidadeTraducao (17)"]:::peer
@@ -523,24 +523,31 @@ revisaoConcordancia/
 
 ### Karaokê
 
-#### `traducaoKaraoke` — 25 classes
+#### `traducaoKaraoke` — 32 classes
 
 ```text
 traducaoKaraoke/
 ├── application/
 │   ├── CacheDoArquivo.java
 │   ├── ClassificadorLetraKaraokeService.java
+│   ├── LocalizadorDoVideoDeOrigem.java
 │   ├── MontadorEventoFinal.java
 │   ├── PalavrasForaDoDicionario.java
 │   ├── PlanoDeClassificacao.java
 │   ├── RegistroDaExecucao.java
+│   ├── TipografiaDaLetraPortuguesa.java
 │   ├── TradutorDeLetraKaraoke.java
 │   └── TraduzirKaraokeUseCase.java
 ├── domain/
+│   ├── ports/
+│   │   └── FontesEmbutidasPort.java
 │   ├── AcentosLetraKaraoke.java
 │   ├── ClasseLinhaKaraoke.java
+│   ├── CoberturaDeFontes.java
 │   ├── DesfechoKaraoke.java
+│   ├── EstiloAss.java
 │   ├── FalhaArquivoKaraoke.java
+│   ├── FontesDoVideo.java
 │   ├── GradienteKaraoke.java
 │   ├── ResultadoTraducaoKaraoke.java
 │   ├── SinaisDeKaraoke.java
@@ -550,6 +557,7 @@ traducaoKaraoke/
 │   ├── TraducaoKaraokeException.java
 │   └── VersosDaLetra.java
 ├── infrastructure/
+│   ├── FontesEmbutidasMkvAdapter.java
 │   ├── ImportadorManifestoKaraoke.java
 │   ├── TelemetriaKaraokeDataset.java
 │   └── TraducaoKaraokePersistencia.java
@@ -904,7 +912,7 @@ core/
 
 ---
 
-## Testes — 466 classes
+## Testes — 471 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1594,7 +1602,7 @@ traducaoCorrige/
     └── ResultadoManutencaoCacheTest.java
 ```
 
-#### `traducaoKaraoke` — 22 classes
+#### `traducaoKaraoke` — 27 classes
 
 ```text
 traducaoKaraoke/
@@ -1606,21 +1614,26 @@ traducaoKaraoke/
 │   ├── CriterioDeMusicaCaracterizacaoTest.java
 │   ├── EnsaioSegundoTiroPalavraInventadaIT.java
 │   ├── JamaisMexerNoJaponesTest.java
+│   ├── KfxSoPortuguesNoLugarTest.java
+│   ├── LocalizadorDoVideoDeOrigemTest.java
 │   ├── PalavrasForaDoDicionarioTest.java
 │   ├── PlanoDeClassificacaoTest.java
 │   ├── PreservacaoCamadaUnicaTest.java
 │   ├── RegistroDaExecucaoDatasetTest.java
 │   ├── SilabaDeFraseIrmaTest.java
 │   ├── TemperaturaDeterministicaKaraokeTest.java
+│   ├── TipografiaDaLetraPortuguesaTest.java
 │   ├── TradutorDeLetraPerdeVersoTest.java
 │   ├── TradutorDeLetraSemMarcadorTest.java
 │   └── TraduzirKaraokeUseCaseTest.java
 ├── domain/
 │   ├── AcentosLetraKaraokeTest.java
+│   ├── EstiloAssTest.java
 │   ├── GradienteKaraokeTest.java
 │   ├── TagsNoMeioDaLetraTest.java
 │   └── VersosDaLetraTest.java
 └── infrastructure/
+    ├── FontesEmbutidasMkvAdapterTest.java
     ├── ImportadorManifestoKaraokeTest.java
     └── TelemetriaKaraokeDatasetTest.java
 ```

@@ -86,6 +86,11 @@ public class MontadorEventoFinal {
      *
      * <h2>Invariantes do domínio</h2>
      * <ul>
+     *   <li>Frase pintada por cima por um KFX palavra a palavra ({@link
+     *       PlanoDeClassificacao#silabasDaFrase}) NÃO empilha: fica só o português, e as palavras
+     *       do efeito são silenciadas por {@link #comoComentario}. Decisão de Paulo em 12/10/2026,
+     *       depois de ver na TV a abertura do Unicorn: empilhar punha o português na altura em que
+     *       as palavras do efeito estão desenhadas, e o inglês saía escrito EM CIMA dele.</li>
      *   <li>Se JÁ existe camada original preservada neste instante, NÃO empilha — senão a letra
      *       apareceria duas vezes. É o caso dos episódios 01-12 do Unicorn, que têm ED romaji ao
      *       lado do ED - EN.</li>
@@ -94,14 +99,18 @@ public class MontadorEventoFinal {
      * </ul>
      *
      * <h2>Comportamento em caso de falha</h2>
-     * Qualquer entrada nula devolve o traduzido sozinho — o comportamento anterior.
+     * Qualquer entrada nula devolve o traduzido sozinho — o comportamento anterior. Plano nulo é
+     * tratado como "sem camada original e sem KFX": empilha, o lado que preserva a letra.
      */
     public String comOriginalPreservada(EventoLegenda evento, String traduzido,
-            PlanoDeClassificacao plano) {
+            PlanoDeClassificacao plano, int posicao) {
         if (evento == null || traduzido == null || traduzido.isBlank()) {
             return traduzido;
         }
-        if (plano.temOriginalPreservadaNoInstante(evento)) {
+        if (plano != null && !plano.silabasDaFrase(posicao).isEmpty()) {
+            return traduzido;
+        }
+        if (plano != null && plano.temOriginalPreservadaNoInstante(evento)) {
             return traduzido;
         }
         String original = evento.texto();
@@ -116,5 +125,32 @@ public class MontadorEventoFinal {
             return traduzido;
         }
         return original + "\\N" + traduzido;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: tira da tela uma sílaba/palavra do KFX cuja frase virou português,
+     * sem apagá-la do arquivo.
+     *
+     * <h2>Por que {@code Comment:} e não apagar a linha</h2>
+     * O ASS tem o tipo de linha que nenhum player desenha, e ele é a forma reversível: o evento
+     * continua no arquivo com o texto, o tempo e a posição originais, à vista de quem auditar (A7),
+     * e volta a ser {@code Dialogue:} trocando uma palavra. Medido em 12/10/2026: a linha
+     * {@code Comment:} atravessa o {@code mkvmerge} e o libass não a desenha quando lê a faixa de
+     * dentro do MKV, enquanto o {@code Dialogue:} do mesmo instante aparece.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só converte linha {@code Dialogue} cujo prefixo começa com
+     * {@code Dialogue:}; índice, estilo, tempos e texto ficam idênticos.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: evento nulo, que não é diálogo ou de prefixo em formato
+     * desconhecido volta INTACTO — o lado que mantém o efeito na tela, nunca o que some com a letra
+     * sem deixar rastro.
+     */
+    public static EventoLegenda comoComentario(EventoLegenda evento) {
+        if (evento == null || !evento.isDialogo() || evento.prefixo() == null
+            || !evento.prefixo().startsWith("Dialogue:")) {
+            return evento;
+        }
+        String prefixo = "Comment:" + evento.prefixo().substring("Dialogue:".length());
+        return new EventoLegenda(evento.indice(), "Comment", evento.estilo(), prefixo, evento.texto());
     }
 }

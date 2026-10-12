@@ -68,6 +68,10 @@ public record TelemetriaKaraoke(
     int mantidasSemTraducao,
     int acentosRepostos,
     int entradasCacheDescartadas,
+    int frasesKfxSoPortugues,
+    int silabasKfxSilenciadas,
+    int linhasComFonteDoDialogo,
+    String fontesDaMusica,
     List<String> avisos
 ) {
 
@@ -145,7 +149,8 @@ public record TelemetriaKaraoke(
             r.eventosTotais(), r.efeitosKfxPreservados(), r.preservadasOriginalJapones(),
             r.jaEmPortugues(), r.paraTraduzir(), r.reaproveitadasCache(), r.traduzidas(),
             r.mantidasSemTraducao(), r.acentosRepostos(), r.entradasCacheDescartadas(),
-            r.avisos());
+            r.frasesKfxSoPortugues(), r.silabasKfxSilenciadas(), r.linhasComFonteDoDialogo(),
+            r.fontesDaMusica(), r.avisos());
     }
 
     /**
@@ -168,7 +173,7 @@ public record TelemetriaKaraoke(
             falha.motivo(),
             e.status(), e.motivo(), e.contextoId(), e.contextoNome(), e.contextoHash(),
             e.modeloLlm(), e.cacheIgnorado(), e.estadoDicionario(), e.duracaoMs(), e.arquivos(),
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, List.of());
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, List.of());
     }
 
     /**
@@ -189,7 +194,7 @@ public record TelemetriaKaraoke(
             e.motivo(),
             e.status(), e.motivo(), e.contextoId(), e.contextoNome(), e.contextoHash(),
             e.modeloLlm(), e.cacheIgnorado(), e.estadoDicionario(), e.duracaoMs(), 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, List.of());
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, List.of());
     }
 
     /**
@@ -224,9 +229,10 @@ public record TelemetriaKaraoke(
             duracaoMs, arquivosNaExecucao,
             eventosTotais, efeitosKfxPreservados, preservadasOriginalJapones, jaEmPortugues,
             paraTraduzir, reaproveitadasCache, traduzidas, mantidasSemTraducao,
-            // Acento reposto e cache descartado sao posteriores a 14/08: zero aqui e "nao medido",
-            // e quem diz isso e a coluna origemDoRegistro.
-            0, 0, avisos);
+            // Acento reposto e cache descartado sao posteriores a 14/08, e KFX so em portugues e
+            // fonte do dialogo a 12/10: zero aqui e "nao medido", e quem diz isso e a coluna
+            // origemDoRegistro.
+            0, 0, 0, 0, 0, null, avisos);
     }
 
     /**

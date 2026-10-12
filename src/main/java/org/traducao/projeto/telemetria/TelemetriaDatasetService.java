@@ -181,7 +181,8 @@ public class TelemetriaDatasetService {
         "cacheIgnorado", "estadoDicionario", "duracaoExecucaoMs", "arquivosNaExecucao",
         "eventosTotais", "efeitosKfxPreservados", "preservadasOriginalJapones", "jaEmPortugues",
         "paraTraduzir", "reaproveitadasCache", "traduzidas", "mantidasSemTraducao",
-        "acentosRepostos", "entradasCacheDescartadas", "quantidadeAvisos");
+        "acentosRepostos", "entradasCacheDescartadas", "frasesKfxSoPortugues",
+        "silabasKfxSilenciadas", "linhasComFonteDoDialogo", "fontesDaMusica", "quantidadeAvisos");
 
     /** Tidy data do karaokê: uma linha por aviso, ligada de volta por {@code registradoEm + arquivo}. */
     static final List<String> COLUNAS_KARAOKE_AVISOS = List.of(

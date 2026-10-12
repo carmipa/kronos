@@ -40,6 +40,26 @@ public record ResultadoTraducaoKaraoke(
      * em limpeza declarada.
      */
     int entradasCacheDescartadas,
+    /**
+     * Frases de KFX palavra a palavra que ficaram SÓ em português (sem o inglês empilhado),
+     * decisão de Paulo em 12/10/2026 depois de ver a abertura do Unicorn na TV: empilhar punha o
+     * português debaixo das palavras do efeito, e o inglês saía escrito em cima dele.
+     */
+    int frasesKfxSoPortugues,
+    /**
+     * Sílabas/palavras do efeito dessas frases que viraram {@code Comment:} — fora da tela, ainda
+     * no arquivo. Sem o número, "a abertura perdeu o efeito" e "a abertura foi corrigida" seriam
+     * indistinguíveis no dataset.
+     */
+    int silabasKfxSilenciadas,
+    /** Linhas portuguesas que receberam a fonte do diálogo porque a da música não tem o glifo. */
+    int linhasComFonteDoDialogo,
+    /**
+     * {@code NAO_NECESSARIO}, {@code VERIFICADAS (video)} ou {@code NAO_VERIFICADAS: motivo} — três
+     * estados, para "nenhuma fonte trocada" nunca significar ao mesmo tempo "conferi" e "não pude
+     * conferir" (A8).
+     */
+    String fontesDaMusica,
     List<String> avisos
 ) {
 }

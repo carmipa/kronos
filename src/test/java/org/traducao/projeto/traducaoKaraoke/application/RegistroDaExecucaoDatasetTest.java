@@ -122,6 +122,7 @@ class RegistroDaExecucaoDatasetTest {
     void traduzidoEFalhaSaemDistinguiveis() {
         ResultadoTraducaoKaraoke feito = new ResultadoTraducaoKaraoke(
             "ep01.ass", caminhoWindows("saida", "ep01.ass"), 900, 400, 120, 5, 60, 20, 40, 3, 7, 2,
+            16, 70, 16, "VERIFICADAS (ep01.mkv)",
             List.of("alucinacao detectada; letra mantida"));
         DesfechoKaraoke desfecho = new DesfechoKaraoke(
             StatusExecucaoKaraoke.COMPLETA, null,
@@ -179,7 +180,7 @@ class RegistroDaExecucaoDatasetTest {
     void nenhumaLinhaCarregaCaminhoAbsoluto() {
         String destino = caminhoWindows("animes", "86", "saida", "ep01.ass");
         ResultadoTraducaoKaraoke feito = new ResultadoTraducaoKaraoke(
-            "ep01.ass", destino, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, List.of());
+            "ep01.ass", destino, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "NAO_NECESSARIO", List.of());
         DesfechoKaraoke desfecho = new DesfechoKaraoke(
             StatusExecucaoKaraoke.COMPLETA, null, List.of(), false,
             DesfechoKaraoke.EstadoDicionario.DISPONIVEL);

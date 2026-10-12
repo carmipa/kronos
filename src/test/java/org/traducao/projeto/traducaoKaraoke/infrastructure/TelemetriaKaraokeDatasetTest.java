@@ -132,7 +132,7 @@ class TelemetriaKaraokeDatasetTest {
             TelemetriaKaraoke.DesfechoDoArquivo.TRADUZIDO.name(), null,
             "COMPLETA", null, "eight_six", "86 (Eighty-Six)", "abc123", "aya-expanse-8b",
             false, "DISPONIVEL", 1_000L, 1,
-            100, 10, 5, 0, 50, 5, traduzidas, 0, 3, 0,
+            100, 10, 5, 0, 50, 5, traduzidas, 0, 3, 0, 0, 0, 0, "NAO_NECESSARIO",
             List.of("aviso de exemplo"));
     }
 }

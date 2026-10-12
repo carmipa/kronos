@@ -281,5 +281,31 @@ class SilabaDeFraseIrmaTest {
             assertEquals(ClasseLinhaKaraoke.EFEITO_KFX, plano.classeNaPosicao(i),
                 "o fragmento " + i + " voltou a vazar por causa do 'We' adiantado ou do 'vive' vizinho");
         }
+        assertEquals(List.of(2, 3, 4, 5, 6, 7, 8, 9), plano.silabasDaFrase(1),
+            "a frase tem de saber EXATAMENTE quais pedacos sao os dela — o 'vive' da frase anterior "
+                + "nao pode ser silenciado junto quando ela virar portugues");
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: a frase sabe QUAIS pedaços são os dela — é o que permite tirar da tela
+     * exatamente essas palavras quando a frase vira só português (Unicorn, 12/10/2026).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só a frase reconstruída tem lista; o pedaço, a coincidência e a
+     * partição incompleta respondem lista vazia — o lado que não silencia nada.
+     */
+    @Test
+    @DisplayName("a frase sabe quais pedaços são os dela; o resto responde lista vazia")
+    void fraseSabeQuaisSaoAsSilabasDela() {
+        PlanoDeClassificacao unicorn = planoDe(opl2DoUnicorn());
+        assertEquals(List.of(1, 2, 3, 4, 5), unicorn.silabasDaFrase(0));
+        assertEquals(List.of(), unicorn.silabasDaFrase(1), "o pedaco nao tem pedacos");
+        assertEquals(List.of(), unicorn.silabasDaFrase(99), "posicao fora do documento");
+
+        PlanoDeClassificacao incompleta = planoDe(List.of(
+            evento("0:01:37.00", "0:01:39.80", ESTILO, "Do you feel alone"),
+            evento("0:01:37.00", "0:01:39.90", ESTILO, "Do"),
+            evento("0:01:37.15", "0:01:39.90", ESTILO, "you")));
+        assertEquals(List.of(), incompleta.silabasDaFrase(0),
+            "particao incompleta nao e efeito da frase — silenciar 'Do you' apagaria letra de verdade");
     }
 }

@@ -103,6 +103,12 @@ public class TraducaoKaraokePersistencia {
             item.put("acentosRepostos", r.acentosRepostos());
             // Limpeza DECLARADA: cache que encolhe sem numero parece perda de dado.
             item.put("entradasCacheDescartadas", r.entradasCacheDescartadas());
+            // Abertura do Unicorn, 12/10/2026: frase de KFX que ficou só em português, as palavras
+            // do efeito silenciadas e a fonte do diálogo onde a da música não desenha o português.
+            item.put("frasesKfxSoPortugues", r.frasesKfxSoPortugues());
+            item.put("silabasKfxSilenciadas", r.silabasKfxSilenciadas());
+            item.put("linhasComFonteDoDialogo", r.linhasComFonteDoDialogo());
+            item.put("fontesDaMusica", r.fontesDaMusica());
             item.put("avisos", r.avisos());
             return item;
         }).toList();

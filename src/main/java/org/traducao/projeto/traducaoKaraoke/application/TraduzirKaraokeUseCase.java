@@ -137,6 +137,14 @@ public class TraduzirKaraokeUseCase {
     @Inject
     MontadorEventoFinal montador;
 
+    /**
+     * As fontes que viajam no vídeo de origem, para a linha portuguesa da música não sair com
+     * caractere de reserva (12/10/2026). Nulo em teste de unidade: a fonte fica NÃO VERIFICADA e
+     * nenhuma é trocada.
+     */
+    @Inject
+    org.traducao.projeto.traducaoKaraoke.domain.ports.FontesEmbutidasPort fontesEmbutidas;
+
 
     @Inject
     LogStreamService logStream;
@@ -438,6 +446,13 @@ public class TraduzirKaraokeUseCase {
         // mexer no critério de música deixou de exigir tocar num método que também grava cache e
         // escreve arquivo. Ver PlanoDeClassificacao, inclusive quanto à ORDEM dos dois passes.
         PlanoDeClassificacao plano = PlanoDeClassificacao.montar(documento, classificador, corretorOrtografico);
+        // A leitura das fontes do vídeo é PREGUIÇOSA: só acontece se alguma linha portuguesa
+        // estiver numa fonte diferente da do diálogo. Vídeo de 500 MB, segundos de mkvextract.
+        TipografiaDaLetraPortuguesa tipografia = TipografiaDaLetraPortuguesa.doArquivo(
+            documento, plano, () -> lerFontesDoVideo(arquivo));
+        // Frases de KFX palavra a palavra que ficaram só em português: as palavras do efeito
+        // delas são silenciadas DEPOIS do laço, porque podem vir antes ou depois da frase.
+        List<Integer> frasesKfxSoPortugues = new ArrayList<>();
 
         List<EventoLegenda> eventos = documento.eventos();
         for (int posicao = 0; posicao < eventos.size(); posicao++) {
@@ -529,8 +544,17 @@ public class TraduzirKaraokeUseCase {
                         acentosRepostos++;
                     }
                     traduzidasNoArquivo.putIfAbsent(original, comAcento);
+                    boolean kfxSoPortugues = !plano.silabasDaFrase(posicao).isEmpty();
+                    String vestido = tipografia.vestir(evento, comAcento, kfxSoPortugues);
                     eventosFinais.add(evento.comTexto(
-                        montador.comOriginalPreservada(evento, comAcento, plano)));
+                        montador.comOriginalPreservada(evento, vestido, plano, posicao)));
+                    if (kfxSoPortugues) {
+                        frasesKfxSoPortugues.add(posicao);
+                        logStream.publicarLog(CANAL_LOG, "   [KFX → SÓ PT] "
+                            + RegistroDaExecucao.visivelResumido(original) + "  =>  "
+                            + RegistroDaExecucao.visivelResumido(comAcento) + " ("
+                            + plano.silabasDaFrase(posicao).size() + " palavra(s) do efeito saem da tela)");
+                    }
                     if (veioDoCache) {
                         doCache++;
                         logStream.publicarLog(CANAL_LOG, "   [CACHE] reaproveitada: " + RegistroDaExecucao.visivelResumido(traduzido));
@@ -541,6 +565,28 @@ public class TraduzirKaraokeUseCase {
                     }
                 }
             }
+        }
+
+        // As palavras do efeito que pintavam por cima uma frase agora SÓ em português saem da tela
+        // como Comment: — ficam no arquivo, reversíveis. Abertura do Unicorn, 12/10/2026: deixá-las
+        // em Dialogue escrevia o inglês EM CIMA do português (TV, MPC-HC e libass, 336 frases).
+        // A posição em eventosFinais é a mesma do documento: todo ramo do laço acima acrescenta
+        // exatamente um evento por evento lido.
+        int silabasSilenciadas = 0;
+        if (eventosFinais.size() == eventos.size()) {
+            for (int frase : frasesKfxSoPortugues) {
+                for (int silaba : plano.silabasDaFrase(frase)) {
+                    EventoLegenda atual = eventosFinais.get(silaba);
+                    EventoLegenda comentado = MontadorEventoFinal.comoComentario(atual);
+                    if (comentado != atual) {
+                        eventosFinais.set(silaba, comentado);
+                        silabasSilenciadas++;
+                    }
+                }
+            }
+        } else if (!frasesKfxSoPortugues.isEmpty()) {
+            avisos.add("Efeito palavra a palavra NAO silenciado: a lista de saida perdeu o alinhamento "
+                + "com o documento (" + eventosFinais.size() + " x " + eventos.size() + ")");
         }
 
         // PALAVRA INVENTADA PELO MODELO ("Açãoaria", "Anjel", "desfezera"): vai ao manifesto e ao
@@ -567,8 +613,9 @@ public class TraduzirKaraokeUseCase {
             logStream.publicarLog(CANAL_LOG, "   [GRAVADO] " + destino);
         }
 
+        String estadoFontes = tipografia.estadoDasFontes();
         logStream.publicarLog(CANAL_LOG, String.format(Locale.ROOT,
-            "   Resumo: %d evento(s) | KFX preservado: %d | letra original: %d | já PT: %d | traduzível: %d (LLM %d, cache %d, sem tradução %d) | acento reposto: %s | fora do dicionário: %s",
+            "   Resumo: %d evento(s) | KFX preservado: %d | letra original: %d | já PT: %d | traduzível: %d (LLM %d, cache %d, sem tradução %d) | acento reposto: %s | fora do dicionário: %s | KFX só PT: %d frase(s), %d palavra(s) do efeito fora da tela | fonte do diálogo: %d linha(s) (fontes da música: %s)",
             documento.eventos().size(), kfx, originais, jaPt, paraTraduzir, traduzidas, doCache, semTraducao,
             // Três estados, nunca dois: sem hunspell, "0 corrigidas" e "não pude verificar" são
             // coisas diferentes e não podem imprimir o mesmo sinal.
@@ -577,7 +624,9 @@ public class TraduzirKaraokeUseCase {
                 : String.valueOf(acentosRepostos),
             foraDoDicionario.verificado()
                 ? String.valueOf(foraDoDicionario.porLetra().size())
-                : "NÃO VERIFICADO"));
+                : "NÃO VERIFICADO",
+            frasesKfxSoPortugues.size(), silabasSilenciadas,
+            tipografia.linhasComFonteDoDialogo(), estadoFontes));
 
         // O que estava no cache e NAO foi usado some na regravacao — e some certo, porque a regua
         // de evidencia positiva tornou inalcançavel o que o classificador antigo criou por engano
@@ -599,7 +648,32 @@ public class TraduzirKaraokeUseCase {
         return new ResultadoTraducaoKaraoke(
             nome, nomeDestino, documento.eventos().size(), kfx, originais, jaPt,
             paraTraduzir, doCache, traduzidas, semTraducao, acentosRepostos,
-            entradasCacheDescartadas, List.copyOf(avisos));
+            entradasCacheDescartadas, frasesKfxSoPortugues.size(), silabasSilenciadas,
+            tipografia.linhasComFonteDoDialogo(), estadoFontes, List.copyOf(avisos));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: acha o vídeo de onde a legenda saiu e lê as fontes dele, para a linha
+     * portuguesa da música não sair com caractere de reserva.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só lê; o motivo de não ter lido sobe para o resumo (A7).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: vídeo não achado ou leitor ausente devolvem
+     * {@link org.traducao.projeto.traducaoKaraoke.domain.FontesDoVideo#naoVerificadas} — nenhuma
+     * fonte é trocada sem verificação.
+     */
+    private org.traducao.projeto.traducaoKaraoke.domain.FontesDoVideo lerFontesDoVideo(Path legenda) {
+        if (fontesEmbutidas == null) {
+            return org.traducao.projeto.traducaoKaraoke.domain.FontesDoVideo.naoVerificadas(
+                "leitor de fontes do video nao configurado");
+        }
+        LocalizadorDoVideoDeOrigem.Localizacao achado = LocalizadorDoVideoDeOrigem.localizar(legenda);
+        if (achado.video() == null) {
+            logStream.publicarLog(CANAL_LOG, "   [FONTE] não verificada: " + achado.motivo());
+            return org.traducao.projeto.traducaoKaraoke.domain.FontesDoVideo.naoVerificadas(achado.motivo());
+        }
+        logStream.publicarLog(CANAL_LOG, "   [FONTE] lendo as fontes embutidas em " + achado.video().getFileName());
+        return fontesEmbutidas.lerFontes(achado.video());
     }
 
 
