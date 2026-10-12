@@ -453,6 +453,8 @@ public class TraduzirKaraokeUseCase {
         // Frases de KFX palavra a palavra que ficaram só em português: as palavras do efeito
         // delas são silenciadas DEPOIS do laço, porque podem vir antes ou depois da frase.
         List<Integer> frasesKfxSoPortugues = new ArrayList<>();
+        // Linhas que deixaram de empilhar o inglês porque o romaji está na tela em sílabas (86, 12/10).
+        int inglesNaoEmpilhado = 0;
 
         List<EventoLegenda> eventos = documento.eventos();
         for (int posicao = 0; posicao < eventos.size(); posicao++) {
@@ -545,6 +547,10 @@ public class TraduzirKaraokeUseCase {
                     }
                     traduzidasNoArquivo.putIfAbsent(original, comAcento);
                     boolean kfxSoPortugues = !plano.silabasDaFrase(posicao).isEmpty();
+                    if (!kfxSoPortugues && plano.temOriginalEmSilabasNaPosicao(posicao)
+                        && !plano.temOriginalPreservadaNoInstante(evento)) {
+                        inglesNaoEmpilhado++;
+                    }
                     String vestido = tipografia.vestir(evento, comAcento, kfxSoPortugues);
                     eventosFinais.add(evento.comTexto(
                         montador.comOriginalPreservada(evento, vestido, plano, posicao)));
@@ -615,7 +621,7 @@ public class TraduzirKaraokeUseCase {
 
         String estadoFontes = tipografia.estadoDasFontes();
         logStream.publicarLog(CANAL_LOG, String.format(Locale.ROOT,
-            "   Resumo: %d evento(s) | KFX preservado: %d | letra original: %d | já PT: %d | traduzível: %d (LLM %d, cache %d, sem tradução %d) | acento reposto: %s | fora do dicionário: %s | KFX só PT: %d frase(s), %d palavra(s) do efeito fora da tela | fonte do diálogo: %d linha(s) (fontes da música: %s)",
+            "   Resumo: %d evento(s) | KFX preservado: %d | letra original: %d | já PT: %d | traduzível: %d (LLM %d, cache %d, sem tradução %d) | acento reposto: %s | fora do dicionário: %s | KFX só PT: %d frase(s), %d palavra(s) do efeito fora da tela | romaji em sílabas: %d linha(s) sem o inglês | fonte do diálogo: %d linha(s) (fontes da música: %s)",
             documento.eventos().size(), kfx, originais, jaPt, paraTraduzir, traduzidas, doCache, semTraducao,
             // Três estados, nunca dois: sem hunspell, "0 corrigidas" e "não pude verificar" são
             // coisas diferentes e não podem imprimir o mesmo sinal.
@@ -625,7 +631,7 @@ public class TraduzirKaraokeUseCase {
             foraDoDicionario.verificado()
                 ? String.valueOf(foraDoDicionario.porLetra().size())
                 : "NÃO VERIFICADO",
-            frasesKfxSoPortugues.size(), silabasSilenciadas,
+            frasesKfxSoPortugues.size(), silabasSilenciadas, inglesNaoEmpilhado,
             tipografia.linhasComFonteDoDialogo(), estadoFontes));
 
         // O que estava no cache e NAO foi usado some na regravacao — e some certo, porque a regua

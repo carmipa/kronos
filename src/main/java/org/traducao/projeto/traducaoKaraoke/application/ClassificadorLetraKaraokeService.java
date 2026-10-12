@@ -383,6 +383,19 @@ public class ClassificadorLetraKaraokeService {
             .replace("'", "").replace("’", "");
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: o quanto (0–100) um texto parece japonês romanizado, para o plano
+     * reconhecer a letra ORIGINAL quando ela é desenhada sílaba a sílaba, sem linha inteira.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o critério é do detector do peer {@code legenda}; aqui só se
+     * pergunta a ele, nunca se copia a regra.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: texto nulo ou sem palavras devolve 0 (ver o detector).
+     */
+    int proporcaoRomaji(String texto) {
+        return detector.proporcaoRomaji(texto);
+    }
+
     /** Há kana ou kanji no texto? Pergunta única desta fatia — o plano consulta aqui, não copia. */
     static boolean temEscritaJaponesa(String texto) {
         return texto != null && ESCRITA_JAPONESA_PATTERN.matcher(texto).find();

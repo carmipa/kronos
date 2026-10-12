@@ -128,7 +128,9 @@ class KfxSoPortuguesNoLugarTest {
                 chamadasTraduzir++;
                 String entrada = lote.linhasOriginais().getFirst();
                 String saida = entrada.contains("feel alone") ? "Você se sente sozinho"
-                    : entrada.contains("mask") ? "Atrás da sua máscara" : "Tradução simulada";
+                    : entrada.contains("mask") ? "Atrás da sua máscara"
+                    : entrada.contains("shadows") ? "Para sombras paralisadas em uma neblina silenciosa"
+                    : "Tradução simulada";
                 return new TraducaoLote(lote.idLote(), List.of(saida), true, null);
             }
         };
@@ -283,6 +285,39 @@ class KfxSoPortuguesNoLugarTest {
         assertEquals(0, r.frasesKfxSoPortugues());
         assertEquals(0, r.silabasKfxSilenciadas());
         assertTrue(linhasDoEstilo(saida, "Comment", "ED - English").isEmpty(), saida);
+    }
+
+    /**
+     * Encerramento do 86 (12/10/2026): o romaji só existe em sílabas, no alto da tela. A tradução
+     * inglesa do fansub vira só português no lugar — nada de inglês empilhado — e as sílabas do
+     * romaji continuam acesas, intactas.
+     */
+    @Test
+    @DisplayName("86: com o romaji em sílabas na tela, o inglês do fansub sai e fica só o português")
+    void romajiEmSilabasTiraOInglesEmpilhado() throws IOException {
+        // O trecho REAL do 86 Parte 1 E02 em 18:08: a linha inglesa em três camadas e as 15 sílabas do
+        // romaji em três camadas cada. Fixture simplificada à mão ficou verde com a regra desligada
+        // (a sílaba de tags reduzidas passava por linha original): por isso o arquivo real.
+        String trecho;
+        try (var in = getClass().getResourceAsStream("/karaoke/86-p1-e02-encerramento-romaji-em-silabas.ass")) {
+            trecho = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        Files.writeString(pastaEntrada.resolve(NOME), trecho, StandardCharsets.UTF_8);
+        List<String> silabasAntes = trecho.lines()
+            .filter(l -> l.startsWith("Dialogue:") && l.contains(",Ending,") && !l.contains("To shadows")).toList();
+
+        useCase.aplicar(pastaEntrada, CONTEXTO);
+        String saida = gravado();
+
+        assertFalse(saida.contains("To shadows stalled"),
+            () -> "o ingles do fansub ficou na tela (romaji + ingles + portugues):\n" + saida);
+        assertEquals(3, saida.lines().filter(l -> l.startsWith("Dialogue:")
+                && l.endsWith("}Para sombras paralisadas em uma neblina silenciosa")).count(),
+            () -> "as tres camadas da linha tinham de virar so portugues no lugar:\n" + saida);
+        assertEquals(45, silabasAntes.size(), "o trecho real tem 15 silabas em 3 camadas");
+        for (String silaba : silabasAntes) {
+            assertTrue(saida.contains(silaba), () -> "a silaba do romaji mudou ou saiu da tela: " + silaba);
+        }
     }
 
     /**

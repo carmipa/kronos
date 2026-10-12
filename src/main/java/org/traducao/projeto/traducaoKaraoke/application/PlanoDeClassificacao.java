@@ -76,13 +76,25 @@ public final class PlanoDeClassificacao {
      * entra frase cujos pedaços reconstroem o texto dela (ver {@link #posicoesDeSilaba}).
      */
     private final Map<Integer, List<Integer>> silabasPorFrase;
+    /** Posições traduzíveis com a letra original acesa em SÍLABAS no meio delas (ver {@link #originalEmSilabas}). */
+    private final Set<Integer> comOriginalEmSilabas;
+
+    /**
+     * Mínimo de sílabas distintas acesas para contar como letra cantada: com menos, uma sílaba solta
+     * de outra camada decidiria sozinha.
+     */
+    static final int MINIMO_SILABAS_DO_ORIGINAL = 4;
+    /** O limiar de romaji do detector do peer legenda (70), aplicado às sílabas acesas juntas. */
+    static final int LIMIAR_ROMAJI_DAS_SILABAS = 70;
 
     private PlanoDeClassificacao(List<ClasseLinhaKaraoke> classePorPosicao,
                                  List<long[]> janelasComOriginalPreservada,
-                                 Map<Integer, List<Integer>> silabasPorFrase) {
+                                 Map<Integer, List<Integer>> silabasPorFrase,
+                                 Set<Integer> comOriginalEmSilabas) {
         this.classePorPosicao = List.copyOf(classePorPosicao);
         this.janelasComOriginalPreservada = List.copyOf(janelasComOriginalPreservada);
         this.silabasPorFrase = Map.copyOf(silabasPorFrase);
+        this.comOriginalEmSilabas = Set.copyOf(comOriginalEmSilabas);
     }
 
     /**
@@ -135,7 +147,7 @@ public final class PlanoDeClassificacao {
                                               ClassificadorLetraKaraokeService classificador,
                                               org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda corretor) {
         if (documento == null || documento.eventos() == null) {
-            return new PlanoDeClassificacao(List.of(), List.of(), Map.of());
+            return new PlanoDeClassificacao(List.of(), List.of(), Map.of(), Set.of());
         }
         List<EventoLegenda> eventos = documento.eventos();
 
@@ -198,7 +210,86 @@ public final class PlanoDeClassificacao {
             }
             janelasComRomaji.removeIf(j -> todaInglesa.contains((int) j[2]));
         }
-        return new PlanoDeClassificacao(classes, janelasComRomaji, silabasPorFrase);
+        return new PlanoDeClassificacao(classes, janelasComRomaji, silabasPorFrase,
+            originalEmSilabas(eventos, classes, silabasPorFrase, classificador));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: reconhece a letra ORIGINAL que está na tela desenhada SÍLABA A SÍLABA,
+     * sem nenhuma linha inteira — para a tradução inglesa do fansub virar só português no lugar, em
+     * vez de empilhar o inglês.
+     *
+     * <h2>O prejuízo que originou, medido em 12/10/2026</h2>
+     * No encerramento do 86 (Partes 1 e 2) o romaji ("Silent haze kasumi gachi ni toraeru kage",
+     * "kimi no koto wo kangaeru") é desenhado sílaba por sílaba em três camadas, no alto da tela, e
+     * não existe a linha inteira. As janelas de "original preservada" só conhecem linha inteira, e
+     * a 4.1 empilhava {@code inglês\Nportuguês}: a tela mostrava romaji + inglês + português — o
+     * inglês do fansub que Paulo manda sair ("removemos o inglês e deixamos só o português").
+     *
+     * <p>INVARIANTES DO DOMÍNIO: olha o MEIO de cada linha traduzível; conta os eventos de efeito
+     * acesos ali, tirando os pedaços da PRÓPRIA frase ({@link #silabasDaFrase}) e as cópias de
+     * camada (mesmo instante e texto). Com {@value #MINIMO_SILABAS_DO_ORIGINAL} sílabas ou mais e
+     * romaji pelo critério do detector ({@value #LIMIAR_ROMAJI_DAS_SILABAS}), o original está na
+     * tela. Sílaba inglesa ("Do", "you", "feel", "a", "lone") não chega ao limiar: a letra cantada
+     * em inglês, sem romaji, continua empilhando (o encerramento ED2 do Unicorn).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: tempo ilegível ou classificador ausente deixam a posição
+     * de fora — o lado que empilha, preservando a letra.
+     */
+    private static Set<Integer> originalEmSilabas(List<EventoLegenda> eventos, List<ClasseLinhaKaraoke> classes,
+                                                  Map<Integer, List<Integer>> silabasPorFrase,
+                                                  ClassificadorLetraKaraokeService classificador) {
+        if (classificador == null) {
+            return Set.of();
+        }
+        List<Integer> efeitos = new ArrayList<>();
+        for (int j = 0; j < eventos.size(); j++) {
+            if (classes.get(j) == ClasseLinhaKaraoke.EFEITO_KFX && inicioCs(eventos.get(j)) >= 0
+                && fimCs(eventos.get(j)) >= 0) {
+                efeitos.add(j);
+            }
+        }
+        if (efeitos.isEmpty()) {
+            return Set.of();
+        }
+        efeitos.sort(Comparator.comparingLong((Integer j) -> inicioCs(eventos.get(j))).thenComparingInt(j -> j));
+        Set<Integer> resultado = new HashSet<>();
+        for (int i = 0; i < eventos.size(); i++) {
+            if (classes.get(i) != ClasseLinhaKaraoke.TRADUZIVEL_INGLES) {
+                continue;
+            }
+            long ini = inicioCs(eventos.get(i));
+            long fim = fimCs(eventos.get(i));
+            if (ini < 0 || fim <= ini) {
+                continue;
+            }
+            long meio = (ini + fim) / 2;
+            Set<Integer> daPropriaFrase = new HashSet<>(silabasPorFrase.getOrDefault(i, List.of()));
+            Set<String> vistas = new HashSet<>();
+            StringBuilder silabas = new StringBuilder();
+            int distintas = 0;
+            for (int j : efeitos) {
+                EventoLegenda ef = eventos.get(j);
+                long iniJ = inicioCs(ef);
+                if (iniJ > meio) {
+                    break;
+                }
+                if (fimCs(ef) <= meio || daPropriaFrase.contains(j)) {
+                    continue;
+                }
+                String visivel = visivelDe(ef);
+                if (visivel.isEmpty() || !vistas.add(iniJ + "|" + fimCs(ef) + "|" + visivel)) {
+                    continue;
+                }
+                silabas.append(visivel).append(' ');
+                distintas++;
+            }
+            if (distintas >= MINIMO_SILABAS_DO_ORIGINAL
+                && classificador.proporcaoRomaji(silabas.toString()) >= LIMIAR_ROMAJI_DAS_SILABAS) {
+                resultado.add(i);
+            }
+        }
+        return resultado;
     }
 
     /** Mínimo de palavras que SÓ o inglês reconhece — ver o Javadoc de {@link #montar(DocumentoLegenda, ClassificadorLetraKaraokeService, org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda)}. */
@@ -362,6 +453,20 @@ public final class PlanoDeClassificacao {
      */
     public List<Integer> silabasDaFrase(int posicao) {
         return silabasPorFrase.getOrDefault(posicao, List.of());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: a letra original está na tela, desenhada sílaba a sílaba, no meio desta
+     * linha traduzível? Se está, a tradução do fansub vira só português — o caso do encerramento do
+     * 86, 12/10/2026 (ver {@link #originalEmSilabas}).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: resposta por POSIÇÃO, como o resto do plano.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: posição desconhecida devolve {@code false} — o lado que
+     * empilha e preserva a letra.
+     */
+    public boolean temOriginalEmSilabasNaPosicao(int posicao) {
+        return comOriginalEmSilabas.contains(posicao);
     }
 
     /** Quantos eventos o plano decidiu — para o resumo por arquivo. */

@@ -93,7 +93,8 @@ public class MontadorEventoFinal {
      *       as palavras do efeito estão desenhadas, e o inglês saía escrito EM CIMA dele.</li>
      *   <li>Se JÁ existe camada original preservada neste instante, NÃO empilha — senão a letra
      *       apareceria duas vezes. É o caso dos episódios 01-12 do Unicorn, que têm ED romaji ao
-     *       lado do ED - EN.</li>
+     *       lado do ED - EN, e do encerramento do 86, em que o romaji é desenhado sílaba a sílaba
+     *       ({@link PlanoDeClassificacao#temOriginalEmSilabasNaPosicao}, 12/10/2026).</li>
      *   <li>A moldura de tags do evento é preservada: o texto original entra como está.</li>
      *   <li>Tradução igual ao original não empilha — mostrar a mesma frase duas vezes é ruído.</li>
      * </ul>
@@ -110,7 +111,8 @@ public class MontadorEventoFinal {
         if (plano != null && !plano.silabasDaFrase(posicao).isEmpty()) {
             return traduzido;
         }
-        if (plano != null && plano.temOriginalPreservadaNoInstante(evento)) {
+        if (plano != null && (plano.temOriginalPreservadaNoInstante(evento)
+                || plano.temOriginalEmSilabasNaPosicao(posicao))) {
             return traduzido;
         }
         String original = evento.texto();
