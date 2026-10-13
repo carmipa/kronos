@@ -417,6 +417,73 @@ class PlanoDeClassificacaoTest {
                 + "as silabas puladas — senao o fix #3 reabriria o scar 22/23 do ED");
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO (decisão de Paulo, 12/10/2026, Break Blade 1-5): o último verso do
+     * encerramento é cantado em inglês ("ALIVE SERIOUS AGE", na altura do romaji) e o fansub pôs a
+     * tradução dele embaixo ("Alive in this serious age"). A tela mostrava QUATRO linhas — os dois
+     * ingleses, cada um com um português empilhado. Paulo: o original fica INTACTO em cima e embaixo
+     * fica SÓ o português.
+     *
+     * <p>A1, mesmo sinal dos dois lados: as duas linhas candidatas são "toda inglês na camada
+     * original". Só a que tem a tradução do fansub no MESMO momento fica intacta; a que canta
+     * sozinha (Zeta, 0:00:40) continua virando português empilhado (F8 de 24/09).
+     */
+    @Test
+    @DisplayName("F8 + fansub: ingles cantado com a traducao do fansub ao lado fica intacto e o fansub vira so PT")
+    void inglesCantadoComTraducaoDoFansubFicaIntacto(@org.junit.jupiter.api.io.TempDir Path pasta) throws IOException {
+        String cima = "Dialogue: 0,%s,Ending,,0,0,0,,{\\be1\\fad(0,200)\\pos(502.5,165)}%s";
+        String baixo = "Dialogue: 0,%s,Ending,,0,0,0,,{\\be1\\fad(0,200)\\pos(502.5,930)}%s";
+        DocumentoLegenda doc = documento(pasta,
+            String.format(cima, "0:49:57.89,0:50:02.00", "Hashiridashite Kigatsuitanda"),
+            String.format(cima, "0:50:02.31,0:50:07.57", "Omoi wa Tsunagaru Tabi Kieru"),
+            String.format(cima, "0:50:07.86,0:50:20.00", "Futatabi Aeru Hi no\\NTame ni Ima o Ikiru yo"),
+            String.format(cima, "0:50:20.50,0:50:26.09", "ALIVE SERIOUS AGE"),
+            String.format(baixo, "0:49:57.89,0:50:02.00", "I began to run and noticed too late"),
+            String.format(baixo, "0:50:02.31,0:50:07.57", "that feelings die when they connect"),
+            String.format(baixo, "0:50:07.86,0:50:20.00", "I will live in the present for\\Nwe may meet in the future"),
+            String.format(baixo, "0:50:20.50,0:50:26.09", "Alive in this serious age"),
+            // 8: ingles na altura do romaji SEM a traducao do fansub ao lado — continua traducao
+            String.format(cima, "0:51:00.00,0:51:04.00", "ALIVE SERIOUS AGE"));
+
+        PlanoDeClassificacao plano = PlanoDeClassificacao.montar(doc, classificador);
+
+        assertEquals(ClasseLinhaKaraoke.ORIGINAL_JAPONES, plano.classeNaPosicao(0), "o romaji e o original");
+        assertEquals(ClasseLinhaKaraoke.ORIGINAL_JAPONES, plano.classeNaPosicao(3),
+            "'ALIVE SERIOUS AGE' esta na camada do romaji e tem a traducao do fansub ao lado: original, intacto");
+        assertTrue(plano.temOriginalPreservadaNoInstante(doc.eventos().get(7)),
+            "com o original intacto em cima, 'Alive in this serious age' vira SO portugues");
+        assertEquals(ClasseLinhaKaraoke.TRADUZIVEL_INGLES, plano.classeNaPosicao(7), "o fansub continua traduzivel");
+        assertEquals(ClasseLinhaKaraoke.TRADUZIVEL_INGLES, plano.classeNaPosicao(8),
+            "A1: o mesmo ingles na mesma camada, SEM traducao ao lado, continua traducao (empilha)");
+        assertFalse(plano.temOriginalPreservadaNoInstante(doc.eventos().get(8)),
+            "A1: sozinho ele e a letra — nao pode achar a si mesmo como original");
+    }
+
+    /**
+     * O mesmo caso pelo caminho do F8: o estilo da camada é "Song JP" (o classificador já chama a
+     * linha de ORIGINAL) e ela é toda inglesa. Com a tradução do fansub no mesmo momento ela fica
+     * intacta; sozinha (Zeta), continua virando português empilhado.
+     */
+    @Test
+    @DisplayName("F8 + fansub: linha toda inglesa no estilo JP com a traducao do fansub ao lado fica intacta")
+    void f8ComTraducaoDoFansubFicaIntacto(@org.junit.jupiter.api.io.TempDir Path pasta) throws IOException {
+        DocumentoLegenda doc = documento(pasta,
+            "Dialogue: 0,0:03:00.00,0:03:04.00,Song JP,,0,0,0,,I wanna have a pure time!",
+            "Dialogue: 0,0:03:00.00,0:03:04.00,OP - English,,0,0,0,,I wanna have a pure time!",
+            "Dialogue: 0,0:00:40.23,0:00:43.27,Song JP,,0,0,0,,I wanna have a pure time!");
+
+        PlanoDeClassificacao plano = PlanoDeClassificacao.montar(doc, classificador, new TresDicionarios(true));
+
+        assertEquals(ClasseLinhaKaraoke.TRADUZIVEL_INGLES, plano.classeNaPosicao(1),
+            "pre-condicao: a camada do fansub e traducao");
+        assertEquals(ClasseLinhaKaraoke.ORIGINAL_JAPONES, plano.classeNaPosicao(0),
+            "com a traducao do fansub no mesmo momento, a linha cantada fica intacta");
+        assertTrue(plano.temOriginalPreservadaNoInstante(doc.eventos().get(1)),
+            "e o fansub vira so portugues");
+        assertEquals(ClasseLinhaKaraoke.TRADUZIVEL_INGLES, plano.classeNaPosicao(2),
+            "A1: sozinha (Zeta) ela continua virando portugues empilhado");
+    }
+
     /** FALHA FECHADA: documento nulo e posição fora da faixa não podem virar exceção. */
     @Test
     @DisplayName("FALHA FECHADA: nulo e posicao invalida devolvem FORA_DE_MUSICA")

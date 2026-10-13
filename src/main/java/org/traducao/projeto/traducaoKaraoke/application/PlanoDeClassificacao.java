@@ -203,12 +203,17 @@ public final class PlanoDeClassificacao {
                     silabas.contains(i))));
         }
 
-        Set<Integer> todaInglesa = originaisTodaInglesas(eventos, classes, silabas, corretor);
+        Set<Integer> todaInglesa = new HashSet<>(originaisTodaInglesas(eventos, classes, silabas, corretor));
+        todaInglesa.removeAll(comTraducaoDoFansubNoMesmoMomento(eventos, classes, todaInglesa));
         if (!todaInglesa.isEmpty()) {
             for (int i : todaInglesa) {
                 classes.set(i, ClasseLinhaKaraoke.TRADUZIVEL_INGLES);
             }
             janelasComRomaji.removeIf(j -> todaInglesa.contains((int) j[2]));
+        }
+        for (int i : inglesCantadoNaCamadaOriginal(eventos, classes)) {
+            classes.set(i, ClasseLinhaKaraoke.ORIGINAL_JAPONES);
+            janelasComRomaji.add(new long[] {inicioCs(eventos.get(i)), fimCs(eventos.get(i)), i});
         }
         return new PlanoDeClassificacao(classes, janelasComRomaji, silabasPorFrase,
             originalEmSilabas(eventos, classes, silabasPorFrase, classificador));
@@ -290,6 +295,154 @@ public final class PlanoDeClassificacao {
             }
         }
         return resultado;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: das linhas originais todas em inglês (F8), as que têm a TRADUÇÃO DO
+     * FANSUB no mesmo momento — essas são a letra cantada em inglês e ficam intactas, e a tradução
+     * do fansub ao lado vira só português (ela encontra o original preservado e não empilha).
+     *
+     * <h2>A decisão que originou, 12/10/2026</h2>
+     * Encerramento do Break Blade 1-5: o último verso é cantado em inglês ("ALIVE SERIOUS AGE", na
+     * altura do romaji) e o fansub pôs embaixo "Alive in this serious age". Com o F8 as duas linhas
+     * viravam {@code inglês\Nportuguês} e a tela mostrava quatro linhas. Paulo escolheu: o original
+     * intacto em cima e só o português embaixo — a regra geral dele (a camada original sempre fica;
+     * o inglês do fansub é traduzido e sai).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: "tradução do fansub" é linha {@code TRADUZIVEL_INGLES} que não é
+     * candidata do F8, com as DUAS pontas a até {@link #FOLGA_PAR_DE_CAMADAS_CS} das pontas do
+     * original — o mesmo critério de "mesmo momento" do F6. Linha cantada sozinha (Zeta, 0083)
+     * continua no F8 e empilha. Romaji irmão (08th) não é tradução do fansub e não muda nada.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: sem candidatas, ou tempo ilegível, nenhuma posição sai —
+     * o F8 segue como era.
+     */
+    private static Set<Integer> comTraducaoDoFansubNoMesmoMomento(List<EventoLegenda> eventos,
+            List<ClasseLinhaKaraoke> classes, Set<Integer> candidatas) {
+        if (candidatas.isEmpty()) {
+            return Set.of();
+        }
+        List<long[]> doFansub = new ArrayList<>();
+        for (int j = 0; j < eventos.size(); j++) {
+            if (classes.get(j) == ClasseLinhaKaraoke.TRADUZIVEL_INGLES && !candidatas.contains(j)) {
+                long ini = inicioCs(eventos.get(j));
+                long fim = fimCs(eventos.get(j));
+                if (ini >= 0 && fim >= 0) {
+                    doFansub.add(new long[] {ini, fim});
+                }
+            }
+        }
+        Set<Integer> intactas = new HashSet<>();
+        for (int i : candidatas) {
+            long ini = inicioCs(eventos.get(i));
+            long fim = fimCs(eventos.get(i));
+            if (ini < 0 || fim < 0) {
+                continue;
+            }
+            for (long[] f : doFansub) {
+                if (Math.abs(f[0] - ini) <= FOLGA_PAR_DE_CAMADAS_CS && Math.abs(f[1] - fim) <= FOLGA_PAR_DE_CAMADAS_CS) {
+                    intactas.add(i);
+                    break;
+                }
+            }
+        }
+        return intactas;
+    }
+
+    /** Linhas originais com a mesma posição para uma camada contar como a camada ORIGINAL da música. */
+    static final int MINIMO_ORIGINAIS_DA_CAMADA = 3;
+    private static final java.util.regex.Pattern POS_Y =
+        java.util.regex.Pattern.compile("\\\\pos\\(\\s*-?[0-9.]+\\s*,\\s*(-?[0-9.]+)\\s*\\)");
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: a linha em inglês que está NA CAMADA DA LETRA ORIGINAL (mesmo estilo e
+     * mesma altura do romaji) e tem, no mesmo momento, a tradução do fansub em OUTRA camada — é o
+     * verso cantado em inglês, e fica intacto; a tradução do fansub ao lado encontra o original
+     * preservado e vira só português.
+     *
+     * <h2>A decisão que originou, 12/10/2026</h2>
+     * Break Blade 1-5, encerramento: o romaji é desenhado em {@code \pos(502.5,165)} e a tradução
+     * do fansub em {@code \pos(502.5,930)}, os dois no estilo "Ending". O último verso é cantado em
+     * inglês, "ALIVE SERIOUS AGE", na altura do romaji, e o fansub pôs embaixo "Alive in this
+     * serious age". O classificador chama as duas de tradução (texto inglês) e a tela mostrava
+     * quatro linhas. Paulo: o original intacto em cima, e embaixo só o português.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a camada é o par (estilo, altura do primeiro {@code \pos}); linha
+     * sem {@code \pos} não tem camada e não entra. Camada original é a que tem pelo menos
+     * {@value #MINIMO_ORIGINAIS_DA_CAMADA} linhas ORIGINAL. A irmã tem de ser tradução de OUTRA
+     * camada, com as duas pontas a até {@link #FOLGA_PAR_DE_CAMADAS_CS}. Inglês na camada original
+     * SEM a tradução ao lado continua tradução (empilha, preservando a letra — o lado do prejuízo
+     * do Unicorn).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: tempo ou posição ilegível deixa a linha como estava.
+     */
+    private static Set<Integer> inglesCantadoNaCamadaOriginal(List<EventoLegenda> eventos,
+                                                              List<ClasseLinhaKaraoke> classes) {
+        Map<String, Integer> originaisPorCamada = new HashMap<>();
+        String[] camada = new String[eventos.size()];
+        for (int i = 0; i < eventos.size(); i++) {
+            camada[i] = camadaDe(eventos.get(i));
+            if (camada[i] != null && classes.get(i) == ClasseLinhaKaraoke.ORIGINAL_JAPONES) {
+                originaisPorCamada.merge(camada[i], 1, Integer::sum);
+            }
+        }
+        List<Integer> traducoes = new ArrayList<>();
+        for (int j = 0; j < eventos.size(); j++) {
+            if (classes.get(j) == ClasseLinhaKaraoke.TRADUZIVEL_INGLES && camada[j] != null
+                && inicioCs(eventos.get(j)) >= 0 && fimCs(eventos.get(j)) >= 0) {
+                traducoes.add(j);
+            }
+        }
+        if (originaisPorCamada.isEmpty() || traducoes.isEmpty()) {
+            return Set.of();
+        }
+        traducoes.sort(Comparator.comparingLong((Integer j) -> inicioCs(eventos.get(j))));
+        long[] inicios = new long[traducoes.size()];
+        for (int k = 0; k < inicios.length; k++) {
+            inicios[k] = inicioCs(eventos.get(traducoes.get(k)));
+        }
+        Set<Integer> intactas = new HashSet<>();
+        for (int i : traducoes) {
+            if (originaisPorCamada.getOrDefault(camada[i], 0) < MINIMO_ORIGINAIS_DA_CAMADA) {
+                continue;
+            }
+            long ini = inicioCs(eventos.get(i));
+            long fim = fimCs(eventos.get(i));
+            for (int k = primeiroAPartirDe(inicios, ini - FOLGA_PAR_DE_CAMADAS_CS);
+                 k < inicios.length && inicios[k] <= ini + FOLGA_PAR_DE_CAMADAS_CS; k++) {
+                int j = traducoes.get(k);
+                if (j != i && !camada[i].equals(camada[j])
+                    && Math.abs(fimCs(eventos.get(j)) - fim) <= FOLGA_PAR_DE_CAMADAS_CS) {
+                    intactas.add(i);
+                    break;
+                }
+            }
+        }
+        return intactas;
+    }
+
+    /** Primeiro índice com valor maior ou igual ao limite, num vetor ordenado (busca binária). */
+    private static int primeiroAPartirDe(long[] ordenado, long limite) {
+        int lo = 0;
+        int hi = ordenado.length;
+        while (lo < hi) {
+            int meio = (lo + hi) >>> 1;
+            if (ordenado[meio] < limite) {
+                lo = meio + 1;
+            } else {
+                hi = meio;
+            }
+        }
+        return lo;
+    }
+
+    /** (estilo, altura do primeiro {@code \pos}); {@code null} quando a linha não tem {@code \pos}. */
+    private static String camadaDe(EventoLegenda ev) {
+        if (ev == null || ev.texto() == null || ev.estilo() == null) {
+            return null;
+        }
+        java.util.regex.Matcher m = POS_Y.matcher(ev.texto());
+        return m.find() ? ev.estilo().trim().toLowerCase(Locale.ROOT) + "|" + m.group(1) : null;
     }
 
     /** Mínimo de palavras que SÓ o inglês reconhece — ver o Javadoc de {@link #montar(DocumentoLegenda, ClassificadorLetraKaraokeService, org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda)}. */
