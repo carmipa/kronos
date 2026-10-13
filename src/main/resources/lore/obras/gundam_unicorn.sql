@@ -8,6 +8,7 @@ INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Alberto Vist');
 INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Anaheim Electronics');
 INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Angelo Sauper');
 INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Anksha');
+INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Anno Domini');
 INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Audrey Burne');
 INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Axis');
 INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'Banagher');  -- [03/09] usado na legenda, ausente da lore
@@ -154,6 +155,10 @@ INSERT INTO termo_protegido VALUES ('gundam_unicorn', 'psycommu');
 --   Neo Zeon (6/61), Londo Bell (2/22), Nahel Argama (1/60) — taxa baixa e as
 --     falas mostram pronome/omissão, não localização do termo.
 INSERT INTO traducao_obrigatoria VALUES ('gundam_unicorn', 'Universal Century', 'Século Universal');
+INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Ano Dominio', 'Anno Domini');
+INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Ano Domínio', 'Anno Domini');
+INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Ano do Dominio', 'Anno Domini');
+INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Ano do Domínio', 'Anno Domini');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Armadura Móvel', 'Mobile Armor');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Armadura Normal', 'Normal Suit');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Armaduras Móveis', 'Mobile Armors');
@@ -166,6 +171,8 @@ INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Cárdeas', 'Cardeas
 -- medido: "Doze Ple" 4x, "Ple Doze" 4x, "Ple Twelve" 3x. Nome proprio invertido e traduzido.
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Doze Ple', 'Ple Twelve');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Eixo', 'Axis');
+INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Era de Deus', 'Anno Domini');
+INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Era do Domínio', 'Anno Domini');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Esfera de Co-Prosperidade', 'Co-Prosperity Sphere');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Esfera de Prosperidade', 'Co-Prosperity Sphere');
 INSERT INTO correcao_terminologia VALUES ('gundam_unicorn', 'Esfera de Prosperidade Comum', 'Co-Prosperity Sphere');

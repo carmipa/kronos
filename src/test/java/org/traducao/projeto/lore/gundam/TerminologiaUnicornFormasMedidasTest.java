@@ -158,4 +158,32 @@ class TerminologiaUnicornFormasMedidasTest {
         assertTrue(!correcoes.containsKey("Federação Terrestre"),
             "20 de 20 falas usam a forma traduzida, igual a CCA e F91");
     }
+
+    /**
+     * Decisão de Paulo, 12/10/2026, vendo o E01: "Anno Domini" fica em LATIM — o modelo escrevia
+     * "Ano Domínio", "ano do domínio" e "era do Domínio" (ao pé da letra seria "era de Deus"). As
+     * três primeiras formas são as do cache real do E01.
+     */
+    @Test
+    @DisplayName("Anno Domini fica em latim: 'Ano Domínio' e 'ano do domínio' voltam ao latim")
+    void annoDominiFicaEmLatim() {
+        assertEquals("Adeus, Anno Domini.\\NOlá, Século Universal!",
+            reforcar("Goodbye, Anno Domini.\\NHello, Universal Century!",
+                "Adeus, Ano Domínio.\\NOlá, Século Universal!"));
+        assertEquals("e agradecer ao passado,\\Nà era do Anno Domini.",
+            reforcar("and give thanks to the past,\\Nthe Anno Domini era.",
+                "e agradecer ao passado,\\Nà era do Ano Domínio."));
+        assertEquals("Em poucos momentos, o Anno\\NDomini chegará ao fim.",
+            reforcar("In a few moments,\\Nthe Anno Domini era will come to an end.",
+                "Em poucos momentos, o ano\\Ndo domínio chegará ao fim."),
+            "a quebra \\N de dentro do termo volta no mesmo lugar");
+    }
+
+    @Test
+    @DisplayName("A1: 'domínio' comum, sem 'Anno Domini' no inglês, não é tocado")
+    void dominioComumNaoETocado() {
+        String fala = "O ano do domínio da Federação acabou.";
+        assertEquals(fala, reforcar("The year of the Federation's dominion is over.", fala),
+            "mesmo sinal ('ano do domínio'), mas o inglês não fala do calendário: fica como está");
+    }
 }
