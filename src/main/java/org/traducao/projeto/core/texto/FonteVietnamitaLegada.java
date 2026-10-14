@@ -33,9 +33,12 @@ import java.util.Set;
  *       1.3 já conhecia em minúsculas. Um {@code @} na frente (fonte vertical) não muda nada.</li>
  *   <li>NÃO é legada: {@code VNF-…} (as vietnamitas modernas, em Unicode), {@code Vinque Sans},
  *       {@code Verdana} — o sinal "começa com V/Vn" sozinho não basta.</li>
- *   <li>Só conta o que vai à TELA: estilo usado por ao menos uma linha {@code Dialogue:} e
- *       {@code \fn} dentro de linha {@code Dialogue:}. Estilo declarado e não usado, e
- *       {@code Comment:}, não são desenhados.</li>
+ *   <li>BANIDA em qualquer lugar da legenda (Paulo, 14/10/2026: "banir esse tipo de fonte"): todo
+ *       estilo do cabeçalho, usado ou não, e todo {@code \fn} dentro de linha {@code Dialogue:} ou
+ *       {@code Comment:} — os dois tipos de evento que o leitor ASS do KRONOS lê com texto e que a
+ *       1.3 reescreve. Estilo sem fala e comentário não desenham HOJE, mas basta alguém reativar a
+ *       linha ou apontar uma fala para o estilo (a 4.1 escolhe a fonte do diálogo para a letra) e a
+ *       letra trocada volta à tela sem aviso. O motivo diz se o estilo está ou não na tela.</li>
  *   <li>Só JDK, sem regex: o kernel não conhece fatia nem framework.</li>
  * </ul>
  *
@@ -50,8 +53,17 @@ public final class FonteVietnamitaLegada {
 
     private static final String MARCA_FONTE_INLINE = "\\fn";
 
-    /** Uma linha {@code Dialogue:} reduzida ao que importa aqui. */
-    public record Fala(String estilo, String texto) { }
+    /**
+     * Uma linha de evento reduzida ao que importa aqui; {@code naTela} é {@code Dialogue:}, falso é
+     * {@code Comment:}.
+     */
+    public record Fala(String estilo, String texto, boolean naTela) {
+
+        /** Linha {@code Dialogue:}. */
+        public Fala(String estilo, String texto) {
+            this(estilo, texto, true);
+        }
+    }
 
     private FonteVietnamitaLegada() {
     }
@@ -209,12 +221,13 @@ public final class FonteVietnamitaLegada {
     }
 
     /**
-     * PROPÓSITO DE NEGÓCIO: diz, em frases curtas para o operador, onde a legenda põe fonte legada
-     * NA TELA — o motivo de reprovar e pedir a 1.3.
+     * PROPÓSITO DE NEGÓCIO: diz, em frases curtas para o operador, onde a legenda tem fonte legada —
+     * o motivo de reprovar e pedir a 1.3.
      *
-     * <p>INVARIANTES DO DOMÍNIO: estilo legado só conta se alguma fala o usa (nome comparado sem caixa,
-     * com o {@code *} de estilo padrão ignorado); {@code \fn} legado conta por família, com o número de
-     * falas.
+     * <p>INVARIANTES DO DOMÍNIO: todo estilo legado do cabeçalho conta, na ordem do arquivo; o que
+     * nenhuma linha {@code Dialogue:} usa sai marcado "(nenhuma fala na tela usa)" (nome comparado sem
+     * caixa, com o {@code *} de estilo padrão ignorado). {@code \fn} legado conta por família, em
+     * fala e em comentário, com o número de linhas.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: sem achado, lista vazia; nunca lança.
      */
@@ -224,9 +237,8 @@ public final class FonteVietnamitaLegada {
         Set<String> estilosNaTela = new LinkedHashSet<>();
         Map<String, Integer> inline = new LinkedHashMap<>();
         for (Fala fala : falas == null ? List.<Fala>of() : falas) {
-            String estilo = normalizarEstilo(fala.estilo());
-            if (legados.containsKey(estilo)) {
-                estilosNaTela.add(estilo);
+            if (fala.naTela()) {
+                estilosNaTela.add(normalizarEstilo(fala.estilo()));
             }
             for (String fonte : fontesInline(fala.texto())) {
                 if (ehLegada(fonte)) {
@@ -235,10 +247,9 @@ public final class FonteVietnamitaLegada {
             }
         }
         List<String> achados = new ArrayList<>();
-        for (String estilo : estilosNaTela) {
-            achados.add("estilo \"" + legados.get(estilo));
-        }
-        inline.forEach((fonte, n) -> achados.add("\\fn" + fonte + " em " + n + " fala(s)"));
+        legados.forEach((estilo, descricao) -> achados.add("estilo \"" + descricao
+            + (estilosNaTela.contains(estilo) ? "" : " (nenhuma fala na tela usa)")));
+        inline.forEach((fonte, n) -> achados.add("\\fn" + fonte + " em " + n + " linha(s)"));
         return achados;
     }
 
@@ -247,8 +258,8 @@ public final class FonteVietnamitaLegada {
      * ASS inteiro em texto — para quem não tem o documento já lido, como o remux.
      *
      * <p>INVARIANTES DO DOMÍNIO: cabeçalho é tudo antes de {@code [Events]}; as colunas Style e Text
-     * vêm do {@code Format:} de {@code [Events]} (sem ele, o padrão ASS de 10 colunas); só linhas
-     * {@code Dialogue:}.
+     * vêm do {@code Format:} de {@code [Events]} (sem ele, o padrão ASS de 10 colunas); linhas
+     * {@code Dialogue:} e {@code Comment:} — o universo que a 1.3 consegue reescrever.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: conteúdo nulo ou sem {@code [Events]} devolve lista vazia.
      */
@@ -289,10 +300,11 @@ public final class FonteVietnamitaLegada {
                 }
                 continue;
             }
-            if (aparada.startsWith("Dialogue:")) {
+            boolean dialogo = aparada.startsWith("Dialogue:");
+            if (dialogo || aparada.startsWith("Comment:")) {
                 String[] partes = linha.substring(linha.indexOf(':') + 1).split(",", colunas);
                 if (partes.length > Math.max(idxEstilo, idxTexto)) {
-                    falas.add(new Fala(partes[idxEstilo].trim(), partes[idxTexto]));
+                    falas.add(new Fala(partes[idxEstilo].trim(), partes[idxTexto], dialogo));
                 }
             }
         }

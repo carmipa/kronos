@@ -103,6 +103,7 @@ sequenceDiagram
 - Diálogos, placas e efeitos KFX passam **byte a byte** — o módulo só toca música.
 - A aplicação roda **na fila única do pipeline**, mas não relê a lore global: o `contextoId` escolhido vira um snapshot imutável e seu prompt é passado explicitamente em todas as chamadas ao LLM.
 - Cache, manifesto e telemetria registram o ID e a proveniência do contexto usado; cache legado sem carimbo não é reaproveitado automaticamente.
+- 🚫 **Fonte vietnamita antiga reprova o arquivo** (desde 14/10/2026, Gundam ZZ): `.VnBook-Antiqua`, `VnBook-Antiqua`, `.VnTime`, `VNI-Times` e afins em **qualquer** estilo do cabeçalho (usado ou não) ou em `\fn` de fala ou comentário. A reprovação vem logo depois de ler o arquivo — antes de cache e LLM, sem gravar nada — e fica no manifesto pedindo a [1.3 Troca Tipo Legenda](etapa-1.3-troca-tipo-legenda.md). A regra é a única do kernel (`FonteVietnamitaLegada`), a mesma do 5.1 e da 1.3.
 
 ---
 

@@ -16,6 +16,27 @@ Fansubs antigos usam fontes com codificações pré-Unicode — em especial as v
 
 > 💡 Caso real: a temporada de *Gundam 08th MS Team* (release [Joseki]) usava `.VnBook-Antiqua` no estilo `Dialogue`, com o `Vnantiqb.ttf` embutido nos MKVs. O defeito é 100% de **renderização** — o `.ass` está íntegro — e por isso não aparece em nenhum grep/diff do texto.
 
+### 🚫 Fonte vietnamita antiga é BANIDA — a 4.1 e o 5.1 reprovam e pedem esta tela
+
+Ordens de Paulo em 14/10/2026, depois do Gundam ZZ publicado com 10.514 de 16.467 falas em
+`VnBook-Antiqua` (sem o ponto — a lista antiga desta tela não a conhecia):
+
+- **Regra única** em `core.texto.FonteVietnamitaLegada`, a mesma nas três ferramentas. É antiga:
+  `.vn…` e `vni-…` (sem caixa), `Vn` + maiúscula (`VnBook-Antiqua`, `VnTimes`) e os nomes antigos em
+  minúsculas. **Não** é: `VNF-…` (vietnamita moderna, em Unicode), `Vinque Sans`, `Verdana`.
+- **Em qualquer lugar da legenda:** todo estilo do cabeçalho, **usado ou não** por fala, e todo `\fn`
+  dentro de linha `Dialogue:` **ou** `Comment:`. Estilo sem fala e comentário não desenham hoje, mas
+  basta reativar a linha ou apontar uma fala para o estilo para a letra trocada voltar sem aviso. O
+  motivo da reprovação diz quando o estilo não está na tela (`(nenhuma fala na tela usa)`).
+- **4.1 Karaokê** reprova o arquivo antes de cache e LLM, sem gravar; **5.1 Remuxer** não gera o MKV
+  daquele episódio (pendência `fonteVietnamita=N`) e segue os outros. As duas mandam rodar esta tela.
+- **Esta tela troca tudo o que a reprovação cobra:** `Fontname` de todo estilo (inclusive linha de
+  estilo com menos colunas que o `Format:`) e o `\fn` de falas e comentários. Depois de aplicar, a
+  regra não acha mais nada — o teste
+  `estiloSemFalaComentarioELinhaCurtaComFonteLegadaTambemSaoTrocados` prova isso relendo o arquivo.
+- Legenda salva em ANSI continua passando quando a fonte é comum (nome de fonte é ASCII). ASS em
+  UTF-16 é recusado antes pelo validador de entrada do 5.1.
+
 ---
 
 ## Pacote e classes principais
@@ -144,7 +165,7 @@ Para decisão manual de legibilidade:
 
 ## Pontos de atenção
 
-- A troca altera apenas o cabeçalho `[V4+ Styles]`; tags `\fn` inline nos eventos (raras) precisam de conferência manual — o relatório de auditoria as aponta.
+- A troca altera o `Fontname` em `[V4+ Styles]` e o `\fn` de fonte vietnamita antiga dentro das linhas `Dialogue:` e `Comment:` (desde 14/10/2026; até então só o cabeçalho). O relatório de auditoria lista o `\fn` como `\fn nas falas`; `\fn` de fonte comum não é tocado.
 - Depois da troca, os MKVs finais precisam ser **re-remuxados** ([Remuxer](etapa-5.1-remuxer.md)) para embutir a legenda corrigida.
 - Fontes anexadas no MKV original que nenhum estilo referencia mais (ex.: o `Vnantiqb.ttf` órfão) são inofensivas, mas continuam dentro do vídeo até um remux que as descarte.
 - Regra prática ao iniciar **qualquer série nova**: rodar o escaneamento na pasta das legendas extraídas antes de traduzir — fontes `.Vn*`, `VNI-*` e similares quebram a acentuação PT-BR silenciosamente.

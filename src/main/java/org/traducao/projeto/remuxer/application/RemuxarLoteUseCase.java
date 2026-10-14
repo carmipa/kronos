@@ -294,12 +294,14 @@ public class RemuxarLoteUseCase {
     /**
      * PROPÓSITO DE NEGÓCIO: recusa arquivo vazio ou com conteúdo incompatível
      * com a extensão ASS/SRT antes de invocar o mkvmerge — e, no ASS, a legenda
-     * que põe fonte vietnamita antiga na tela (o Gundam ZZ publicado em 09/10/2026
-     * mostrava "Nóo, ộ a atraỗóo!"; ordem de Paulo em 14/10: reprova e pede a 1.3).
+     * com fonte vietnamita antiga (o Gundam ZZ publicado em 09/10/2026 mostrava
+     * "Nóo, ộ a atraỗóo!"; ordens de Paulo em 14/10: reprova, pede a 1.3, e a fonte
+     * é banida em qualquer lugar da legenda).
      *
      * <p>INVARIANTES DO DOMÍNIO: apenas ASS e SRT textuais são aceitos; a fonte é
      * julgada pela regra única do kernel ({@link FonteVietnamitaLegada}), a mesma da
-     * 1.3 e da 4.1, só no que vai à tela (estilo usado por fala, {@code \fn} na fala).
+     * 1.3 e da 4.1: todo estilo do cabeçalho e o {@code \fn} de fala e de comentário.
+     * ASS em UTF-16 nem chega aqui: o validador de entrada o recusa antes.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: formato desconhecido ou assinatura
      * inválida lança {@link ExtratorException}; fonte vietnamita antiga lança
@@ -322,7 +324,7 @@ public class RemuxarLoteUseCase {
             String conteudo = new String(Files.readAllBytes(legenda), StandardCharsets.UTF_8);
             List<String> achados = FonteVietnamitaLegada.achadosNoAss(conteudo);
             if (!achados.isEmpty()) {
-                throw new LegendaComFonteVietnamitaException("fonte vietnamita antiga na tela ("
+                throw new LegendaComFonteVietnamitaException("fonte vietnamita antiga na legenda ("
                     + String.join("; ", achados) + "). Rode a 1.3 Troca de Tipo de Legenda (Arial) na pasta "
                     + "das legendas e refaça o remux; o MKV deste episódio não foi gerado.");
             }

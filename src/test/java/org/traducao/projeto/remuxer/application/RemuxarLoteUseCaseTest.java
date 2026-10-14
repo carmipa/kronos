@@ -114,6 +114,31 @@ class RemuxarLoteUseCaseTest {
     }
 
     /**
+     * PROPÓSITO DE NEGÓCIO: banimento de 14/10/2026 (Paulo: "banir esse tipo de fonte") — a fonte
+     * vietnamita antiga num estilo que nenhuma fala usa e num {@code \fn} de comentário também segura
+     * o MKV, mesmo com o diálogo em Arial e a legenda salva em ANSI (a leitura tolerante não pode
+     * cegar a verificação; par do controle ANSI acima).
+     * INVARIANTES DO DOMÍNIO: o mkvmerge não é chamado; pendência, não falha.
+     * COMPORTAMENTO EM CASO DE FALHA: chamada ao adaptador ou contador zerado reprovam.
+     */
+    @Test
+    void estiloSemFalaEComentarioComFonteVietnamitaTambemReprovamMesmoEmAnsi(@TempDir Path tempDir) throws IOException {
+        Cenario cenario = criarCenario(tempDir, "");
+        String legenda = legendaAssComFonteDoDialogo("Arial")
+            .replace("Style: Dialogue,Arial,75\n", "Style: Dialogue,Arial,75\nStyle: Velho,VnBook-Antiqua,75\n")
+            .replace("Dialogue: 0,0:00:00.00", "Comment: 0,0:00:00.00,0:00:00.50,Dialogue,,0,0,0,,{\\fn.VnTime}nota\nDialogue: 0,0:00:00.00");
+        Files.write(cenario.legendas().resolve("Anime - S01E01_PT-BR.ass"),
+            legenda.getBytes(java.nio.charset.Charset.forName("windows-1252")));
+
+        RelatorioRemux relatorio = criarUseCase(adapterQueFalhaSeExecutado())
+            .executar(cenario.videos(), cenario.legendas(), 0);
+
+        assertEquals(1, relatorio.getLegendasComFonteVietnamita());
+        assertEquals(0, relatorio.getMkvProcessadosSucesso());
+        assertEquals("CONCLUIDO_COM_PENDENCIAS", relatorio.getStatusFinal());
+    }
+
+    /**
      * PROPÓSITO DE NEGÓCIO: ASS com estilo declarado e uma fala que o usa.
      * INVARIANTES DO DOMÍNIO: passa na validação de entrada do remux.
      * COMPORTAMENTO EM CASO DE FALHA: constante sempre válida.

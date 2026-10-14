@@ -374,25 +374,26 @@ public class TraduzirKaraokeUseCase {
     }
 
     /**
-     * PROPÓSITO DE NEGÓCIO: reprova a legenda cujo texto vai à tela em fonte vietnamita antiga —
-     * "Não, é a atração!" sai "Nóo, ộ a atraỗóo!". O Gundam ZZ foi publicado assim em 09/10/2026 e a
-     * 4.1 não acusou. Ordem de Paulo (14/10): reprova e pede a 1.3 Troca de Tipo de Legenda.
+     * PROPÓSITO DE NEGÓCIO: reprova a legenda que tem fonte vietnamita antiga — "Não, é a atração!"
+     * sai "Nóo, ộ a atraỗóo!". O Gundam ZZ foi publicado assim em 09/10/2026 e a 4.1 não acusou. Ordens
+     * de Paulo (14/10): reprova e pede a 1.3 Troca de Tipo de Legenda, e a fonte é banida em qualquer
+     * lugar da legenda.
      *
-     * <p>INVARIANTES DO DOMÍNIO: a regra é a única do kernel ({@link FonteVietnamitaLegada}); só conta
-     * estilo usado por fala e {@code \fn} dentro de fala ({@code Comment:} e estilo sem fala não vão à
-     * tela). Vale para simular e para aplicar.
+     * <p>INVARIANTES DO DOMÍNIO: a regra é a única do kernel ({@link FonteVietnamitaLegada}); conta todo
+     * estilo do cabeçalho e o {@code \fn} de fala e de comentário (o comentário entra com
+     * {@code naTela} falso, para o motivo dizer se o estilo aparece). Vale para simular e para aplicar.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: com achado, lança {@link TraducaoKaraokeException} nomeando a
      * fonte e a 1.3; sem achado, não faz nada.
      */
     private void reprovarFonteVietnamitaAntiga(DocumentoLegenda documento) {
         List<FonteVietnamitaLegada.Fala> falas = documento.eventos().stream()
-            .filter(EventoLegenda::isDialogo)
-            .map(e -> new FonteVietnamitaLegada.Fala(e.estilo(), e.texto()))
+            .filter(e -> e.isDialogo() || "Comment".equals(e.tipoLinha()))
+            .map(e -> new FonteVietnamitaLegada.Fala(e.estilo(), e.texto(), e.isDialogo()))
             .toList();
         List<String> achados = FonteVietnamitaLegada.achados(documento.cabecalho(), falas);
         if (!achados.isEmpty()) {
-            throw new TraducaoKaraokeException("REPROVADO: fonte vietnamita antiga na tela ("
+            throw new TraducaoKaraokeException("REPROVADO: fonte vietnamita antiga na legenda ("
                 + String.join("; ", achados) + ") desenha outra letra no lugar do acento. Rode a 1.3 "
                 + "Troca de Tipo de Legenda (Arial) nesta pasta e depois a 4.1 de novo.");
         }

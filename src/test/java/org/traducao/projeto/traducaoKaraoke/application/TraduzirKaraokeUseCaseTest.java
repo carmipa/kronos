@@ -397,6 +397,28 @@ class TraduzirKaraokeUseCaseTest {
         assertTrue(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO)));
     }
 
+    /**
+     * Banimento de 14/10/2026 (Paulo: "banir esse tipo de fonte"): o diálogo em Arial, mas um
+     * {@code Comment:} com {@code \fn} vietnamita antigo e um estilo antigo que nenhuma fala usa. A
+     * 4.1 reprova do mesmo jeito, antes do LLM e sem gravar, pedindo a 1.3 — que troca os dois.
+     */
+    @Test
+    void fonteVietnamitaEmComentarioOuEstiloSemFalaTambemReprova() throws IOException {
+        String legenda = legendaComFonteDoDialogo("Arial")
+            .replace("Style: OP - English,FrancophilSans,63", "Style: OP - English,FrancophilSans,63\r\nStyle: Velho,.VnTime,40")
+            .replace("Dialogue: 0,0:00:01.00", "Comment: 0,0:00:00.50,0:00:01.00,Default,,0,0,0,,{\\fnVNI-Times}nota\r\nDialogue: 0,0:00:01.00");
+        Files.writeString(pastaEntrada.resolve(NOME_ARQUIVO), legenda, StandardCharsets.UTF_8);
+
+        List<ResultadoTraducaoKaraoke> resultados = useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+
+        assertTrue(resultados.isEmpty(), "o arquivo reprovado nao entra como processado");
+        String motivo = persistenciaMock.desfechoCapturado.get().falhas().getFirst().motivo();
+        assertTrue(motivo.contains(".VnTime") && motivo.contains("VNI-Times") && motivo.contains("1.3"), motivo);
+        assertEquals(0, llmFake.chamadasTraduzir, "reprovou antes de gastar LLM");
+        assertFalse(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO)),
+            "nada gravado para o arquivo reprovado");
+    }
+
     private static String legendaComFonteDoDialogo(String fonte) {
         return String.join("\r\n",
             "[Script Info]",

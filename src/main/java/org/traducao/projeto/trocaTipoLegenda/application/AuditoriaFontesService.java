@@ -65,7 +65,7 @@ public class AuditoriaFontesService {
             if (linha.startsWith("[") && linha.endsWith("]")) {
                 break;
             }
-            if (linha.startsWith("Format:")) {
+            if (linha.regionMatches(true, 0, "Format:", 0, "Format:".length())) {
                 indiceFormat = i;
                 break;
             }
@@ -99,15 +99,18 @@ public class AuditoriaFontesService {
             if (linha.startsWith("[") && linha.endsWith("]")) {
                 break;
             }
-            if (linha.startsWith("Style:")) {
+            if (linha.regionMatches(true, 0, "Style:", 0, "Style:".length())) {
                 String dadosEstilo = linha.substring(linha.indexOf(':') + 1);
                 if (dadosEstilo.startsWith(" ")) {
                     dadosEstilo = dadosEstilo.substring(1);
                 }
-                
-                // Dividir por vírgula limitando pelo número de colunas
+
+                // Dividir por vírgula limitando pelo número de colunas. Linha com MENOS colunas que o
+                // Format ainda tem nome e fonte (o renderizador completa o resto com o padrão), e a
+                // regra do kernel a acusa: exigir todas as colunas escondia do escanear justamente a
+                // linha que reprova na 4.1 e no remux.
                 String[] partes = dadosEstilo.split(",", numColunas);
-                if (partes.length >= numColunas) {
+                if (partes.length > Math.max(indexName, indexFontname)) {
                     String nomeEstilo = partes[indexName].trim();
                     String nomeFonte = partes[indexFontname].trim();
                     
@@ -198,7 +201,7 @@ public class AuditoriaFontesService {
             }
 
             String[] partes = dadosEstilo.split(",", numColunas);
-            if (partes.length < numColunas) {
+            if (partes.length <= indexFontname) {
                 continue;
             }
 
@@ -215,19 +218,20 @@ public class AuditoriaFontesService {
     }
 
     /**
-     * PROPÓSITO DE NEGÓCIO: acha a fonte vietnamita antiga escrita com {@code \fn} DENTRO das falas,
-     * que a troca do cabeçalho não alcança — sem isto, a reprovação da 4.1 e do remux pediria uma
-     * troca que a 1.3 não faz.
+     * PROPÓSITO DE NEGÓCIO: acha a fonte vietnamita antiga escrita com {@code \fn} DENTRO das falas e
+     * dos comentários, que a troca do cabeçalho não alcança — sem isto, a reprovação da 4.1 e do remux
+     * pediria uma troca que a 1.3 não faz.
      *
-     * <p>INVARIANTES DO DOMÍNIO: só linhas {@code Dialogue} (as que vão à tela); uma linha por família,
-     * na ordem em que aparece; sempre {@code problematica}, com Arial como sugerida.
+     * <p>INVARIANTES DO DOMÍNIO: linhas {@code Dialogue} e {@code Comment} (a fonte é banida em
+     * qualquer lugar, Paulo 14/10/2026); uma linha por família, na ordem em que aparece; sempre
+     * {@code problematica}, com Arial como sugerida.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula ou sem {@code \fn} legado devolve lista vazia.
      */
     public List<AuditoriaFonteInfo> analisarFontesNasFalas(List<EventoLegenda> eventos) {
         Set<String> familias = new LinkedHashSet<>();
         for (EventoLegenda evento : eventos == null ? List.<EventoLegenda>of() : eventos) {
-            if (evento != null && evento.isDialogo()) {
+            if (temTextoReescrevivel(evento)) {
                 FonteVietnamitaLegada.fontesInline(evento.texto()).stream()
                     .filter(FonteVietnamitaLegada::ehLegada)
                     .forEach(familias::add);
@@ -241,10 +245,11 @@ public class AuditoriaFontesService {
     }
 
     /**
-     * PROPÓSITO DE NEGÓCIO: troca, nas falas, cada {@code \fn} de fonte vietnamita antiga por Arial.
+     * PROPÓSITO DE NEGÓCIO: troca, nas falas e nos comentários, cada {@code \fn} de fonte vietnamita
+     * antiga por Arial.
      *
-     * <p>INVARIANTES DO DOMÍNIO: só linhas {@code Dialogue}; texto visível, outras tags e {@code \fn}
-     * de fonte comum ficam byte a byte; a contagem é por ocorrência trocada.
+     * <p>INVARIANTES DO DOMÍNIO: linhas {@code Dialogue} e {@code Comment}; texto visível, outras tags
+     * e {@code \fn} de fonte comum ficam byte a byte; a contagem é por ocorrência trocada.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula volta vazia com zero substituições; nunca lança.
      */
@@ -252,7 +257,7 @@ public class AuditoriaFontesService {
         List<EventoLegenda> saida = new ArrayList<>();
         int substituicoes = 0;
         for (EventoLegenda evento : eventos == null ? List.<EventoLegenda>of() : eventos) {
-            if (evento == null || !evento.isDialogo()) {
+            if (!temTextoReescrevivel(evento)) {
                 saida.add(evento);
                 continue;
             }
@@ -266,6 +271,19 @@ public class AuditoriaFontesService {
             substituicoes += (int) legadas;
         }
         return new ResultadoSubstituicaoFalas(saida, substituicoes);
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: diz se o evento é uma linha cujo texto a 1.3 pode reescrever.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: {@code Dialogue} ou {@code Comment} com texto — o mesmo universo que a
+     * regra do kernel examina; linha crua (sem texto separado) fica como está.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: evento nulo devolve {@code false}.
+     */
+    private static boolean temTextoReescrevivel(EventoLegenda evento) {
+        return evento != null && evento.texto() != null
+            && (evento.isDialogo() || "Comment".equals(evento.tipoLinha()));
     }
 
     private boolean ehSecaoEstilos(String linha) {

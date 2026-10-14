@@ -249,6 +249,40 @@ class TrocaTipoLegendaUseCaseTest {
         assertTrue(FonteVietnamitaLegada.achadosNoAss(corrigido).isEmpty(), "a 1.3 resolve o que a reprovacao cobra");
     }
 
+    /**
+     * O banimento de 14/10/2026 (Paulo: "banir esse tipo de fonte") reprova a fonte vietnamita antiga
+     * em QUALQUER lugar da legenda — estilo que nenhuma fala usa, {@code \fn} dentro de
+     * {@code Comment:}, linha de estilo com menos colunas que o {@code Format:}. A reprovação só é
+     * honesta se a 1.3 resolver tudo o que ela cobra: depois de aplicar, a regra não acha mais nada.
+     * O {@code \fn} de fonte comum no comentário fica (A1).
+     */
+    @Test
+    void estiloSemFalaComentarioELinhaCurtaComFonteLegadaTambemSaoTrocados(@TempDir Path tempDir) throws IOException {
+        String conteudo = "[Script Info]\nTitle: Test Legend\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize\n"
+            + "Style: Default,Arial,40\n"
+            + "Style: Antigo,VnBook-Antiqua,40\n"
+            + "Style: Curto,.VnTime\n\n"
+            + "[Events]\nFormat: Layer, Start, End, Style, Text\n"
+            + "Comment: 0,0:00:01.00,0:00:02.00,Default,{\\fnVNI-Times}nota {\\fnVerdana}comum\n"
+            + "Dialogue: 0,0:00:03.00,0:00:04.00,Default,Olá Mundo\n";
+        Files.writeString(tempDir.resolve("banida.ass"), conteudo, StandardCharsets.UTF_8);
+        assertFalse(FonteVietnamitaLegada.achadosNoAss(conteudo).isEmpty(), "controle: a regra reprova a entrada");
+
+        AuditoriaLegendaResultado escaneado = useCase.escanear(tempDir).arquivos().getFirst();
+        assertTrue(escaneado.fontes().stream().anyMatch(f -> f.problematica() && "VNI-Times".equals(f.fonteAtual())),
+            "o escanear da 1.3 mostra o \\fn do comentario: " + escaneado.fontes());
+        assertTrue(escaneado.fontes().stream().anyMatch(f -> f.problematica() && ".VnTime".equals(f.fonteAtual())),
+            "o escanear da 1.3 mostra a linha de estilo curta: " + escaneado.fontes());
+
+        assertEquals(1, useCase.aplicar(tempDir).totalAlterados());
+        String corrigido = Files.readString(tempDir.resolve("banida.ass"), StandardCharsets.UTF_8);
+        assertTrue(corrigido.contains("Style: Antigo,Arial,40"), corrigido);
+        assertTrue(corrigido.contains("Style: Curto,Arial"), corrigido);
+        assertTrue(corrigido.contains("{\\fnArial}nota {\\fnVerdana}comum"), corrigido);
+        assertTrue(FonteVietnamitaLegada.achadosNoAss(corrigido).isEmpty(),
+            "a 1.3 resolve o que a reprovacao cobra: " + FonteVietnamitaLegada.achadosNoAss(corrigido));
+    }
+
     private void criarLegendaDeTeste(Path pasta, String nome, String fonte) throws IOException {
         String cabecalho = "[Script Info]\n" +
             "Title: Test Legend\n" +

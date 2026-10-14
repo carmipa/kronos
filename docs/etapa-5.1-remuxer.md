@@ -12,6 +12,8 @@
 
 > Esta seção afirmava o contrário até 2026-09-02 — dizia que "por padrão as legendas antigas são removidas". A frase sobreviveu cinco semanas à remoção do caminho destrutivo, em três lugares ao mesmo tempo: aqui, na ficha da tela e no console do CLI, que anunciava "remover legendas originais" enquanto o adaptador preservava tudo.
 
+🚫 **Legenda com fonte vietnamita antiga não vira MKV** (desde 14/10/2026 — o Gundam ZZ foi publicado em 09/10 com o diálogo em `VnBook-Antiqua`, "Nóo, ộ a atraỗóo!" na tela). Na validação de cada legenda ASS, a regra única do kernel (`FonteVietnamitaLegada`) procura a fonte em **qualquer** estilo do cabeçalho (usado ou não) e em `\fn` de fala ou comentário; achou, o console mostra `[REPROVADA — FONTE VIETNAMITA]` com o motivo, o mkvmerge **não** é chamado para aquele episódio, o lote segue os outros e termina `CONCLUIDO_COM_PENDENCIAS` (`fonteVietnamita=N` na telemetria). O remédio é a [1.3 Troca Tipo Legenda](etapa-1.3-troca-tipo-legenda.md) na pasta das legendas e um novo remux. Legenda em ANSI com fonte comum continua passando.
+
 ![Painel do Remuxer](../src/main/resources/static/img/screenshots/remuxer.webp)
 
 ---

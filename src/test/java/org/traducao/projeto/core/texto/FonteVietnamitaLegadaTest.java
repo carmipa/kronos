@@ -62,34 +62,63 @@ class FonteVietnamitaLegadaTest {
         assertEquals(List.of("estilo \"Dialogue\" = VnBook-Antiqua"), achados);
     }
 
+    /**
+     * Paulo, 14/10/2026: "banir esse tipo de fonte". Estilo declarado e não usado hoje não desenha
+     * nada, mas basta alguém (ou a própria 4.1, que escolhe a fonte do diálogo para a letra) passar a
+     * usá-lo para a letra trocada voltar à tela sem nenhum aviso. Reprova e a 1.3 troca.
+     */
     @Test
-    @DisplayName("fronteira A1: estilo legado declarado mas que nenhuma fala usa não vai à tela e não reprova")
-    void estiloLegadoSemFalaNaoReprova() {
-        assertTrue(FonteVietnamitaLegada.achados(CABECALHO_ZZ, List.of(
-            new FonteVietnamitaLegada.Fala("Song ENG", "Não é um anime."))).isEmpty());
+    @DisplayName("banida: estilo legado declarado que nenhuma fala usa também reprova, e o motivo diz que não está na tela")
+    void estiloLegadoSemFalaTambemReprova() {
+        assertEquals(List.of("estilo \"Dialogue\" = VnBook-Antiqua (nenhuma fala na tela usa)"),
+            FonteVietnamitaLegada.achados(CABECALHO_ZZ, List.of(
+                new FonteVietnamitaLegada.Fala("Song ENG", "Não é um anime."))));
     }
 
     @Test
     void fnLegadoDentroDaFalaReprovaEFnComumNao() {
         List<String> achados = FonteVietnamitaLegada.achados(CABECALHO_ZZ, List.of(
-            new FonteVietnamitaLegada.Fala("Default", "{\\fn.VnTime\\fs40}Placa"),
+            new FonteVietnamitaLegada.Fala("Dialogue", "{\\fn.VnTime\\fs40}Placa"),
             new FonteVietnamitaLegada.Fala("Default", "{\\b1\\fn.VnTime}Outra"),
             new FonteVietnamitaLegada.Fala("Default", "{\\fnArial}Comum")));
-        assertEquals(List.of("\\fn.VnTime em 2 fala(s)"), achados);
+        assertEquals(List.of("estilo \"Dialogue\" = VnBook-Antiqua", "\\fn.VnTime em 2 linha(s)"), achados);
     }
 
     @Test
-    @DisplayName("arquivo inteiro: só Dialogue conta; Comment com a fonte legada não vai à tela")
+    @DisplayName("banida: Comment com \\fn legado reprova no arquivo inteiro, como o estilo legado sem fala")
     void achadosNoArquivoInteiro() {
         String ass = "﻿" + CABECALHO_ZZ + "\r\n\r\n[Events]\r\n"
             + "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\r\n"
             + "Comment: 0,0:00:01.00,0:00:02.00,Default,,0,0,0,,{\\fnVNI-Times}nota\r\n"
             + "Dialogue: 0,0:00:03.00,0:00:04.00,Song ENG,,0,0,0,,Não é um anime, não é.\r\n";
-        assertTrue(FonteVietnamitaLegada.achadosNoAss(ass).isEmpty(), "Comment e estilo nao usado nao reprovam");
+        assertEquals(List.of("estilo \"Dialogue\" = VnBook-Antiqua (nenhuma fala na tela usa)",
+            "\\fnVNI-Times em 1 linha(s)"), FonteVietnamitaLegada.achadosNoAss(ass));
 
         String comFala = ass + "Dialogue: 0,0:00:05.00,0:00:06.00,Dialogue,,0,0,0,,Irmão, é a atração!\r\n";
-        assertEquals(List.of("estilo \"Dialogue\" = VnBook-Antiqua"), FonteVietnamitaLegada.achadosNoAss(comFala));
+        assertEquals(List.of("estilo \"Dialogue\" = VnBook-Antiqua", "\\fnVNI-Times em 1 linha(s)"),
+            FonteVietnamitaLegada.achadosNoAss(comFala));
         assertTrue(FonteVietnamitaLegada.achadosNoAss("sem eventos").isEmpty());
+    }
+
+    /**
+     * A1 do banimento: o sinal que agora reprova (estilo que nenhuma fala usa, {@code \fn} dentro de
+     * {@code Comment:}) aparece igualzinho com fonte legítima — vietnamita moderna em Unicode
+     * ({@code VNF-}), {@code Vinque Sans}, {@code Verdana} — e isso tem de passar.
+     */
+    @Test
+    @DisplayName("fronteira A1: estilo sem fala e \\fn em Comment com VNF-, Vinque Sans e Verdana não reprovam")
+    void mesmoSinalComFonteLegitimaNaoReprova() {
+        String linhaEstilo = "Style: Song ENG,FrancophilSans,63,&H00FFFFFF,&H00000000,&H00000000,&H4BD3AE6A,-1,0,0,0,"
+            + "100,100,2,0,1,1,0,2,56,56,45,1";
+        String cabecalho = CABECALHO_ZZ.replace("VnBook-Antiqua", "VNF-Futura")
+            + "\n" + linhaEstilo.replace("Song ENG,FrancophilSans", "Placa,Vinque Sans")
+            + "\n" + linhaEstilo.replace("Song ENG,FrancophilSans", "Nota,Verdana");
+        String ass = cabecalho + "\n\n[Events]\n"
+            + "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+            + "Comment: 0,0:00:01.00,0:00:02.00,Nota,,0,0,0,,{\\fnVerdana}nota {\\fnVNF-Futura}outra\n"
+            + "Comment: 0,0:00:02.00,0:00:03.00,Default,,0,0,0,,{\\fnVinque Sans}sinal\n"
+            + "Dialogue: 0,0:00:03.00,0:00:04.00,Song ENG,,0,0,0,,Não é um anime, não é.\n";
+        assertTrue(FonteVietnamitaLegada.achadosNoAss(ass).isEmpty(), FonteVietnamitaLegada.achadosNoAss(ass).toString());
     }
 
     @Test
