@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *       módulo de idioma do painel na MESMA versão que {@code app.js} e {@code index.html} usam;</li>
  *   <li>todo {@code aria-describedby} aponta para um elemento {@code role="tooltip"} da página, e os
  *       ids são únicos;</li>
- *   <li>nenhuma referência a {@code /q/health} ou {@code /login}; nenhum endereço externo além do
+ *   <li>nenhuma referência a {@code /q/health} ou {@code /login}; nenhum endereço externo além do site do autor e do
  *       repositório do projeto;</li>
  *   <li>o retorno automático só aceita a mesma origem.</li>
  * </ul>
@@ -56,6 +56,8 @@ class CatracaPaginasDeErroTest {
     private static final Path CATALOGO = ERROS.resolve("assets").resolve("kronos-error-catalog.js");
     private static final Path JS_KIT = ERROS.resolve("assets").resolve("kronos-error.js");
     private static final String REPO = "https://github.com/carmipa/traducao_animes_llm_local_quarkus";
+    /** Página do autor, no "Desenvolvido por" (Paulo, 14/10/2026). */
+    private static final String SITE = "https://carminati.dev.br/";
 
     private static final Pattern DESCRITO_POR = Pattern.compile("aria-describedby=\"([^\"]+)\"");
     private static final Pattern ID = Pattern.compile("\\sid=\"([^\"]+)\"");
@@ -89,7 +91,7 @@ class CatracaPaginasDeErroTest {
         }
         Matcher mu = URL_EXTERNA.matcher(html);
         while (mu.find()) {
-            if (!mu.group().equals(REPO)) {
+            if (!mu.group().equals(REPO) && !mu.group().equals(SITE)) {
                 out.add("endereço externo: " + mu.group());
             }
         }

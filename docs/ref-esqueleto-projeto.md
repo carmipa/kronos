@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **513** |
-| classes em `src/test` | **482** |
+| classes em `src/main` | **514** |
+| classes em `src/test` | **484** |
 
 ---
 
@@ -40,7 +40,7 @@ graph TB
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
-    G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (2)<br/>vitrine (4)"]:::fatia
+    G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (3)<br/>vitrine (4)"]:::fatia
     PEERS["<b>🧱 peers</b><br/><i>importáveis por qualquer fatia</i><br/>cachetraducao (5)<br/>legenda (15)<br/>llm (4)<br/>lore (24)<br/>qualidadeTraducao (17)"]:::peer
     BASE["<b>⚙️ infra transversal</b><br/>config (2)<br/>core (36)"]:::base
     G0 --> PEERS
@@ -717,13 +717,15 @@ mcp/
 └── KronosMcpTools.java
 ```
 
-#### `sistema` — 2 classes
+#### `sistema` — 3 classes
 
 ```text
 sistema/
 ├── application/
 │   └── EncerrarAplicacaoUseCase.java
 └── presentation/
+    ├── web/
+    │   └── PaginasDeErroNavegador.java
     └── SistemaController.java
 ```
 
@@ -932,7 +934,7 @@ core/
 
 ---
 
-## Testes — 482 classes
+## Testes — 484 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -981,7 +983,7 @@ apiDadosAnime/
         └── ApiDadosAnimeHttpPropertiesIT.java
 ```
 
-#### `arquitetura` — 31 classes
+#### `arquitetura` — 32 classes
 
 ```text
 arquitetura/
@@ -1007,6 +1009,7 @@ arquitetura/
 ├── CatracaOrdemDocumentacaoTest.java
 ├── CatracaPadraoMusicalTemDonoUnicoTest.java
 ├── CatracaPaginaDeDocumentacaoAbreTest.java
+├── CatracaPaginasDeErroTest.java
 ├── CatracaRegraDuplicadaEntreFatiasTest.java
 ├── CatracaSeletorDeObraLigadoTest.java
 ├── CatracaSeletorDeObraRegistradoTest.java
@@ -1508,6 +1511,15 @@ revisaoLore/
     │   └── ServidorLlmDeTeste.java
     ├── RevisaoLoreAuditoriaCacheTest.java
     └── RevisaoLoreLogPersistenciaTest.java
+```
+
+#### `sistema` — 1 classes
+
+```text
+sistema/
+└── presentation/
+    └── web/
+        └── PaginasDeErroNavegadorHttpTest.java
 ```
 
 #### `telemetria` — 14 classes

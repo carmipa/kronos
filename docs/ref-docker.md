@@ -261,9 +261,12 @@ classpath de teste (`prova-vitrine/nao-deve-vazar.txt`): 403 com a vitrine ligad
 
 ### Deploy na VPS
 
-É decisão de Paulo (domínio e proxy). O contêiner publica só em
+Publicada por Paulo em <https://kronos.carminati.dev.br/>. O contêiner publica só em
 `127.0.0.1:18099`; quem expõe é o NPM. **Nunca** publicar a imagem do `Dockerfile`
 comum na VPS: ela é o sistema completo.
+
+Para o proxy servir as páginas de erro do KRONOS quando o contêiner estiver fora do
+ar (502/503/504), o bloco pronto está em `ferramentas/paginas-de-erro/nginx-kronos-erros.conf`.
 
 ### O que já foi verificado (14/10/2026, notebook, Docker 29.3.1)
 
@@ -278,6 +281,15 @@ comum na VPS: ela é o sistema completo.
 | Tela no navegador | faixa da vitrine visível; Telemetria com o retrato (9 fatias, 974 operações); Mapa, Tradução e Extração mostram a frase da vitrine; "Sair" avisa e **não** mostra a tela de encerrada; console só com os 403 esperados |
 | Testes | 132 da vitrine; **12 mutações** (política, fila, processo externo, arranque, filtro não registrado, contador do SSE) derrubaram os testes pela causa certa; suíte completa 3013/0 |
 
-**Não verificado:** a vitrine atrás do NPM na VPS (o deploy é decisão de Paulo) —
-em particular, se o proxy repassa o SSE sem bufferizar (o filtro já manda
-`X-Accel-Buffering: no`).
+### O que foi verificado no ar (14/10/2026, <https://kronos.carminati.dev.br/>)
+
+Só leituras e um `POST` numa rota que não existe — nada que pudesse mudar estado em produção.
+
+| Verificação | Resultado |
+|---|---|
+| `GET /` | 200 atrás do proxy (`Server: openresty`), com `X-Kronos-Vitrine: 1`, `X-Content-Type-Options: nosniff` e `X-Frame-Options: DENY` |
+| `GET /api/status` | 200 |
+| `POST /api/<rota inexistente>` | **403** — a guarda da vitrine está ativa (sem ela seria 404) |
+| `GET /mcp` | 403 |
+| SSE `/api/logs/stream` por 17 s | dois batimentos e a mensagem do console chegaram no tempo: **o proxy não bufferiza o SSE** |
+| versão no ar | a de `04134cc5` (documentação de 14/10): o `ref-docker` corrigido está servido; a i18n do aviso de falha e as páginas de erro ainda não |

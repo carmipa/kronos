@@ -33,6 +33,7 @@ VERSION = "1.1.0"
 VERSAO_I18N = "2.2"      # tem de ser a mesma do import em static/js/app.js
 VERSAO_CSS_I18N = "1.3"  # tem de ser a mesma do <link> em static/index.html
 AUTHOR = "Paulo André Carminati"
+SITE = "https://carminati.dev.br/"  # página do autor (Paulo, 14/10/2026)
 REPO = "https://github.com/carmipa/traducao_animes_llm_local_quarkus"
 
 # ---------------------------------------------------------------------------
@@ -126,6 +127,7 @@ UI = {
     "retry.exhausted": "Tentativas automáticas esgotadas. Use “Tentar agora” ou volte ao painel.",
     "foot.by": "Desenvolvido por", "foot.repo": "Quarkus Repo", "foot.page": "Página de erro v" + VERSION,
     "tip.foot.repo": "Abrir o repositório do projeto no GitHub",
+    "tip.foot.autor": "Abre carminati.dev.br, a página do autor, em uma nova aba",
     "tip.foot.ref": "Versão das páginas de erro e código de referência desta tela",
     "tip.hint": "Sugestão de ação para resolver ou contornar o problema",
     "ajuda": "Ajuda sobre",
@@ -444,7 +446,7 @@ def pagina(e, dinamica=False):
 </main>
 
 <footer class="kc-foot">
-  <div class="kc-by"><span>%(foot_by)s</span> <b translate="no">%(author)s</b>
+  <div class="kc-by"><span>%(foot_by)s</span> %(autor)s
     %(repo)s
   </div>
   <div class="kc-ref"><span translate="no">KRONOS CORE ·</span> <span>%(foot_page)s</span> <span translate="no">· <span data-diag="ref">KC-%(ref)s</span></span> %(dica_ref)s</div>
@@ -471,7 +473,9 @@ def pagina(e, dinamica=False):
         aria_actions=esc(UI["aria.actions"]), acoes=acoes,
         diag_title=esc(UI["diag.title"]), dica_diag=dica_ajuda("d-diag-title", UI["diag.title"], UI["tip.diag.title"]),
         copiar=dica_controle(copiar, "d-copy", UI["tip.copy"]), linhas=linhas, detalhe=detalhe, retry=retry,
-        foot_by=esc(UI["foot.by"]), author=AUTHOR, repo=dica_controle(repo, "d-repo", UI["tip.foot.repo"]),
+        foot_by=esc(UI["foot.by"]), repo=dica_controle(repo, "d-repo", UI["tip.foot.repo"]),
+        autor=dica_controle('<a class="kc-autor" href="%s" target="_blank" rel="noopener" aria-describedby="d-autor">'
+                            '<b translate="no">%s</b></a>' % (SITE, esc(AUTHOR)), "d-autor", UI["tip.foot.autor"]),
         foot_page=esc(UI["foot.page"]), ref=("—" if dinamica else e["display"]),
         dica_ref=dica_ajuda("d-ref", "a referência da página", UI["tip.foot.ref"]),
     )

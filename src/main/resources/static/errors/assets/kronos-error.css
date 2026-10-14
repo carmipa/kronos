@@ -188,8 +188,9 @@ a { color: var(--accent); }
   gap: 1rem;
   padding: 1.25rem 2.5%;
   border-bottom: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  backdrop-filter: blur(10px);
+  /* Sem backdrop-filter: ele faz o topo virar a referência do position: fixed, e o tooltip
+     canônico (/dica/dica.js calcula x/y pela tela) abria deslocado. Medido em 14/10/2026. */
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
 }
 
 .kc-brand {
@@ -557,7 +558,10 @@ a { color: var(--accent); }
   to   { opacity: 1; transform: none; }
 }
 
-.kc-hero, .kc-diag { animation: kc-rise .45s ease-out both; }
+/* `backwards`, não `both`: com `both` o fim da animação deixava transform (identidade) no
+   elemento, que vira a referência do position: fixed — o tooltip do "Copiar diagnóstico" abria
+   em x=2051, fora da tela. Medido em 14/10/2026. */
+.kc-hero, .kc-diag { animation: kc-rise .45s ease-out backwards; }
 .kc-diag { animation-delay: .12s; }
 
 @media (max-width: 1100px) {

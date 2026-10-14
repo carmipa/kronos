@@ -13,8 +13,8 @@ dela, mas porque ninguém a lê no momento em que ela importa.
 Documentação não impõe nada. Um arquivo de instruções pode ser ignorado por qualquer agente que
 abra o projeto amanhã. **Um teste vermelho, não.**
 
-Daí a peça central da arquitetura do KRONOS: **46 guardas executáveis** (36 `Catraca*` + 10
-`Fronteira*`), 181 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
+Daí a peça central da arquitetura do KRONOS: **47 guardas executáveis** (37 `Catraca*` + 10
+`Fronteira*`), 185 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
 verificam comportamento — verificam que **um padrão perigoso não voltou**. Elas leem o
 código-fonte, a estrutura de pacotes ou o HTML, e **reprovam o build** ao encontrar a forma do
 bug.
@@ -55,7 +55,7 @@ graph TB
         A3["Homologar é decisão consciente:<br/>entra na lista, com justificativa"]
     end
 
-    subgraph B["🔒 Catraca*Test — 36 guardas, 120 testes"]
+    subgraph B["🔒 Catraca*Test — 37 guardas, 124 testes"]
         direction TB
         B1["Varre o FONTE atrás da<br/>forma de um defeito conhecido"]
         B2["Sem número congelado<br/>quando o invariante é universal"]
@@ -81,9 +81,9 @@ do código.
 
 ## O inventário completo
 
-Contado em **14/10/2026** nas anotações `@Test` de cada classe: **46 guardas · 181 testes**
-(36 `Catraca*Test` com 120, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
-**3.019 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
+Contado em **14/10/2026** nas anotações `@Test` de cada classe: **47 guardas · 185 testes**
+(37 `Catraca*Test` com 124, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
+**3.031 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
 
 ### Fronteiras — congelam *quem pode importar quem* (10 guardas, 61 testes)
 
@@ -112,7 +112,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaEscritaDeFalaVetaMusicaConcordanciaTest` | 3 | Idem na **3.3** |
 | `CatracaFerramentaDeAcervoVetaMusicaTest` | 2 | Idem nas **ferramentas que varrem o acervo** — o caminho que não passa por tela nenhuma, e que reescreveu 103 linhas de romaji antes desta existir |
 
-### Catracas de interface (11 guardas, 40 testes)
+### Catracas de interface (12 guardas, 44 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
@@ -127,6 +127,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaBordaAssincronaConfereCaminhoTest` | 2 | Tela responder *"iniciado"* para trabalho que não tem como acontecer |
 | `CatracaTelaDestrutivaNasceEmDryRunTest` | 2 | Tela que reescreve o acervo abrir com "gravar" como padrão |
 | `CatracaI18nAutomaticaTest` | 6 | Script da tela trocar o `lang` do `<html>` — com o Google bloqueado, a página ficava em português declarando `en-US`, e o leitor de tela lia com a voz inglesa —, o aviso de falha do tradutor perder o inglês ou o espanhol, ícone e código saírem da lista protegida, o `element.js` virar síncrono ou nascer dicionário (`data-i18n=`). O comportamento no navegador é provado por `ferramentas/navegador/verificar-i18n.mjs` |
+| `CatracaPaginasDeErroTest` | 4 | Página de erro sem o código do catálogo ou editada à mão, tooltip apontando para nada, módulo de idioma em versão diferente da do painel, `/q/health` (que o KRONOS não tem) ou `/login` de volta, endereço externo fora do site do autor e do repositório, e o retorno automático aceitando outra origem — no kit de origem, `?from=//outro-site` levava a pessoa para fora do KRONOS |
 
 ### Catracas de lore (6 guardas, 19 testes)
 
@@ -193,7 +194,7 @@ classes provam isso, e o portão as roda pelo filtro `org.traducao.projeto.*Vitr
 ### 1. Guarda nasce de prejuízo real, nunca de bug hipotético
 
 Guarda preventiva é cerimônia, e cerimônia é a primeira coisa abandonada na pressa. Cada uma das
-36 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
+37 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
 
 - `CatracaRegraDuplicadaEntreFatiasTest` — *"cópia não declarada foi a causa de três defeitos em
   03/08/2026, um deles vivo por nove dias."*
@@ -308,8 +309,10 @@ que se force a execução.
 **Cobertura declarada, não presumida.** O filtro pega a convenção de nome (`*Catraca*`,
 `*Fronteira*`, `*Guarda*`) **mais** as duas guardas da seção acima (`*WebInterfaceTest`,
 `*SseConsoleDinamicoTest`), nomeadas explicitamente no script, e — desde 14/10/2026 —
-`org.traducao.projeto.*Vitrine*`, que traz as [guardas da vitrine pública](#guardas-da-vitrine-pública).
-Esta vai com o nome **qualificado** de propósito: no Windows o lançador Java expande curinga solto
+`org.traducao.projeto.*Vitrine*`, que traz as [guardas da vitrine pública](#guardas-da-vitrine-pública), e
+`PaginasDeErroNavegadorHttpTest`, que prova que a página de erro só vale para navegação e que a API
+continua recebendo a resposta de antes.
+As duas vão com o nome **qualificado** de propósito: no Windows o lançador Java expande curinga solto
 contra os arquivos da pasta, e `*Vitrine*` casaria com o `Dockerfile.vitrine` da raiz, que viraria
 nome de tarefa do Gradle. Guarda nova com nome fora da convenção não entra sozinha — acrescente na
 lista do `$FILTROS`. A medição de 11/08/2026 (154 testes em 31 classes, 30 s) ficou velha: as
@@ -361,7 +364,7 @@ discussão sem argumento novo:
 | Falha fechada / segredo fora do Git | ✅ `${VAR:?}` no compose, `.env` ignorado |
 | Construir não é publicar · não editar durante o build | ✅ declarado em [ref-docker](ref-docker.md) |
 | Bytes não provam tela | ✅ virou item 4 do Definition of Done |
-| Tela de erro com HTTP real (sem *soft 404*) | ✅ **já cumprido** — medido: `/pagina-que-nao-existe` devolve 404. Na [vitrine](ref-docker.md#vitrine-pública-vps), o que está fora da lista de permitidos devolve **403** |
+| Tela de erro com HTTP real (sem *soft 404*) | ✅ **já cumprido** — medido: `/pagina-que-nao-existe` devolve 404, e desde 14/10/2026 quem navega até lá vê a [página de erro do KRONOS](arquitetura.md#páginas-de-erro) com o mesmo 404 (a API recebe a resposta de antes). Na [vitrine](ref-docker.md#vitrine-pública-vps), o que está fora da lista de permitidos devolve **403** |
 | Guardas de RLS, tenant, `casa_id` | ❌ não há banco nem inquilino |
 | `build.sh` / `deploy.sh` | ❌ não há: o KRONOS roda na máquina de quem usa. A única coisa publicada é a [vitrine](ref-docker.md#vitrine-pública-vps) (`Dockerfile.vitrine`), que mostra as telas e não executa nada |
 | Build sempre capado | 🟡 declarado sem mecanismo — a VM do WSL2 já limita em ≈19,4 GB de 39,7 GB |

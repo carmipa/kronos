@@ -14,12 +14,12 @@ O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Qu
 > |---|---|---|
 > | fatias funcionais | **21** | 28 pacotes de topo sob `org.traducao.projeto`, menos 5 peers, `core` e `config` |
 > | peers | **5** | `legenda` · `cachetraducao` · `lore` · `qualidadeTraducao` · `llm` |
-> | classes / linhas em `src/main` | **513** / **79.283** | `find … -name '*.java'` |
-> | classes / linhas em `src/test` | **482** / **90.216** | idem — o teste já pesa mais que o código |
+> | classes / linhas em `src/main` | **514** / **79.455** | `find … -name '*.java'` |
+> | classes / linhas em `src/test` | **484** / **90.556** | idem — o teste já pesa mais que o código |
 > | rotas `/api` | **49** | 39 em **21** `@RestController` + 10 em **6** recursos JAX-RS (`@Path`) |
 > | lore | **70** arquivos SQL, um por obra: **69** do lado da tradução, **69** do lado da revisão; **68** na lista da UI | `sem_lore` só existe na tradução e é oculta (`aparece_na_lista = 0`); `macross_dyrl` só existe na revisão — ver `lore/esquema.sql` |
-> | guardas executáveis | **46** | 36 `Catraca*Test` + 10 `Fronteira*`, somando 181 testes — mais as 7 classes de guarda da vitrine |
-> | suíte completa | **3.019** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
+> | guardas executáveis | **47** | 37 `Catraca*Test` + 10 `Fronteira*`, somando 185 testes — mais as 7 classes de guarda da vitrine |
+> | suíte completa | **3.031** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
 >
 > Divergência entre um número aqui e o código é bug de documentação, não licença poética.
 > O número anterior desta página (72 lores) vinha de contagem de classes Java; a lore virou
@@ -103,6 +103,38 @@ As três bandeiras no topo da barra lateral (Brasil, Estados Unidos, Espanha) tr
 - **Quando o Google não responde** (rede, bloqueador, captcha por limite de uso, ou dez segundos sem tradução), um aviso no rodapé diz o que aconteceu **no idioma pedido** e oferece tentar de novo, ficar em português e — só em endereço público `https` — abrir a página pelo Google Tradutor.
 - **Guardas:** `CatracaI18nAutomaticaTest` no build; no navegador, `ferramentas/navegador/verificar-i18n.mjs` (tradução real com uma única carga ao Google, Google bloqueado, captcha, Google mudo, ícones intactos e calibração contra o script anterior).
 
+### Páginas de erro
+
+Dezoito páginas (400, 401, 403, 404, 405, 408, 409, 410, 413, 415, 422, 429, 500, 502, 503, 504, sem conexão e falha de interface) mais a dinâmica `/errors/error.html?code=…`, em `static/errors/`, no mesmo visual do painel: cor por erro, código grande, o que aconteceu, uma ação concreta e um painel de diagnóstico com Request ID que se copia.
+
+- **Fonte única:** `ferramentas/paginas-de-erro/gerar.py` gera as páginas e o catálogo. Texto se muda no gerador e se regera — editar o HTML gerado é perder a edição na próxima geração.
+- **Quem serve:** o arquivo estático abre direto em `/errors/<código>.html`. Além disso, quem **navega** até um endereço que não existe recebe a página 404 com o status 404, e quem abre pela barra do navegador uma ação que só aceita `POST` recebe a 405 — antes, um `<h1>Resource not found</h1>` cru e uma tela em branco. Só navegação (`GET`/`HEAD` com `Accept: text/html`): o `fetch` do painel e qualquer cliente de API recebem a resposta de antes, byte a byte (`sistema.presentation.web.PaginasDeErroNavegador`).
+- **Request ID:** o mesmo vai no cabeçalho `X-Request-Id`, no diagnóstico da página e no log (`[PAGINA-ERRO] 404 GET /caminho -> página de erro (rid KC-…)`). Nenhuma mensagem de exceção, caminho de disco ou pilha entra na página.
+- **Retry e saúde:** nas páginas 408, 429, 5xx e sem conexão, a contagem consulta `/api/status` e, quando o KRONOS responde, volta à rota de origem — só do próprio site: `?from=//outro-site` é recusado.
+- **Idioma e tooltip:** as mesmas três bandeiras do painel (sem dicionário) e o tooltip canônico (`/dica/`), com o "?" ao lado de títulos e rótulos.
+- **Não ligado de propósito:** erro de JavaScript e queda de Wi-Fi no painel **não** levam à página de falha ou de sem conexão — isso tiraria a pessoa do console de um trabalho em andamento por qualquer erro de extensão do navegador.
+- **Na VPS:** `ferramentas/paginas-de-erro/nginx-kronos-erros.conf` serve 502/503/504 quando o contêiner da vitrine estiver fora do ar (aplicar é passo de deploy).
+
+**De onde veio.** Kit de páginas de erro v1.0.0 de 14/10/2026, adaptado na v1.1.0. Visual, cores, ícones, anatomia e textos foram mantidos; mudou o que o KRONOS não tem ou o que estava errado:
+
+| No kit | No KRONOS | Por quê |
+|---|---|---|
+| saúde em `/q/health` | `/api/status` | o KRONOS não tem `/q/health`: o chip ficaria "inacessível" para sempre e o retry nunca voltaria |
+| botão "Entrar" (`/login`) na 401 | Painel Inicial e Voltar | não há login no KRONOS |
+| `?from=` aceito se começar com `/` | só a mesma origem | `//outro-site` também começa com `/` — redirecionamento aberto |
+| "Ver telemetria" em `/telemetria` | `/#telemetria`, que abre o painel | a telemetria é um painel da tela, não uma rota |
+| PT/EN/ES por dicionário próprio | bandeiras do painel | regra de internacionalização do projeto (decisão de Paulo em 14/10/2026) |
+| tooltip próprio | componente canônico | regra de tooltip do projeto (decisão de Paulo em 14/10/2026) |
+| `px` e coluna central | `rem`, laterais em `%`, largura cheia, topo que quebra linha | regra de CSS do projeto; no kit, a 390 px, o chip de status saía da tela |
+| 401/403 falam de sessão e perfil | proxy com autenticação; pasta fora das raízes | o KRONOS não tem login nem perfil |
+| 500: "registrado na telemetria" | "registrado no log do servidor" | é no log que o Request ID está |
+| 502/504: o LLM caiu | o proxy não alcançou o KRONOS | quem devolve 502/504 é o proxy da frente; LLM fora do ar o painel mostra no cartão |
+| 503: "filas pausadas e retomadas" | "reiniciando ou sobrecarregado" | o KRONOS não pausa fila |
+| 415: "use a 1.3" | "a Extração (1.2) já entrega ASS, SRT ou PGS" | a 1.3 troca fonte, não formato |
+| falha de interface: "abra a Telemetria" | "abra o console do navegador (F12)" | o erro de JavaScript está no console do navegador |
+
+**Guardas:** `CatracaPaginasDeErroTest` (uma página por código, tooltip ligado, mesma versão do módulo de idioma, nada de `/q/health` ou `/login`, retorno só da mesma origem) e `PaginasDeErroNavegadorHttpTest` (servidor HTTP real: página para navegação, resposta de antes para a API). No navegador, `ferramentas/navegador/verificar-paginas-de-erro.mjs`: as 19 páginas no desktop e no celular sem erro e sem estouro, varredura da regra de tooltip e axe WCAG 2.2 AA limpos, 404 com Request ID, retorno que não vaza, telemetria que abre, `?detail=` que não executa, idioma, teclado e todo tooltip dentro da tela.
+
 A exceção é a [vitrine pública](ref-docker.md#vitrine-pública-vps): outra imagem (`Dockerfile.vitrine`) que mostra as telas na rede e recusa toda função.
 
 ![Painel Inicial do KRONOS CORE](../src/main/resources/static/img/screenshots/painel-inicial.webp)
@@ -140,7 +172,7 @@ graph TB
         CFG["config<br/>bootstrap de modo"]
     end
 
-    GUARD["🚦 46 guardas executáveis<br/>10 Fronteira* + 36 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
+    GUARD["🚦 47 guardas executáveis<br/>10 Fronteira* + 37 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
 
     FUNC -->|"importa — arestas congeladas por tipo exato"| PEERS
     FUNC --> BASE

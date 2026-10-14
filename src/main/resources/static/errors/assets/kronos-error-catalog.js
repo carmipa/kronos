@@ -64,6 +64,7 @@ window.KC_CATALOG = {
   "foot.repo": "Quarkus Repo",
   "foot.page": "Página de erro v1.1.0",
   "tip.foot.repo": "Abrir o repositório do projeto no GitHub",
+  "tip.foot.autor": "Abre carminati.dev.br, a página do autor, em uma nova aba",
   "tip.foot.ref": "Versão das páginas de erro e código de referência desta tela",
   "tip.hint": "Sugestão de ação para resolver ou contornar o problema",
   "ajuda": "Ajuda sobre"
