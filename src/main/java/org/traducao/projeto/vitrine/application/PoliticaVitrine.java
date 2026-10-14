@@ -65,8 +65,12 @@ public final class PoliticaVitrine {
         }
     }
 
-    /** Extensões de arquivo estático que a tela usa. Medido em 14/10: js, css, webp, png, html, svg. */
-    public static final Set<String> EXTENSOES_ESTATICAS = Set.of("html", "js", "css", "webp", "png", "svg", "ico");
+    /**
+     * Extensões de arquivo estático que a tela usa. Medido em 14/10: js, css, webp, png, html, svg; e
+     * woff2 desde que as fontes e os ícones passaram a ser servidos pelo próprio KRONOS (antes vinham
+     * do Google Fonts). Só woff2: woff, ttf e otf não existem no projeto e continuam recusados.
+     */
+    public static final Set<String> EXTENSOES_ESTATICAS = Set.of("html", "js", "css", "webp", "png", "svg", "ico", "woff2");
 
     /** GETs que seguem para o controller real: todos só leem memória. */
     public static final Set<String> GET_REAIS = Set.of(

@@ -73,6 +73,11 @@ class PoliticaVitrineTest {
         // sem a regra explícita de /mcp e /q, estes passariam pela regra do estático (têm extensão)
         "GET,/mcp/messages/abc.js,BLOQUEAR",
         "GET,/q/dev-ui/main.css,BLOQUEAR",
+        // fonte local: woff2 passa; as outras extensões de fonte, com o mesmo sinal, não
+        "GET,/fontes/material-symbols-outlined.woff2,PERMITIR",
+        "POST,/fontes/material-symbols-outlined.woff2,BLOQUEAR",
+        "GET,/fontes/material-symbols-outlined.woff,BLOQUEAR",
+        "GET,/fontes/outfit.ttf,BLOQUEAR",
         // estático fora da lista de extensões
         "GET,/prova-vitrine/nao-deve-vazar.txt,BLOQUEAR",
         "GET,/application-local.yml,BLOQUEAR",
