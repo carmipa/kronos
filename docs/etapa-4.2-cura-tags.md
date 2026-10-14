@@ -1,10 +1,12 @@
-# Modulo: Correcao de Legendas
+# Etapa 4.2 — Correção de Karaokê
 
-[<- Correcao & Revisao](etapa-2.3-correcao-revisao.md) | [Revisao de Lore ->](etapa-3.2-revisao-lore.md)
+[<- 4.1 Karaokê](etapa-4.1-traducao-karaoke.md) | [5.1 Remuxer ->](etapa-5.1-remuxer.md)
 
 ---
 
 ## Para que serve
+
+Painel **"4.2 Correção de Karaokê"** da SPA (grupo **Karaokê**). No codigo, a fatia se chama `correcaoLegendas`.
 
 Este modulo e o pos-processamento especializado de legendas traduzidas. A regra central e:
 
@@ -107,7 +109,7 @@ O console web recebe as linhas via SSE no canal:
 correcao-legendas
 ```
 
-Cada linha de execucao do use case inclui timestamp UTC e tempo relativo.
+A linha do console sai **sem relogio** (o console web carimba a hora local no navegador). O instante UTC fica no campo proprio de cada evento persistido (`LogEventoCorrecaoLegendas`) no relatorio JSON. Nao ha tempo relativo por linha.
 
 ---
 
@@ -135,6 +137,14 @@ Alias legado mantido para compatibilidade.
 | `diretorioTraduzido` | Sim | Pasta com legendas PT-BR que podem ser alteradas |
 | `contextoId` | Nao | Ativa correcao textual via LLM local |
 
+Respostas (as duas rotas):
+
+| HTTP | Quando |
+|------|--------|
+| `202` | Trabalho aceito e enviado para a fila unica do pipeline; o progresso sai no canal SSE `correcao-legendas` |
+| `400` | Pasta nao informada, pasta inexistente, caminho invalido ou `contextoId` desconhecido |
+| `409` | O pipeline ja esta ocupado com outra operacao |
+
 ---
 
 ## Decisoes importantes
@@ -151,4 +161,4 @@ Alias legado mantido para compatibilidade.
 
 | Anterior | Proximo |
 |----------|---------|
-| [<- Correcao & Revisao](etapa-2.3-correcao-revisao.md) | [Revisao de Lore ->](etapa-3.2-revisao-lore.md) |
+| [<- 4.1 Karaokê](etapa-4.1-traducao-karaoke.md) | [5.1 Remuxer ->](etapa-5.1-remuxer.md) |

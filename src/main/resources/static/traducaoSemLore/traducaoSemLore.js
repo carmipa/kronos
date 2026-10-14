@@ -1,7 +1,7 @@
 import { logNoConsole, mostrarAlerta } from '../js/app.js';
 
 const CONSOLE = 'console-traducao-sem-lore';
-/** Id reservado do contexto genérico — espelha ContextoSemLore.ID no backend. */
+/** Id reservado do contexto genérico — espelha ProvedorContexto.ID_SEM_LORE no backend. */
 const CONTEXTO_SEM_LORE = 'sem_lore';
 
 /**

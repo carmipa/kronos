@@ -27,7 +27,7 @@
             <h3>O que cada aba faz</h3>
             <span class="op-caixa-etiqueta">momentos diferentes do fluxo</span>
         </div>
-        <p class="op-caixa-desc">Duas ferramentas de preparo do <code>.ass</code>, e elas <strong>não são sequência</strong>: a troca de fontes vem <em>antes</em> da tradução, o achatamento vem <em>depois</em>. Toda gravação tem backup automático da pasta.</p>
+        <p class="op-caixa-desc">Duas ferramentas de preparo do <code>.ass</code>, e elas <strong>não são sequência</strong>: a troca de fontes vem <em>antes</em> da tradução, o achatamento vem <em>depois</em>. Toda gravação faz backup, antes, de cada arquivo que vai alterar.</p>
         <ol class="op-lista">
             <li class="op-linha">
                 <span class="op-marca"><span class="material-symbols-outlined">translate</span></span>
@@ -44,10 +44,10 @@
                 <span class="op-marca"><span class="material-symbols-outlined">format_size</span></span>
                 <div class="op-texto">
                     <span class="op-titulo">Normalizar Fontname para Arial — por legibilidade</span>
-                    <span class="op-desc">Escolha manual, não defeito. <strong>Não achata estilos, não remove efeito e não toca em texto nem em tempo</strong> — só troca o nome da fonte nos estilos.</span>
+                    <span class="op-desc">Escolha manual, não defeito. <strong>Não achata estilos, não remove efeito e não toca no texto visível nem no tempo</strong> — troca o nome da fonte de todos os estilos para Arial e, nas falas, só o <code>\fn</code> de fonte vietnamita legada.</span>
                     <span class="op-selos">
                         <span class="op-selo op-selo-escreve">grava nos .ass</span>
-                        <span class="op-selo op-selo-seguro">não altera texto nem tempo</span>
+                        <span class="op-selo op-selo-seguro">não altera texto visível nem tempo</span>
                     </span>
                 </div>
             </li>
@@ -150,18 +150,18 @@
         <span class="material-symbols-outlined aviso-risco-icon">warning</span>
         <div class="aviso-risco-texto">
             <h4 id="titulo-correcao-fontes">Fontes Legacy/ANSI Detectadas</h4>
-            <p id="texto-correcao-fontes">Alto risco de renderização incorreta de acentos PT-BR (ex: "Não" aparecendo como "Nóo" no VLC). Recomendamos aplicar a substituição pelas fontes Unicode seguras equivalentes.</p>
+            <p id="texto-correcao-fontes">Alto risco de renderização incorreta de acentos PT-BR (ex: "Não" aparecendo como "Nóo" no VLC). Recomendamos aplicar a substituição: a fonte legada é trocada por Arial.</p>
         </div>
     </div>
 
     <div class="mapeamentos-sugeridos-container">
-        <h5>Mapeamentos que serão aplicados:</h5>
+        <h5>Exemplos do que vira Arial (a regra cobre toda fonte <code>.Vn…</code>, <code>VNI-…</code> e <code>Vn</code> + maiúscula, nos estilos e no <code>\fn</code> das falas e comentários):</h5>
         <ul class="mapeamentos-lista">
             <li><span class="fonte-antiga">.VnBook-Antiqua</span> <span class="seta-subst">&rarr;</span> <span class="fonte-nova">Arial</span></li>
             <li><span class="fonte-antiga">.VnArial</span> <span class="seta-subst">&rarr;</span> <span class="fonte-nova">Arial</span></li>
             <li><span class="fonte-antiga">.VnTimes</span> <span class="seta-subst">&rarr;</span> <span class="fonte-nova">Arial</span></li>
         </ul>
-        <p class="nota-backup"><em>* Nota: Um backup de segurança de todos os arquivos modificados será salvo na pasta <code>backups/</code> antes da gravação física.</em></p>
+        <p class="nota-backup"><em>* Nota: cada arquivo que vai mudar é copiado para <code>backups/troca_tipo_legenda_&lt;data&gt;/</code> antes da gravação física.</em></p>
     </div>
 
     <div class="correcao-actions">
@@ -169,7 +169,7 @@
             <span class="material-symbols-outlined btn-icon">font_download</span>
             <span>Aplicar Substituições</span>
         </button>
-        <button type="button" class="btn btn-secondary" id="btn-forcar-arial" data-tooltip="Troca manualmente todos os Fontname dos estilos para Arial, com backup. Não achata estilos nem remove efeitos.">
+        <button type="button" class="btn btn-secondary" id="btn-forcar-arial" data-tooltip="Troca todos os Fontname dos estilos para Arial (e o \fn de fonte vietnamita legada nas falas), com backup. Não achata estilos, não remove efeitos e não mexe no texto visível.">
             <span class="material-symbols-outlined btn-icon">visibility</span>
             <span>Forçar Arial</span>
         </button>

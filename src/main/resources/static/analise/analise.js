@@ -32,7 +32,7 @@ export function initAnalise() {
         
         logNoConsole('console-analise', 'Solicitando auditoria de mídia...', 'info');
         logNoConsole('console-analise', `Diretório: ${entrada}`, 'info');
-        if (saida) logNoConsole('console-analise', `Saída dos relatórios: ${saida}`, 'info');
+        if (saida) logNoConsole('console-analise', 'Pasta de saída informada, mas a análise não grava em disco: o resultado fica na tela (exportável em TXT).', 'info');
 
         try {
             const res = await fetch('/api/analisar', {

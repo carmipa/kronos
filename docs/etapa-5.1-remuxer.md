@@ -1,6 +1,6 @@
 # 📦 Módulo: Remuxer
 
-[← Troca Tipo Legenda](etapa-1.3-troca-tipo-legenda.md) | [Renomear Arquivos →](etapa-5.2-renomear-arquivos.md)
+[← 4.2 Correção de Karaokê](etapa-4.2-cura-tags.md) | [5.2 Renomear Arquivos →](etapa-5.2-renomear-arquivos.md)
 
 ---
 
@@ -67,7 +67,9 @@ graph TD
     F -->|"Sim"| G["Bloqueia e informa ambiguidade"]
 ```
 
-As listas são ordenadas antes do pareamento, cada legenda só pode ser usada uma vez e códigos como episódio `01` e `010` não são tratados como iguais. Em empate, o Remuxer não escolhe a primeira legenda por acaso: ele registra uma pendência. Legendas completas PT-BR e `.ass` recebem prioridade sobre faixas `Forced`, `Signs` ou `Songs`.
+As listas são ordenadas antes do pareamento, cada legenda só pode ser usada uma vez e códigos como episódio `01` e `010` não são tratados como iguais. Em empate, o Remuxer não escolhe a primeira legenda por acaso: ele registra uma pendência. Legendas completas PT-BR e `.ass` recebem prioridade sobre faixas `Forced`, `Signs` ou `Songs`, e o `.parcial.` perde para o final do mesmo episódio (−50 na pontuação de desempate).
+
+No fallback por episódio, quando vídeo e legenda trazem temporada (`SxxEyy`), a **temporada também tem de bater**. Legenda **sem** temporada não vai para o especial `S00` quando o lote tem o episódio regular de mesmo número — fica com o regular, e o especial só recebe legenda que diga `S00Eyy`. Sem isso, o especial `S00E01` do Gundam ZZ, que vem antes na ordem dos nomes, levou a legenda do episódio 1 em 09/10/2026.
 
 O caso de filme com exatamente um vídeo e uma legenda continua aceitando nomes de releases diferentes. Confira o sincronismo quando vídeo e legenda vierem de fontes distintas.
 
@@ -106,10 +108,11 @@ sequenceDiagram
     UI->>API: POST /api/remuxar
     API->>API: destino existe? não é a pasta de vídeos nem a de legendas?
     API-->>UI: aceite da fila ou erro 400/409
-    API->>Map: parear(videos, legendas)
-    Map-->>API: PlanoRemux auditável
+    API->>UC: executar (dentro do job da fila)
+    UC->>Map: construirPlano(videos, legendas, destino)
+    Map-->>UC: PlanoRemux auditável
     loop Para cada tarefa da fila
-        API->>AD: executarRemux(tarefa, offset)
+        UC->>AD: executarRemux(tarefa, offset)
         AD->>MKV: identificar a ORIGEM com mkvmerge -J
         AD->>MKV: gerar arquivo .part-UUID.mkv
         AD->>MKV: identificar o TEMPORÁRIO com mkvmerge -J
@@ -140,7 +143,7 @@ O destino final nunca é escrito diretamente. Falha, timeout ou cancelamento rem
 | Campo | Obrigatório | Descrição |
 |-------|:-----------:|-----------|
 | `entrada` | ✅ | Pasta com os vídeos originais |
-| `saida` | ⚪ | Pasta com `.ass`/`.srt` **traduzidos** — nome herdado do contrato, não é a saída do remux. Vazio procura a subpasta `traducao_ptbr` ao lado dos vídeos |
+| `saida` | ⚪ | Pasta com `.ass`/`.srt` **traduzidos** — nome herdado do contrato, não é a saída do remux. Vazio procura uma subpasta **dentro** da pasta de vídeos, nesta ordem de preferência: `traducao_ptbr`, `legenda_ptbr`, `legendas ptbr`, `legendas pt`, `legendas portugues` (sem diferenciar caixa nem `-`, `_` e espaço) |
 | `pastaDestino` | ⚪ | Onde gravar os `.mkv` finais. Vazio ⇒ `mkv_final_ptbr/` dentro da pasta de vídeos. Precisa existir, e **não pode ser** a pasta de vídeos nem a de legendas |
 | `syncOffsetMs` | ⚪ | Inteiro entre -86.400.000 e 86.400.000 ms, aplicado a todo o lote |
 | `preservarLegendasOriginais` | ⚪ | **Aceito e ignorado.** Continua no contrato para não quebrar cliente antigo; não existe caminho que apague faixa |
@@ -157,4 +160,4 @@ O endpoint rejeita pasta inválida antes da fila (`400`) e nova solicitação qu
 
 | Anterior | Próximo |
 |----------|---------|
-| [← Troca Tipo Legenda](etapa-1.3-troca-tipo-legenda.md) | [Renomear Arquivos →](etapa-5.2-renomear-arquivos.md) |
+| [← 4.2 Correção de Karaokê](etapa-4.2-cura-tags.md) | [5.2 Renomear Arquivos →](etapa-5.2-renomear-arquivos.md) |

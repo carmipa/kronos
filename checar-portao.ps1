@@ -35,7 +35,10 @@ $COMPROVANTE = '.claude/LEITURA-REGRA-ATUAL.md'
 
 # As duas ultimas moram fora da convencao de nome e estao documentadas em
 # docs/catracas-e-fronteiras.md, secao "Guardas que nao se chamam Catraca".
-$FILTROS = @('*Catraca*', '*Fronteira*', '*Guarda*', '*WebInterfaceTest', '*SseConsoleDinamicoTest')
+# As da vitrine publica (VitrineRotasDoCodigoTest, PoliticaVitrineTest, ModoVitrineCamada2Test...)
+# entram pelo nome QUALIFICADO: no Windows o lancador Java expande curinga solto em nome de arquivo,
+# e '*Vitrine*' casaria com o Dockerfile.vitrine da raiz e viraria nome de tarefa do Gradle.
+$FILTROS = @('*Catraca*', '*Fronteira*', '*Guarda*', '*WebInterfaceTest', '*SseConsoleDinamicoTest', 'org.traducao.projeto.*Vitrine*')
 
 function Escrever($rotulo, $texto) { Write-Host ("  {0,-14} {1}" -f $rotulo, $texto) }
 

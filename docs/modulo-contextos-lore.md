@@ -20,7 +20,7 @@ concordância) e o tom geral da tradução. Todo painel que chama o LLM aceita u
 |---|---|
 | até 15/08/2026 | **82 classes Java**, 11.369 linhas, com **zero** lógica condicional |
 | 15/08 a 09/10/2026 | **um** `lore.yaml` de 15.565 linhas (1 MB), lido no boot |
-| desde 09/10/2026 | **um arquivo SQL por obra** (~13 KB), carregado num SQLite em memória no boot |
+| desde 09/10/2026 | **um arquivo SQL por obra** (média de ~16,5 KB em 14/10/2026), carregado num SQLite em memória no boot |
 
 Por que saiu do YAML: para corrigir ou anexar a lore de uma obra era preciso abrir 1 MB, e o arquivo
 crescia ~13 KB por obra nova. Agora cada obra é um arquivo, o esquema impõe as regras e dá para
@@ -71,17 +71,17 @@ depois, e não no boot.
 
 ---
 
-## O que a lore contém — medido em 09/10/2026
+## O que a lore contém — medido em 14/10/2026
 
 | tabela | linhas | para que serve |
 |---|---|---|
 | `obra` | 70 | a identidade. `sem_lore` só tem tradução; `macross_dyrl` só tem revisão |
 | `lore_traducao` | 69 | `nome`, `aparece_na_lista` (68 aparecem no `<select>` da UI) e o `prompt` de tradução |
 | `lore_revisao` | 69 | `nome` e o `prompt` da Revisão de Lore (diferente do de tradução de propósito) |
-| `termo_protegido` | 2.316 | nomes que **não** se traduzem — e a fonte dos nomes que a 3.2 reconhece |
-| `correcao_terminologia` | 2.115 | forma-ruim → canônico. Só dispara quando o inglês contém o canônico |
-| `traducao_obrigatoria` | 9 | termo do inglês que tem tradução fixa |
-| `par_inconfundivel` | 22 | pares que a checagem de ambiguidade não pode trocar um pelo outro, **em ordem** |
+| `termo_protegido` | 2.315 | nomes que **não** se traduzem — e a fonte dos nomes que a 3.2 reconhece |
+| `correcao_terminologia` | 2.121 | forma-ruim → canônico. Só dispara quando o inglês contém o canônico |
+| `traducao_obrigatoria` | 57 | termo do inglês que tem tradução fixa |
+| `par_inconfundivel` | 28 | pares que a checagem de ambiguidade não pode trocar um pelo outro, **em ordem** |
 | `apelido_pasta` | 44 | nomes de pasta que resolvem para a obra (único entre obras) |
 | `equivalencia_aceita` | 85 | tradução **correta** que a revisão deve parar de acusar, **em ordem** |
 
@@ -168,13 +168,18 @@ canônico, o resumo por obra, as obras sem par e a diferença de terminologia en
 
 ---
 
-## As três agregadoras Macross ficam FORA do CDI — de propósito
+## As agregadoras Macross ficam FORA do CDI — de propósito
 
-`ContextoMacross7Filmes`, `ContextoMacrossDeltaFilmes` e `ContextoMacrossFrontierFilmes` existem
-como classes e **não** têm `@Component`. A ausência é **decisão de qualidade de tradução**, não
-esquecimento: elas agregam filmes cuja lore conflita quando misturada.
+São **seis** classes, três por lado: `ContextoMacross7Filmes`, `ContextoMacrossDeltaFilmes` e
+`ContextoMacrossFrontierFilmes` (tradução, em `lore/macross/`) e `ContextoRevisaoLoreMacross7Filmes`,
+`ContextoRevisaoLoreMacrossDeltaFilmes` e `ContextoRevisaoLoreMacrossFrontierFilmes` (revisão, em
+`lore/revisao/`). Elas existem como classes e **não** têm `@Component`. A ausência é **decisão de
+qualidade de tradução**, não esquecimento: elas agregam filmes cuja lore conflita quando misturada.
 
-`CatracaAgregadorasForaDoCdiTest` impede que alguém "conserte" isso.
+Como os beans de contexto vêm do **catálogo** (`ContextoBeansConfig` expõe as obras lidas do SQL),
+o que realmente as mantém fora é o id delas (`macross_7_filmes`, `macross_delta_filmes`,
+`macross_frontier_filmes`) **não estar** em `obras.lst`. `CatracaAgregadorasForaDoCdiTest` confere
+que elas continuam fora dos registros de tradução e de revisão, e impede que alguém "conserte" isso.
 
 ---
 
@@ -192,7 +197,21 @@ Popula os `<select>` de contexto em cada painel:
 ]
 ```
 
-O campo `grupo` é o que permite ao `<select>` agrupar por franquia (`<optgroup>`).
+O campo `grupo` é o que permite ao `<select>` agrupar por franquia (`<optgroup>`). A lista traz só
+as obras com `aparece_na_lista`: o contexto genérico `sem_lore` fica **fora** dos combos de obra.
+
+### `GET /api/revisao-lore/contextos`
+
+O combo da [3.2 Revisão de Lore](etapa-3.2-revisao-lore.md) é montado com as obras do lado da
+revisão (`lore_revisao`), que vêm desta rota em outro formato:
+
+```json
+[ { "id": "gundam_0083", "nome": "...", "termoMetadata": "..." } ]
+```
+
+O nome, o grupo e a ordem exibidos são herdados de `/api/contextos` por junção de `id` no cliente,
+para os dois combos ficarem iguais; obra de revisão sem par na lista principal é agrupada por
+palavra-chave.
 
 ---
 

@@ -13,9 +13,11 @@
 | **FFmpeg / FFprobe** | Qualquer build recente | ✅ Sim | Análise de mídia e extração (containers não-MKV) |
 | **MKVToolNix** (`mkvmerge` / `mkvextract`) | Qualquer build recente | ✅ Sim | Extração de MKV e remuxagem final |
 | **LM Studio** | Qualquer versão com API OpenAI-compatible + `/api/v0/models` | ✅ Sim (para tradução) | Servir o LLM local |
-| **TMDB API Key** | — | ⚪ Opcional | Metadados de anime com pôster/sinopse em PT-BR (sem chave, cai para Jikan/MAL) |
+| **hunspell** + dicionários (`pt_BR`, `en_US`, `de_DE`, `es_ES`…) | — | ⚪ Recomendado | Verificador ortográfico da legenda (`core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda`): repõe acento faltando e separa resíduo de inglês de erro real. Sem dicionário o texto sai **intacto** e a conferência conta como "não verificada". O script `instalar-pre-requisitos.ps1` (raiz) instala e confere ambos |
+| **Redis** | — | ⚪ Opcional | Fluxo ao vivo de telemetria (`quarkus.redis.hosts`). Sem ele o card mostra "desconectado" e a tradução segue |
+| **TMDB API Key** | — | ⚪ Opcional | Metadados de anime com pôster/sinopse em PT-BR (sem chave, cai para AniList e depois Jikan/MAL) |
 
-> O app é **Windows-first**: o seletor nativo de pasta/arquivo (`DialogoArquivoController`) usa PowerShell + `System.Windows.Forms`, e o `BrowserLauncher` abre o navegador padrão automaticamente no boot. Em outros SOs, os endpoints de diálogo nativo não funcionam — informe os caminhos manualmente nos formulários.
+> O app é **Windows-first**: o seletor nativo de pasta/arquivo (`DialogoArquivoController`) usa PowerShell + `System.Windows.Forms`, e o `BrowserLauncher` abre o navegador padrão automaticamente no boot. Fora do Windows (ou sem PowerShell), o botão "Procurar..." abre o **navegador de pastas do servidor** (`/api/navegador/pastas`), limitado às raízes de `navegador.raizes`; o caminho também pode ser digitado no formulário.
 
 ---
 
@@ -106,12 +108,13 @@ Ver [Configuração — Referência Completa](ref-configuracao.md) para todas as
 
 ## Verificando a instalação
 
-1. Abra `http://127.0.0.1:8099` — o painel **Início** deve mostrar os widgets de status:
+1. Abra `http://127.0.0.1:8099` — o painel **Início** deve mostrar os quatro widgets de status:
    - **Orquestrador**: `Java Quarkus` — badge verde "Online"
    - **LLM de Tradução**: badge indicando se o LM Studio respondeu
    - **Cache de Legendas**: contagem de arquivos `.cache.json` já existentes
+   - **Fluxo de Telemetria**: conectado ou desconectado do Redis (`GET /api/fluxo/status`) — desconectado é estado legítimo
 
-   ![Painel Inicial com os três widgets de status (Orquestrador, LLM, Cache)](../src/main/resources/static/img/screenshots/painel-inicial.webp)
+   ![Painel Inicial com os widgets de status](../src/main/resources/static/img/screenshots/painel-inicial.webp)
 2. Vá ao painel **Análise de Mídia**, aponte para uma pasta com um `.mkv` de teste e clique em auditar — se o relatório aparecer no console com as faixas de vídeo/áudio/legenda, `ffprobe` está configurado corretamente.
 3. Vá ao painel **Tradução Local**, escolha um contexto (ex.: "DanMachi") e uma pasta com uma legenda `.ass` de teste — se a tradução iniciar sem erro de "Servidor LLM indisponível", o LM Studio está acessível.
 
@@ -123,7 +126,7 @@ Ver [Configuração — Referência Completa](ref-configuracao.md) para todas as
 |---------|------------------|---------|
 | `mkvmerge.exe detectado` não aparece no log | MKVToolNix não está no `PATH` nem no caminho padrão do Windows | Configure `remuxer.mkvmerge-path` / `extrator.mkvmerge-path` explicitamente |
 | "Servidor LLM indisponível" | LM Studio não está com o servidor local ligado, ou porta diferente de `1234` | Verifique em LM Studio → Developer → Start Server; ajuste `tradutor.llm.base-url` se necessário |
-| Diálogo de seleção de pasta não abre | SO não é Windows, ou PowerShell bloqueado por política de execução | Digite o caminho manualmente no campo de texto |
+| Diálogo de seleção de pasta não abre | SO não é Windows, ou PowerShell bloqueado por política de execução | Sem diálogo nativo, o "Procurar..." usa o navegador de pastas do servidor, limitado a `navegador.raizes` (fora delas: 403). Ou digite o caminho no campo de texto |
 | Porta **8099** já em uso | Outra instância do app já está rodando — e ela pode estar **traduzindo** | Confira o dono da porta ANTES de matar: `Get-NetTCPConnection -LocalPort 8099`. Para mudar, `quarkus.http.port` em `application.properties` |
 
 Mais detalhes em [Solução de Problemas](ref-solucao-problemas.md).

@@ -1,16 +1,16 @@
 # 🎤 Módulo: Karaokê (Traduzir + Achatar — tela única)
 
-[← Revisão de Concordância](etapa-3.3-revisao-concordancia.md) | [Correção de Karaoke →](etapa-4.2-cura-tags.md)
+[← 3.3 Revisão de Concordância](etapa-3.3-revisao-concordancia.md) | [4.2 Correção de Karaokê →](etapa-4.2-cura-tags.md)
 
 ---
 
-> **Tela única desde 21/09/2026.** O antigo **4.3 Karaokê Simples** (achatar/limpar) foi absorvido como o **Passo 2** desta mesma tela. As duas passadas são independentes e se aplicam na ordem **traduzir → achatar**; o backend das duas continua separado (`/api/traducao-karaoke/*` e `/api/novo-karaoke/*`), unido só na interface. Escolher a obra (ou **"sem lore"**) exibe a capa/lore e libera as passadas, no padrão de trava de lore das telas 3.x.
+> **Tela única desde 21/09/2026.** O antigo **4.3 Karaokê Simples** (achatar/limpar) foi absorvido como o **Passo 2** desta mesma tela. As duas passadas são independentes e se aplicam na ordem **traduzir → achatar**; o backend das duas continua separado (`/api/traducao-karaoke/*` e `/api/novo-karaoke/*`), unido só na interface. Escolher a obra exibe a capa/lore e libera as passadas, no padrão de trava de lore das telas 3.x. **"Sem lore" libera só o Passo 2 (Achatar)**: o Passo 1 exige uma obra real — a lore alimenta o LLM, e o backend recusa contexto vazio ou desconhecido.
 
 ## Para que serve
 
 Painel **"4.1 Karaokê"** da SPA (grupo **Karaokê**). Duas passadas:
 
-- **Passo 1 — Traduzir:** traduz as **letras de música** mantendo o japonês original junto na tela — a camada **romaji/japonesa é preservada intacta** e apenas a camada de **tradução em inglês** vai ao LLM, virando PT-BR nos mesmos tempos.
+- **Passo 1 — Traduzir:** traduz as **letras de música** mantendo o japonês original junto na tela — a camada **romaji/japonesa é preservada intacta** e a camada de **tradução em inglês** vai ao LLM, virando PT-BR nos mesmos tempos. Desde 24/09/2026, linha **toda em inglês** na camada original também é traduzida (ver a seção *Inglês cantado na camada original*, abaixo).
 - **Passo 2 — Achatar / limpar:** remove a animação de karaokê (KFX) e entrega **uma linha limpa por frase** — romaji em cima, PT-BR embaixo. Existe porque a geometria animada (`\clip`, posição por sílaba) é feita para os glifos originais; a tradução tem tamanho diferente e **quebra nessa geometria**. Achatar depois de traduzir resolve a "zona" de romaji + inglês + PT sobrepostos.
 
 O problema central que o módulo resolve: **cantores japoneses misturam inglês no meio da letra** (*"kimi no heart ni fly away"*). Uma detecção ingênua de "linha em inglês" mandaria a letra original para o LLM e a destruiria. Aqui a classificação é **por evidência**, com viés de preservação.
@@ -39,7 +39,7 @@ flowchart TB
     A["🎼 Evento de música<br/>(estilo Song/OP/ED ou tags de karaokê)"] --> B{"Efeito KFX?<br/>(sílaba/frame, alta densidade de tags)"}
     B -->|Sim| KFX["🛡️ EFEITO_KFX<br/>preservado intacto"]
     B -->|Não| C{"Kana/Kanji no texto?"}
-    C -->|Sim| JP["🇯🇵 ORIGINAL_JAPONES<br/>nunca traduz"]
+    C -->|Sim| JP["🇯🇵 ORIGINAL_JAPONES<br/>preservada"]
     C -->|Não| D{"Nome do estilo?"}
     D -->|"Romaji / JP / ROM"| JP
     D -->|"English / EN"| E{"Já está em PT-BR?"}
@@ -50,6 +50,7 @@ flowchart TB
     G -->|"romaji vence<br/>('kimi no heart ni fly away')"| JP
     G -->|"inglês vence<br/>('You are the light of my world')"| EN
     G -->|"empate: fração silábica Hepburn<br/>('One more time, one more chance')"| JP
+    JP -.->|"plano do arquivo: texto TODO em inglês<br/>(regra de 24/09/2026, com exceções)"| EN
 
     classDef entrada fill:#831843,stroke:#F472B6,color:#F9FAFB
     classDef decisao fill:#312e81,stroke:#818CF8,color:#F9FAFB
@@ -62,6 +63,21 @@ flowchart TB
 ```
 
 > ⚖️ **Na dúvida, o viés é PRESERVAR** — deixar uma linha de música sem traduzir custa menos que destruir a letra original. O **dry-run mostra a classificação linha a linha** antes de gastar qualquer chamada de LLM.
+
+### Inglês cantado na camada original (desde 24/09/2026)
+
+Depois do classificador, o plano do arquivo (`PlanoDeClassificacao`) revê as linhas ORIGINAL: a
+que tem o texto **todo em inglês** (conferido nos dicionários) passa a `TRADUZIVEL_INGLES`. Sem
+original preservado no instante, ela é a letra cantada e **empilha `inglês\Nportuguês`**; com romaji
+irmão, é a tradução do fansub posta no estilo JP e é trocada no lugar. Linha que **mistura** as duas
+línguas (*"Kagayaku my history"*) continua intacta, e sem o dicionário inglês nada muda.
+
+Duas exceções, de 12/10/2026, mantêm o inglês **intacto** em cima e deixam só o português embaixo:
+
+| caso | decisão |
+|---|---|
+| a **tradução do fansub** está no mesmo momento (as duas pontas dentro da folga de camada) | a linha original em inglês fica intacta |
+| inglês cantado **na camada do romaji** (mesmo estilo e altura de `\pos`) com a tradução em **outra camada** no mesmo momento | volta a `ORIGINAL_JAPONES` |
 
 ---
 
@@ -98,12 +114,15 @@ sequenceDiagram
 ## Garantias de segurança
 
 - **Entrada intocada**: a saída vai para a pasta irmã `<entrada>-karaoke-ptbr`, com o **mesmo nome de arquivo** (o pareamento do [Remuxer](etapa-5.1-remuxer.md) continua funcionando).
-- **Cache editável por arquivo** em `cache/karaoke/*.cache.json` — mesmo fluxo de correção manual da [Tradução Local](etapa-2.1-traducao-llm.md); refrão repetido gasta **uma** chamada de LLM.
+- **Cache editável por arquivo, chaveado pelo NOME**: `<dir-cache>/karaoke/<nome sem .ass>.cache.json` — mesmo fluxo de correção manual da [Tradução Local](etapa-2.1-traducao-llm.md); refrão repetido gasta **uma** chamada de LLM. Como a chave é só o nome, arquivos **homônimos de pastas diferentes dividem o mesmo cache**. Proveniência divergente (outra lore, modelo ou idiomas) **arquiva** o cache antigo, sem apagar, e retraduz tudo; entrada com **verso perdido** é retraduzida. O simular não lê nem grava cache.
 - Falha ou alucinação do LLM numa linha **mantém a linha original** com aviso — nunca derruba o arquivo.
-- Diálogos, placas e efeitos KFX passam **byte a byte** — o módulo só toca música.
+- **Palavra fora do dicionário** na tradução vai ao manifesto e ao console, e a tradução **segue** (refazer não consertava e recusar devolveria a letra ao inglês).
+- Diálogos e placas passam **byte a byte** — o módulo só toca música. A exceção é o **KFX palavra a palavra**: a frase pintada por cima por ele sai **só em português**, e as palavras do efeito saem da tela como `Comment:` (ficam no arquivo, reversíveis), para o inglês não ser desenhado em cima do português.
+- **Fonte do diálogo quando a da música não desenha o português** (`TipografiaDaLetraPortuguesa`): se a fonte efetiva da linha não tem algum glifo do texto, a linha portuguesa ganha `\fn`/`\fs` do estilo do diálogo; a frase de KFX que ficou só em português ganha contorno, sombra e cores do diálogo. As fontes são lidas do **MKV de origem** (`FontesEmbutidasMkvAdapter`: `mkvmerge -J` e `mkvextract attachments`; caminhos em `traducao-karaoke.mkvmerge-path` e `traducao-karaoke.mkvextract-path`). O vídeo é achado pelo **NOME** da legenda (`LocalizadorDoVideoDeOrigem`), nunca por número de episódio; sem vídeo, a fonte fica **NÃO VERIFICADA** e nada é trocado.
 - A aplicação roda **na fila única do pipeline**, mas não relê a lore global: o `contextoId` escolhido vira um snapshot imutável e seu prompt é passado explicitamente em todas as chamadas ao LLM.
 - Cache, manifesto e telemetria registram o ID e a proveniência do contexto usado; cache legado sem carimbo não é reaproveitado automaticamente.
-- 🚫 **Fonte vietnamita antiga reprova o arquivo** (desde 14/10/2026, Gundam ZZ): `.VnBook-Antiqua`, `VnBook-Antiqua`, `.VnTime`, `VNI-Times` e afins em **qualquer** estilo do cabeçalho (usado ou não) ou em `\fn` de fala ou comentário. A reprovação vem logo depois de ler o arquivo — antes de cache e LLM, sem gravar nada — e fica no manifesto pedindo a [1.3 Troca Tipo Legenda](etapa-1.3-troca-tipo-legenda.md). A regra é a única do kernel (`FonteVietnamitaLegada`), a mesma do 5.1 e da 1.3.
+- Pasta **sem `.ass`/`.ssa`** não cria a pasta de destino e fecha com **"NADA A FAZER"**; se houver `.srt`, o console avisa que SRT não tem camada de karaokê.
+- 🚫 **Fonte vietnamita antiga reprova o arquivo** (desde 14/10/2026, Gundam ZZ): `.VnBook-Antiqua`, `VnBook-Antiqua`, `.VnTime`, `VNI-Times` e afins em **qualquer** estilo do cabeçalho (usado ou não) ou em `\fn` de fala ou comentário. A reprovação vem logo depois de ler o arquivo — antes de cache e LLM, sem gravar nada — e vale **também no simular**; no aplicar ela fica registrada no manifesto pedindo a [1.3 Troca Tipo Legenda](etapa-1.3-troca-tipo-legenda.md). A regra é a única do kernel (`FonteVietnamitaLegada`), a mesma do 5.1 e da 1.3.
 
 ---
 
@@ -188,6 +207,12 @@ fatia casava — as cinco empilhariam `inglês\Nportuguês` com o romaji já na 
 **contido** na janela da camada original também conta como o mesmo momento; o que vaza da janela
 continua empilhando.
 
+Desde 12/10/2026 o romaji desenhado **só em sílabas**, sem nenhuma linha inteira (encerramento do
+86), também conta como original na tela: a tradução inglesa do fansub vira **só português** e o
+inglês deixa de empilhar. O empilhamento `inglês\Nportuguês` fica só para quando **não há original
+na tela** — sílaba inglesa não chega ao limiar de romaji, então a letra cantada em inglês sem romaji
+continua empilhando.
+
 Medido pelo plano de produção sobre o acervo (`MedicaoCamadaOriginalNoInstanteIT`, foto antes ×
 depois por identidade do evento): **50 de 14.375** linhas traduzíveis mudam de decisão — todas as
 fatias do Guilty Crown, nenhuma outra.
@@ -222,7 +247,7 @@ Converte karaokê KFX de fansub — **milhares de eventos por sílaba/letra/fram
 | `EventoAss` / `LinhaSimplesKaraoke` (`domain`) | Parse dos eventos ASS e a linha reconstruída (início, fim, texto) |
 | `ResultadoConversaoKaraoke` (`domain`) | Métricas por arquivo (eventos removidos, linhas criadas, preservados por segurança) |
 | `NovoKaraokePersistencia` (`infrastructure`) | Manifesto de auditoria em `logs/novo-karaoke/manifestos/` |
-| `NovoKaraokeController` (`presentation`) | Endpoints REST `/api/novo-karaoke/*` — simular e aplicar em background |
+| `NovoKaraokeController` (`presentation`) | Endpoints REST `/api/novo-karaoke/*` — simular fora da fila; o aplicar entra na **mesma fila FIFO** do Passo 1 |
 
 **Garantias do achatamento:** entrada NUNCA alterada (saída em pasta destino obrigatoriamente diferente — vazia cria `legenda-simplificada` ao lado das legendas da obra); diálogo/placas/`Comment:` byte a byte; bloco KFX que não reconstrói com confiança é **mantido intacto** (viés de preservação); romaji preservado e empilhado ACIMA das outras camadas com `\N`; variantes divergentes da mesma frase deduplicadas por sobreposição + similaridade (romaji original vence texto pulverizado).
 
@@ -243,15 +268,15 @@ As duas passadas moram na mesma tela e logam no **mesmo console** (os dois canai
 { "caminhoOrigem": "C:/animes/86/86 Part 1/traducao_ptbr", "contextoId": "eight_six" }
 ```
 
-O Passo 1 traduz via fila do pipeline (LLM); o Passo 2 roda local (sem LLM). Ambos os "aplicar" acompanham a fila e tocam o aviso sonoro ao terminar.
+O Passo 1 traduz via fila do pipeline (LLM); o Passo 2 roda local (sem LLM). Os dois "simular" rodam fora da fila; os dois "aplicar" entram na **mesma fila FIFO** — achatar não começa enquanto o Passo 1 ainda escreve a saída — e tocam o aviso sonoro ao terminar.
 
 ---
 
 ## Pontos de atenção
 
-- O módulo vem **antes da [Correção de Karaoke](etapa-4.2-cura-tags.md)**. A ordem interna é **traduzir (Passo 1) e depois achatar (Passo 2)**: achatar por último remove a animação e deixa a linha legível.
+- O módulo vem **antes da [4.2 Correção de Karaokê](etapa-4.2-cura-tags.md)**. A ordem interna é **traduzir (Passo 1) e depois achatar (Passo 2)**: achatar por último remove a animação e deixa a linha legível.
 - Estilos rotulados decidem primeiro (`OP - Romaji` preserva, `OP - English` traduz) — a votação por evidência só entra em estilos ambíguos (`Song`, `Insert`).
-- Letra 100% em inglês **cantada no original** (ex.: *"One more time, one more chance"*) é preservada pelo desempate silábico — se ela estiver na camada de tradução com estilo rotulado `English`, é traduzida normalmente.
+- Letra 100% em inglês **cantada no original** (ex.: *"One more time, one more chance"*) passa a ser traduzida desde 24/09/2026 (empilhando `inglês\Nportuguês` quando não há original na tela) — salvo as duas exceções da seção *Inglês cantado na camada original*. Na camada de tradução com estilo rotulado `English`, é traduzida normalmente.
 
 ---
 
@@ -259,4 +284,4 @@ O Passo 1 traduz via fila do pipeline (LLM); o Passo 2 roda local (sem LLM). Amb
 
 | Anterior | Próximo |
 |----------|---------|
-| [← Revisão de Concordância](etapa-3.3-revisao-concordancia.md) | [Correção de Karaoke →](etapa-4.2-cura-tags.md) |
+| [← 3.3 Revisão de Concordância](etapa-3.3-revisao-concordancia.md) | [4.2 Correção de Karaokê →](etapa-4.2-cura-tags.md) |

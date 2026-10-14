@@ -18,8 +18,8 @@ Este arquivo registra decisoes que nao devem depender apenas do historico da con
 
 ## Revisao de Lore
 
-- `revisaoLore` e modulo separado e desacoplado de `traducao/contexto`.
-- Mesmo que prompts sejam repetidos, os prompts de revisao de lore pertencem ao pacote de revisao de lore.
+- `revisaoLore` e modulo separado e desacoplado da Traducao (`traducao`); a lore que ele consome vem do peer `lore`.
+- Os prompts da revisao de lore vivem na tabela `lore_revisao` dos arquivos `src/main/resources/lore/obras/<id>.sql` e sao entregues por `revisaoLore.application.GerenciadorPromptRevisaoLore`.
 - Objetivo: corrigir nomes de personagens, lugares, objetos, organizacoes e termos de universo.
 - Deve preservar nomes no idioma original quando o prompt/lore assim determinar.
 - E uma etapa de refinamento posterior a traducao pronta.

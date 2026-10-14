@@ -26,9 +26,10 @@ public interface ProvedorContexto {
      * PROPÓSITO DE NEGÓCIO: id RESERVADO da tradução sem lore declarada — o anime acabou de ser
      * baixado e a intenção é ver como fica. É também o valor que libera a trava de lore na UI.
      *
-     * <p>INVARIANTES DO DOMÍNIO: vive no CONTRATO, e não na classe que o implementa, porque a
-     * lore está migrando de 82 classes Java para um arquivo de dados — quem precisa do id não
-     * pode depender de uma classe que vai deixar de existir. Era a ÚNICA amarra concreta a uma
+     * <p>INVARIANTES DO DOMÍNIO: vive no CONTRATO, e não numa implementação, porque a lore deixou
+     * de ser classe Java: hoje é um arquivo SQL por obra ({@code lore/obras/sem_lore.sql} inclusive),
+     * lido por {@code CatalogoLoreSqlite} — quem precisa do id não pode depender de uma classe
+     * concreta. Era a ÚNICA amarra concreta a uma
      * lore em todo o projeto ({@code TraducaoController} importava {@code ContextoSemLore} só
      * por esta constante); tirá-la daqui reabriria essa amarra.
      *

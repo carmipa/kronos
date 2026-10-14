@@ -617,10 +617,10 @@
                             <div class="form-group">
                                 <label for="analise-saida">Pasta de saída dos relatórios (Opcional): <span
                                         class="help-icon"
-                                        data-tooltip="Diretório onde serão gravados os relatórios da análise. Deixe em branco para salvar por padrão na subpasta 'relatorios' dentro da pasta da mídia.">?</span></label>
+                                        data-tooltip="Hoje a análise não grava relatório em disco: o resultado aparece na tela, em cartões e na tabela de legendas, e pode ser exportado em TXT pelo botão do relatório. Este campo é aceito, mas ignorado.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="analise-saida"
-                                        placeholder="Deixe vazio p/ salvar em 'relatorios' na pasta da mídia">
+                                        placeholder="Não é usado: o resultado fica na tela e se exporta em TXT">
                                     <button type="button" class="btn-procurar" data-target="analise-saida"
                                         data-type="pasta"><span
                                             class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -798,7 +798,7 @@
                         </ol>
                         <p class="op-escopo">
                             <span class="material-symbols-outlined">folder_off</span>
-                            <span><strong>A pasta de saída é PLANA</strong> — ela não repete a árvore de subpastas. Se a varredura achar dois vídeos com o <strong>mesmo nome</strong> em temporadas diferentes (<code>Season01/Episodio01.mkv</code> e <code>Season02/Episodio01.mkv</code>), o segundo <strong>sobrescreve</strong> a legenda do primeiro. Extraia temporada por temporada, em pastas de saída separadas.</span>
+                            <span><strong>A pasta de saída é PLANA</strong> — ela não repete a árvore de subpastas. Se a varredura achar dois vídeos com o <strong>mesmo nome</strong> em temporadas diferentes (<code>Season01/Episodio01.mkv</code> e <code>Season02/Episodio01.mkv</code>), o segundo <strong>não é extraído</strong>: o console mostra <code>[COLISÃO]</code> e ele conta como falha, sem sobrescrever a legenda do primeiro. Extraia temporada por temporada, em pastas de saída separadas.</span>
                         </p>
                     </div>
 
@@ -830,8 +830,8 @@
                 <div class="panel" id="panel-traducao">
                     <div class="glass-card">
                         <h2>Tradução via LLM Local</h2>
-                        <p class="card-desc">Traduz legendas no formato ASS/SSA do Inglês para Português usando IA local
-                            (ex: Mistral Nemo no LM Studio).</p>
+                        <p class="card-desc">Traduz legendas ASS/SSA/SRT do Inglês para Português usando IA local
+                            (ex: aya-expanse-8b no LM Studio).</p>
 
                         <div class="anime-meta-banner hidden" id="meta-banner-traducao"></div>
 
@@ -844,7 +844,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="traducao-entrada">Pasta com as legendas ORIGINAIS (.ass / .ssa): <span
+                                <label for="traducao-entrada">Pasta com as legendas ORIGINAIS (.ass / .ssa / .srt): <span
                                         class="help-icon"
                                         data-tooltip="Pasta contendo os arquivos de legenda originais (geralmente em inglês) que serão traduzidos pela LLM.">?</span></label>
                                 <div class="input-with-button">
@@ -977,8 +977,9 @@
                             </ul>
                             <p><strong>O que continua protegido:</strong> tags ASS/SSA, detecção de alucinação e
                                 meta-resposta, identificadores numéricos, resíduo em inglês e eco do original.</p>
-                            <p>A saída vai para <code>traducao_ptbr_sem_lore</code>, separada da definitiva. Quando você
-                                escrever a lore de verdade, o cache desta execução é descartado sozinho.</p>
+                            <p>A saída vai para <code>traducao_ptbr_sem_lore</code>, separada da definitiva, e o cache
+                                desta execução fica à parte, em <code>cache/&lt;obra&gt;/sem_lore/</code>: a 2.1 nunca o lê,
+                                então quando você escrever a lore de verdade ela traduz com o próprio cache.</p>
                         </div>
 
                         <form id="form-traducao-sem-lore" class="standard-form">
@@ -1053,7 +1054,7 @@
                                 <span class="op-marca"><span class="material-symbols-outlined">folder_special</span></span>
                                 <div class="op-texto">
                                     <span class="op-titulo">A saída vai para pasta separada</span>
-                                    <span class="op-desc">Grava em <code>traducao_ptbr_sem_lore</code>, e não na definitiva. Quando você escrever a lore de verdade, a 2.1 retraduz do zero — a proveniência divergiu e o cache desta execução é descartado sozinho.</span>
+                                    <span class="op-desc">Grava em <code>traducao_ptbr_sem_lore</code>, e não na definitiva; o cache desta execução fica em <code>cache/&lt;obra&gt;/sem_lore/</code>, que a 2.1 nunca lê. Quando você escrever a lore de verdade, a 2.1 traduz com o próprio cache, sem herdar nada daqui.</span>
                                     <span class="op-selos">
                                         <span class="op-selo op-selo-escreve">grava em pasta própria</span>
                                         <span class="op-selo op-selo-seguro">não toca a tradução definitiva</span>
@@ -1304,9 +1305,10 @@
                 <div class="panel" id="panel-revisao">
                     <div class="glass-card">
                         <h2>Revisão de Legendas</h2>
-                        <p class="card-desc">Varre arquivos .ass/.ssa já em português: corrige concordância de gênero,
-                            pronomes, artigos e tratamentos (senhor/senhora, ele/ela) via <strong>LLM local</strong>, ou
-                            resíduos em inglês via <strong>Google Tradutor</strong>.</p>
+                        <p class="card-desc">Varre arquivos .ass/.ssa já em português e traduz o que ficou em inglês:
+                            a passada principal usa o <strong>LLM local</strong> com os dicionários, e o
+                            <strong>Google Tradutor</strong> só roda no botão próprio, por escolha sua. Concordância aqui
+                            é só a regra local gratuita; o resto fica para a 3.3.</p>
                         <p class="card-hint">Informe a pasta com as legendas <strong>traduzidas</strong> (.ass). A
                             revisão lê e grava os arquivos PT-BR; o inglês de referência vem de <code>_Track2.ass</code>
                             na mesma pasta (ou pasta EN abaixo) e, se não houver, do <strong>cache</strong> do projeto
@@ -1455,13 +1457,13 @@
                         </ol>
 
                         <!-- Medido em 2026-07-28 no Zeta: das 519 correções aplicadas, 504 eram
-                             estilo "Song ENG". A varredura não distingue diálogo de letra de música. -->
+                             estilo "Song ENG". Por isso a música passou a ser VETO ABSOLUTO nesta tela
+                             (FiltroAuditoriaLinha, CatracaEscritaDeFalaVetaMusicaTest). -->
                         <p class="op-escopo">
                             <span class="material-symbols-outlined">lyrics</span>
-                            <span><strong>A varredura pega todos os estilos</strong>, inclusive as letras de abertura e
-                                encerramento. Se a legenda tem uma faixa de música em inglês (estilo
-                                <code>Song ENG</code>), ela será tratada como inglês residual e traduzida. Confira o
-                                relatório antes de dar a rodada por boa.</span>
+                            <span><strong>Música e karaokê ficam de fora</strong>: abertura, encerramento e qualquer
+                                estilo musical (inclusive <code>Song ENG</code>) não são tocados aqui — pertencem à
+                                <strong>4.1 Karaokê</strong>. Se alguma linha musical mudar, o console avisa.</span>
                         </p>
                     </div>
 

@@ -62,11 +62,11 @@ arquivo SQL por obra (`src/main/resources/lore/obras/<id>.sql`), carregado num S
 arranque. Formato, regras e como anexar: [Contextos & Lore](modulo-contextos-lore.md).
 
 ```
-medido em 09/10/2026
+medido em 09/10/2026 (termos e correções recontados em 14/10/2026)
 
 obras ....................... 70  (69 com tradução, 68 na lista da UI; 69 com revisão)
-termos protegidos ........... 2.316
-correções de terminologia ... 2.115  (uma vez por obra, lidas pelos dois lados)
+termos protegidos ........... 2.315
+correções de terminologia ... 2.121  (uma vez por obra, lidas pelos dois lados)
 equivalências aceitas ....... 85 formas
 ```
 
@@ -248,22 +248,38 @@ importa a stack da `traducao`, e o `FronteiraTraducaoArchTest` congela isso.
   "diretorioOriginal": "E:/animes/Gundam/0083/legendas_eng",
   "diretorioTraduzido": "E:/animes/Gundam/0083/legendas_eng/traducao_ptbr",
   "contextoId": "gundam_0083",
-  "revisarTodasFalas": false
+  "revisarTodasFalas": true
 }
 ```
 
+A tela **sempre** envia `revisarTodasFalas: true` — não há caixa para desligar.
+
 `contextoId` é **obrigatório**: sem ele, ou com id desconhecido, o endpoint responde **400** antes
-de sequer olhar as pastas. Não existe modo "sem lore" aqui — o propósito inteiro é comparar contra
-uma lore canônica.
+de sequer olhar as pastas. Também respondem **400**, antes de entrar na fila: pasta não informada ou
+inexistente, e as **duas pastas iguais** (cada arquivo seria comparado consigo mesmo). Não existe
+modo "sem lore" aqui — o propósito inteiro é comparar contra uma lore canônica.
+
+Toda sobrescrita cria backup em `backups/revisao-lore/revisao_<yyyyMMdd_HHmmss_SSS>/` antes de
+gravar o `.ass`.
 
 ---
 
 ## Trilha de auditoria
 
-`RevisaoLoreAuditoriaCache` grava **JSONL append-only**, uma entrada por fala auditada: original
-EN, tradução antes, resposta do LLM, tradução depois e o desfecho (`CONFORME`, `CORRIGIDA`,
-`DESCARTADA_*`, `SEM_RESPOSTA`). É o que permite reverter cirurgicamente uma regressão sem
-retraduzir nada.
+`RevisaoLoreAuditoriaCache` grava **JSONL append-only** em
+`cache/auditoria/revisao_lore_correcoes.jsonl`: original EN, tradução antes, resposta do LLM,
+tradução depois e o desfecho. A fala **limpa** (sem indício de lore) **não** é registrada. Os
+desfechos gravados:
+
+| grupo | códigos |
+|---|---|
+| corrigida | `CORRIGIDA`, `CORRIGIDA_REGRA_LORE` |
+| sem resposta do LLM | `SEM_RESPOSTA` |
+| descartada | `DESCARTADA_ASS_PESADO`, `DESCARTADA_TAGS`, `DESCARTADA_VALIDACAO` |
+| pendente | `PENDENTE_REGRA_LORE_INCOMPLETA`, `PENDENTE_SEM_MELHORIA`, `PENDENTE_ESCOPO_LORE`, `PENDENTE_LORE_NAO_RESOLVIDA` |
+| fora do escopo | `ENCAMINHADA_OPCAO_6` (fala inteira em inglês: é falta de tradução, da 3.1) |
+
+É o que permite reverter cirurgicamente uma regressão sem retraduzir nada.
 
 > **Cuidado ao ler a trilha:** no registro `DESCARTADA_VALIDACAO` o campo `traducaoDepois` guarda a
 > **proposta**, não o que foi para o disco. Filtrar por "antes ≠ depois" produz alarme falso —
@@ -279,9 +295,9 @@ retraduzir nada.
 | `CatracaTerminologiaDeLoreUnificadaTest` | as listas de terminologia divergirem entre si |
 | `CatracaEscritaDeFalaVetaMusicaLoreTest` | a fatia escrever em fala de estilo musical |
 | `CatracaTokenDeControleEmTodaPortaLlmTest` | token de template vazar para a legenda |
-| `CatracaSlotsReservadosLoreTest` | colisão de slots reservados na lore |
+| `CatracaSlotsReservadosLoreTest` | obra do catálogo sem lore que não esteja declarada (pendente ou fora do seletor) |
 | `CatracaAgregadorasForaDoCdiTest` | as três agregadoras Macross entrarem no CDI por engano |
-| `CatracaConsoleOrfaoNaUiTest` | console agregado alimentar o log que o portão de compilação lê |
+| `CatracaConsoleOrfaoNaUiTest` | console de tela que nunca recebe SSE (sem entrada no `consoleMap`) |
 
 ---
 
@@ -289,7 +305,7 @@ retraduzir nada.
 
 - **~1.241 pendências** nas sete obras trabalhadas — e são **curadoria de catálogo**, não defeito de
   código: cada uma é uma decisão sobre a lore.
-- `traduzirArquivo` com 403 linhas e `processarArquivo` com 348 — refatoração **sem defeito
+- `processarArquivo` (em `RevisarLoreUseCase`) com ~407 linhas — refatoração **sem defeito
   aberto**, registrada para não virar lacuna silenciosa.
 - A **proteção de acento nunca foi exercitada numa tradução real**: o acervo foi traduzido antes
   dela existir.

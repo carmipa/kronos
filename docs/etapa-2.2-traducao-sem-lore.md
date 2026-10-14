@@ -14,10 +14,12 @@ existe, e escrevê-la leva tempo.
 
 Esta tela remove a exigência: **não pede obra**. Em troca, não aplica terminologia nenhuma.
 
-O contexto usado é o `sem_lore`, um id **reservado** que vive no contrato
-(`ProvedorContexto.ID_SEM_LORE`) e não numa classe de lore concreta — a lore está migrando de 82
-classes Java para um arquivo de dados, e quem precisa do id não pode depender de uma classe que
-vai deixar de existir.
+![Painel de Tradução sem Lore](../src/main/resources/static/img/screenshots/traducao-sem-lore.webp)
+
+O contexto usado é o `sem_lore`, um id **reservado** do contrato (`ProvedorContexto.ID_SEM_LORE`).
+A lore de cada obra vive num arquivo SQL próprio (`src/main/resources/lore/obras/<id>.sql`), e
+todos são carregados num SQLite em memória quando a aplicação sobe; o `sem_lore` é um desses
+arquivos, `sem_lore.sql`, só com o prompt genérico e nenhum termo.
 
 ---
 
@@ -48,9 +50,10 @@ O resultado vai para **`traducao_ptbr_sem_lore`**, e não para `traducao_ptbr`. 
 
 1. **A definitiva não é sobrescrita.** Quando a lore de verdade existir, você roda a 2.1 e a saída
    boa nasce na pasta de sempre, sem conflito.
-2. **O cache desta execução é descartado sozinho.** A proveniência carimba `contextoId=sem_lore`;
-   quando a obra ganhar lore, `mesmaProveniencia()` dá falso e a 2.1 retraduz do zero, em vez de
-   reaproveitar uma tradução que nunca teve terminologia.
+2. **O cache desta execução fica separado.** A 2.2 grava em `cache/<obra>/sem_lore/`; a 2.1 nunca
+   lê essa subpasta, e a manutenção de cache ([2.3](etapa-2.3-correcao-revisao.md)) e a
+   [Revisão de Legendas (3.1)](etapa-3.1-revisao-legendas.md) a deixam de fora. Quando a obra
+   ganhar lore, a 2.1 não reaproveita nenhuma tradução que nunca teve terminologia.
 
 > ⚠️ A pasta `traducao_ptbr_sem_lore` é **saída**, nunca entrada. Apontar uma tradução para uma
 > pasta de saída já sobrescreveu 17 arquivos limpos em 06/08/2026 — hoje a
@@ -64,10 +67,13 @@ O resultado vai para **`traducao_ptbr_sem_lore`**, e não para `traducao_ptbr`. 
 ```mermaid
 flowchart LR
     A[Pasta com .ass originais] --> B{contextoId}
-    B -->|sem_lore| C[Tradução sem terminologia]
+    B -->|sem_lore| P{"Pasta de obra<br/>que já tem lore?"}
+    P -->|"sim, caixa desmarcada"| X["BLOQUEADO"]
+    P -->|"não, ou caixa marcada"| C[Tradução sem terminologia]
     C --> D[Guardas que continuam:<br/>tags · alucinação · eco · resíduo]
     D --> E[traducao_ptbr_sem_lore]
-    E -.->|lore escrita depois| F[2.1 retraduz do zero:<br/>proveniência divergiu]
+    C --> K[("cache/obra/sem_lore/")]
+    K -.->|"a 2.1 nunca lê"| F["2.1 com lore escrita depois:<br/>cache próprio, nada herdado da 2.2"]
 ```
 
 ---
@@ -80,8 +86,11 @@ reservado. É o backend que decide o resto:
 | o que muda | valor quando `contextoId = sem_lore` |
 |---|---|
 | canal SSE | `traducao-sem-lore` (a 2.1 usa `traducao`) |
+| canal de fim de lote | `traducao-sem-lore-finalizada` (a 2.1 usa `traducao-finalizada`) |
 | nome da operação na telemetria | `Tradução sem Lore via LLM` |
-| pasta de saída, quando não informada | `traducao_ptbr_sem_lore` |
+| pasta de saída, quando não informada | `traducao_ptbr_sem_lore`, ao lado da pasta de entrada |
+| cache | `cache/<obra>/sem_lore/` |
+| pasta de obra que já tem lore | **bloqueada** por padrão; `ignorarLoreExistente: true` (caixa **"Ignorar lore existente desta obra"**) dispensa o portão de obra — só com `sem_lore` |
 
 Canal SSE próprio, e não uma linha no console da 2.1: as duas telas podem estar abertas, e o
 progresso de uma não pode aparecer embaixo da outra. Ver
@@ -93,7 +102,9 @@ progresso de uma não pode aparecer embaixo da outra. Ver
 
 - **Para entregar.** A saída não passou por terminologia; ela serve para ver, não para arquivar.
 - **Quando a obra já tem lore.** Use a [2.1](etapa-2.1-traducao-llm.md) — a lore existe justamente
-  para isso, e usar esta tela desperdiça a proteção que já foi escrita.
+  para isso. Por padrão esta tela **recusa** a pasta de obra que já tem lore: o arquivo sai
+  `[BLOQUEADO]` e a mensagem diz qual contexto é o esperado. A caixa **"Ignorar lore existente desta
+  obra"** dispensa essa guarda — só nesta tela — e a terminologia da obra não é aplicada.
 
 ---
 

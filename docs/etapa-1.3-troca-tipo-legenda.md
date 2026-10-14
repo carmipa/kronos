@@ -1,12 +1,12 @@
 # 🔤 Módulo: Troca Tipo Legenda (Fontes Legadas)
 
-[← Revisão de Lore](etapa-3.2-revisao-lore.md) | [Remuxer →](etapa-5.1-remuxer.md)
+[← Extração de Legendas](etapa-1.2-extracao-legendas.md) | [Análise de Legenda →](etapa-1.4-analise-conteudo.md)
 
 ---
 
 ## Para que serve
 
-Painel **"9. Troca Tipo Legenda"** da SPA (grupo **Qualidade**). Audita arquivos `.ass`/`.ssa` em busca de **fontes legadas de 8 bits** nos estilos (`Fontname` em `[V4+ Styles]`) e as substitui em lote por fontes Unicode seguras — com backup automático antes de gravar. Mesmo quando a auditoria automática não encontra defeito obrigatório, o operador pode escolher **normalizar manualmente os `Fontname` para Arial** por legibilidade em TV; essa ação não achata estilos, não remove efeitos e não altera textos/tempos.
+Painel **"1.3 Troca de Tipo de Legenda"** da SPA (grupo **Preparação**) — roda **antes de traduzir**. Audita os arquivos `.ass`/`.ssa` **da pasta informada** (sem subpastas) em busca de **fonte vietnamita de codificação antiga**, pela regra única `core.texto.FonteVietnamitaLegada`: nos estilos (`Fontname` em `[V4+ Styles]`/`[V4 Styles]`) e no `\fn` das falas (`Dialogue:`) e dos comentários (`Comment:`). Troca em lote por **Arial**, com backup automático antes de gravar. Mesmo quando a auditoria não encontra defeito obrigatório, o operador pode **forçar Arial** por legibilidade em TV: todo `Fontname` vira Arial e o `\fn` legado também é trocado; `\fn` de fonte comum, texto visível e tempos não mudam, e nada é achatado.
 
 ![Painel de Troca Tipo Legenda](../src/main/resources/static/img/screenshots/troca-tipo-legenda.png)
 
@@ -43,11 +43,14 @@ Ordens de Paulo em 14/10/2026, depois do Gundam ZZ publicado com 10.514 de 16.46
 
 | Classe | Papel |
 |--------|-------|
-| `TrocaTipoLegendaUseCase` (`application`) | Orquestra o lote: escaneia, cria backup, grava substituições, persiste relatório e telemetria |
-| `AuditoriaFontesService` (`application`) | Detecta fontes legadas/problemáticas nos estilos e sugere a substituta Unicode |
+| `TrocaTipoLegendaUseCase` (`application`) | Orquestra o lote: escaneia, faz backup dos arquivos que vão mudar, grava as substituições, persiste relatório e telemetria |
+| `AuditoriaFontesService` (`application`) | Detecta a fonte vietnamita antiga (regra única `FonteVietnamitaLegada`) nos estilos e no `\fn` das falas e sugere **sempre Arial** no lugar dela |
+| `AchatarEstilosUseCase` / `AchatadorEstilosDecorativosService` (`application`) | Aba **Achatador de Estilos Decorativos**: reatribui as falas de estilos decorativos ao estilo base (ver abaixo), com backup em `backups/achatar_estilos_<timestamp>/` |
+| `LegendaIoPort`, `ArmazenamentoBackupPort`, `AuditoriaTrocaFontePort`, `TelemetriaTrocaPort`, `ConsoleTrocaPort`, `ClassificadorCamadaMusicalPort` (`domain/ports`) | Portas da fatia: leitura/escrita da legenda, backup, auditoria das trocas, telemetria, console e classificação das camadas musicais |
+| `ArmazenamentoBackupKronosAdapter` (`infrastructure`) | Abre a pasta de backup da execução (`backups/<operação>_<timestamp>/`) e copia cada arquivo antes de ele ser gravado |
 | `TrocaTipoLegendaAuditoriaCache` (`infrastructure`) | Cache/auditoria append-only de cada substituição realizada |
 | `AuditoriaFonteInfo`, `AuditoriaLegendaResultado`, `ResultadoGeralAuditoria`, `ResultadoTrocaFonte` (`domain`) | Records imutáveis dos resultados de auditoria e da aplicação |
-| `TrocaTipoLegendaController` (`presentation`) | Endpoints REST — escanear (síncrono via fila) e aplicar (assíncrono via fila) |
+| `TrocaTipoLegendaController` (`presentation`) | Três rotas REST — escanear (síncrono via fila), aplicar e achatar-estilos (assíncronos via fila) |
 
 ---
 
@@ -67,19 +70,19 @@ sequenceDiagram
     API->>Fila: executarEAguardar(escanear)
     Fila->>UC: escanear(diretorio)
     UC->>Aud: auditar estilos de cada arquivo
-    Aud-->>UC: fontes legadas + sugestões Unicode
+    Aud-->>UC: fontes legadas + sugestão Arial
     UC-->>UI: relatório de auditoria (JSON síncrono)
 
     Op->>UI: Confirma "Aplicar Substituições"
     UI->>API: POST /api/troca-legenda/aplicar
     API->>Fila: submeter(aplicar) — assíncrono
     Fila->>UC: aplicar(diretorio)
-    UC->>UC: backup da pasta → substitui Fontname → grava
+    UC->>UC: backup só dos arquivos que vão mudar → troca Fontname e \fn legado → grava
     UC-->>UI: progresso via SSE (canal troca-tipo-legenda)
 ```
 
 - **Escanear** roda **síncrono dentro da fila** (`executarEAguardar`): garante que nenhum job pesado roda em paralelo e devolve o relatório na própria resposta HTTP. Se a fila estiver ocupada com um job longo, a requisição espera.
-- **Aplicar** roda **assíncrono na fila** (`submeter`): cria o backup, grava os arquivos, loga cada substituição no console via SSE e registra cada troca no cache de auditoria.
+- **Aplicar** roda **assíncrono na fila** (`submeter`): copia para `backups/troca_tipo_legenda_<timestamp>/` só os arquivos que vão mudar, grava, loga cada substituição no console via SSE e registra cada troca no cache de auditoria. Ao fim grava os relatórios `troca_fontes_<timestamp>.json` e `.md` em `relatorios/<nome da pasta>/`.
 - A execução respeita **parada cooperativa** (interrupção via encerramento/`/api/pipeline/parar`) — arquivos já gravados são preservados.
 
 ---
@@ -148,6 +151,7 @@ achatamento (`backups/achatar_estilos_20260806_170047`), sem tocar nas demais li
 |----------|---------|-----------|
 | `POST /api/troca-legenda/escanear` | `{diretorioLegendas}` | — (resposta síncrona) |
 | `POST /api/troca-legenda/aplicar` | `{diretorioLegendas, forcarArial?}` | `troca-tipo-legenda` |
+| `POST /api/troca-legenda/achatar-estilos` | `{diretorioLegendas}` | `troca-tipo-legenda` |
 
 ```json
 { "diretorioLegendas": "C:/animes/[Joseki] Gundam 08th MS Team/traducao-ptbr" }
@@ -159,17 +163,17 @@ Para decisão manual de legibilidade:
 { "diretorioLegendas": "C:/animes/Mobile Suit Zeta Gundam/traducao_ptbr", "forcarArial": true }
 ```
 
-`diretorioLegendas` é **obrigatório** (`400` se ausente).
+`diretorioLegendas` é **obrigatório** nas três rotas: ausente ou pasta inexistente responde `400`. Só os `.ass`/`.ssa` da própria pasta são lidos — subpastas não entram.
 
 ---
 
 ## Pontos de atenção
 
-- A troca altera o `Fontname` em `[V4+ Styles]` e o `\fn` de fonte vietnamita antiga dentro das linhas `Dialogue:` e `Comment:` (desde 14/10/2026; até então só o cabeçalho). O relatório de auditoria lista o `\fn` como `\fn nas falas`; `\fn` de fonte comum não é tocado.
+- A troca altera o `Fontname` em `[V4+ Styles]`/`[V4 Styles]` e o `\fn` de fonte vietnamita antiga dentro das linhas `Dialogue:` e `Comment:` (desde 14/10/2026; até então só o cabeçalho). O relatório de auditoria lista o `\fn` como `\fn nas falas`; `\fn` de fonte comum não é tocado.
 - Depois da troca, os MKVs finais precisam ser **re-remuxados** ([Remuxer](etapa-5.1-remuxer.md)) para embutir a legenda corrigida.
 - Fontes anexadas no MKV original que nenhum estilo referencia mais (ex.: o `Vnantiqb.ttf` órfão) são inofensivas, mas continuam dentro do vídeo até um remux que as descarte.
 - Regra prática ao iniciar **qualquer série nova**: rodar o escaneamento na pasta das legendas extraídas antes de traduzir — fontes `.Vn*`, `VNI-*` e similares quebram a acentuação PT-BR silenciosamente.
-- A normalização manual para Arial mexe somente no campo `Fontname` dos estilos. O **Achatador de Estilos Decorativos** continua sendo uma aba independente na mesma página e não é acionado por essa troca de fonte.
+- A normalização manual para Arial (`forcarArial`) põe Arial em **todo** `Fontname` e também troca o `\fn` de fonte vietnamita antiga das falas e comentários; `\fn` de fonte comum, texto visível e tempos ficam como estão. O **Achatador de Estilos Decorativos** continua sendo uma aba independente na mesma página e não é acionado por essa troca de fonte.
 
 ---
 
@@ -177,4 +181,4 @@ Para decisão manual de legibilidade:
 
 | Anterior | Próximo |
 |----------|---------|
-| [← Revisão de Lore](etapa-3.2-revisao-lore.md) | [Remuxer →](etapa-5.1-remuxer.md) |
+| [← Extração de Legendas](etapa-1.2-extracao-legendas.md) | [Análise de Legenda →](etapa-1.4-analise-conteudo.md) |

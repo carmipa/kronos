@@ -2,8 +2,9 @@
 
 > Estado em 11/08/2026: **imagem construída e aplicação no ar dentro do
 > contêiner** — `kronos-core:local`, 1,32 GB, boot em 1,4 s, `healthy`, tela
-> conferida no navegador. As provas estão em "O que já foi verificado". Segue
-> faltando uma mudança de código, em "O que ainda falta".
+> conferida no navegador. As provas estão em "O que já foi verificado". A
+> conversão de caminho do Windows na borda, que constava como pendente, foi
+> **recusada por decisão** — o motivo está em "Caminho na borda".
 
 ## Por que existe
 
@@ -87,8 +88,8 @@ contêiner a enxerga vazia. Com o default silencioso, portanto, apontar para o
 lugar errado não produzia erro — produzia **acervo vazio**, e o KRONOS reporta
 "nada a traduzir", que é o mesmo sinal de "acervo não montado".
 
-É a mesma regra de falha fechada que a tradução de caminho na borda tem de
-seguir (abaixo), aplicada uma camada antes.
+É a mesma regra de falha fechada que a recusa de caminho na borda segue
+(abaixo), aplicada uma camada antes.
 
 **Custo assumido:** `down`, `logs` e `ps` também interpolam o arquivo, então
 também passam a exigir `.env`. É o preço da recusa explícita, e a mensagem diz
@@ -203,8 +204,9 @@ Tudo abaixo em 11/08/2026, Docker 29.3.1, notebook (32 CPU, 39,7 GB).
 
 **Não verificado:** nenhum episódio foi traduzido de dentro do contêiner. O
 painel exibe o LLM como "conectado" via `host.docker.internal`, mas *exibir
-conectado* não é *ter traduzido* — a tradução de caminho na borda (abaixo)
-continua sendo o que falta para isso valer.
+conectado* não é *ter traduzido*. Dentro do contêiner o caminho é o de lá
+(`/acervo/...`), escolhido pelo navegador de pastas — ver "Caminho na borda",
+acima.
 
 **O build NÃO tem teto próprio.** Aqui ele é limitado pela VM do WSL2
 (≈19,4 GB dos 39,7 GB da máquina), então o host sempre sobra. Num Docker Engine

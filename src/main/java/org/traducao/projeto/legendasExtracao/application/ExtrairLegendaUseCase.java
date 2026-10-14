@@ -95,7 +95,8 @@ public class ExtrairLegendaUseCase {
             relatorio.registrarSaidasDoRemuxIgnoradas(entrada.saidasDoRemuxIgnoradas());
             System.out.printf("   [IGNORADOS] %d MKV(s) publicado(s) pelo remux (_PTBR.mkv): a pasta também tem "
                 + "os originais, e a saída do remux não é legenda de origem. Para extrair de um deles, "
-                + "escolha o arquivo.%n", entrada.saidasDoRemuxIgnoradas());
+                + "copie-o para uma pasta só com MKVs publicados e extraia dessa pasta.%n",
+                entrada.saidasDoRemuxIgnoradas());
             log.info("Extração ignorou {} MKV(s) publicado(s) pelo remux em {} (a pasta tem os originais)",
                 entrada.saidasDoRemuxIgnoradas(), pastaVideos);
         }

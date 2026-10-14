@@ -1,6 +1,6 @@
 # 🗃️ Etapa 2.3 — Correção de Cache
 
-[← 2.1 Tradução Local](etapa-2.1-traducao-llm.md) | [3.1 Revisão de Legendas →](etapa-3.1-revisao-legendas.md)
+[← 2.2 Tradução sem Lore](etapa-2.2-traducao-sem-lore.md) | [3.1 Revisão de Legendas →](etapa-3.1-revisao-legendas.md)
 
 ---
 
@@ -21,14 +21,14 @@ consertar a legenda **já entregue**, as telas são a [3.1](etapa-3.1-revisao-le
 
 | Endpoint | Use case | Atua sobre | Método |
 |----------|----------|-------------|--------|
-| `POST /api/corrigir-cache` | `LimparCacheUseCase` | `cache/**/*.cache.json` | **Nenhum corretor** — apaga entradas de fallback (`traduzido == original`), forçando retradução na próxima passada de `/api/traduzir` |
+| `POST /api/corrigir-cache` | `LimparCacheUseCase` | `cache/**/*.cache.json` | **Nenhum corretor** — invalida (`traduzido = ""`) as entradas que o `ClassificadorEntradaCacheService` marca como falha, forçando retradução na próxima passada de `/api/traduzir` |
 | `POST /api/corrigir-scraping` | `CorrigirComGoogleUseCase` | `cache/**/*.cache.json` | **Google Translate** (scraping da API pública `translate.googleapis.com`) |
 | `POST /api/revisar-cache` | `RevisarCacheUseCase` | `cache/**/*.cache.json` | **LLM local** — foco em concordância PT-BR |
 
 ```mermaid
 graph TD
     Cache[("🗃️ cache/**/*.cache.json<br/>alimenta as próximas traduções")]
-    Cache --> A["🧹 POST /corrigir-cache<br/>apaga fallback → força retradução"]
+    Cache --> A["🧹 POST /corrigir-cache<br/>invalida entradas com falha → força retradução"]
     Cache --> B["🌐 POST /corrigir-scraping<br/>Google Translate"]
     Cache --> C["🧠 POST /revisar-cache<br/>LLM: concordância PT-BR"]
 
@@ -48,6 +48,10 @@ graph TD
 > nenhuma", sem custo. Para erro sutil de gênero, `/revisar-cache` é mais lento, mas entende a lore
 > do contexto.
 >
+> **Escopo:** sem `contextoId`, a varredura pega todos os caches da pasta; com `contextoId`, só os
+> caches daquela obra, pela **proveniência** gravada em cada arquivo (cache antigo sem proveniência
+> entra). As subpastas `karaoke/`, `auditoria/` e `sem_lore/` nunca são tocadas.
+>
 > **O cache é propriedade de um dono único** (o peer `cachetraducao`). Nenhuma outra fatia escreve
 > nele — ver [Arquitetura](arquitetura.md).
 
@@ -57,7 +61,7 @@ graph TD
 
 ## Fluxo 1 — Limpeza de cache (`traducaoCorrige`)
 
-`LimparCacheUseCase` varre `cache/**/*.cache.json` e **remove** (define como vazio) as entradas onde `original.equals(traduzido)` — o padrão de uma tradução que falhou silenciosamente. Não chama nenhum serviço externo; o objetivo é só preparar o terreno para que a próxima execução de [`/api/traduzir`](etapa-2.1-traducao-llm.md) trate essas falas como pendentes de novo.
+`LimparCacheUseCase` varre os `*.cache.json` e **invalida** (`traduzido = ""`) as entradas que o `ClassificadorEntradaCacheService` marca como `NAO_TRADUZIDA` (idêntica ao original sem que a lore autorize), `INVALIDA` (reprovada pela validação da tradução) ou `ROMAJI_TRADUZIDO` (camada de romaji com tradução gravada). Tradução idêntica que a lore autoriza (nome, sigla, termo protegido) e linhas protegidas (karaokê, estilos musicais, linhas gráficas) ficam como estão. Cada arquivo alterado ganha backup e escrita atômica. Não chama nenhum serviço externo; o objetivo é só preparar o terreno para que a próxima execução de [`/api/traduzir`](etapa-2.1-traducao-llm.md) trate essas falas como pendentes de novo.
 
 ---
 
@@ -65,23 +69,38 @@ graph TD
 
 - **`GoogleTranslateScraper`** (`infrastructure`, reutilizado por `raspagemRevisao`) chama `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q=...` via `java.net.http.HttpClient` — a API pública não-oficial do Google Translate, não a API paga do Google Cloud.
 - Mascara tags ASS (`{...}` → `[T0]`) e quebras de linha (`\N` → `[B]`) antes de enviar, restaura na resposta — mesmo princípio do `MascaradorTags` da tradução principal.
-- Ignora termos de lore (`TERMOS_IGNORADOS`: nomes próprios como "Fire Bolt", "Argo Vesta") e siglas de 2 palavras capitalizadas, para não traduzir nomes que devem ficar como estão.
+- Só vão ao Google as entradas que o mesmo `ClassificadorEntradaCacheService` marca como falha. Os termos protegidos da lore do próprio cache são mascarados antes pelo `ProtetorTermosLoreService` e restaurados na volta; se a restauração não fecha, a entrada continua pendente.
 - Pausa de 400ms entre chamadas (rate-limit informal da API pública).
-- `RevisarLegendasUseCase` (modo `GOOGLE`) faz a mesma coisa, mas direto no arquivo `.ass` final: localiza o original em inglês (heurística de nome de arquivo — `_ENG`, `_Track2`, código `S01E01`) e reescreve cada fala suspeita.
+- Para corrigir direto no `.ass` entregue, a tela é a [3.1 Revisão de Legendas](etapa-3.1-revisao-legendas.md).
 
 ---
 
-## Fluxos 3 e 4 — mudaram de lugar (e por quê)
+## Fluxo 3 — Revisão do cache via LLM (`raspagemRevisao`)
 
-Até 06/08/2026 esta página descrevia **quatro** fluxos: os dois do cache (acima) e mais dois que
-atuam **direto no arquivo `.ass` entregue**. Os dois de arquivo cresceram, ganharam tela própria
-numerada no menu e **página própria** — manter a descrição aqui criaria duas fontes de verdade
-sobre o mesmo assunto, que é o que a invariante de fonte única proíbe.
+`POST /api/revisar-cache` → `RevisaoCacheController` → `RevisarCacheUseCase`. Revisa concordância, gênero e resíduos em traduções **válidas** já gravadas no cache, usando a lore da proveniência de cada arquivo; entradas vazias ou inválidas ficam para a tradução ou para o Google. Antes de começar, confere se o LLM local está carregado. Resposta ausente, alucinada ou que não reduz o problema é descartada, e toda alteração tem backup, escrita atômica e auditoria.
+
+---
+
+## Reforço de terminologia (ensaio / aplicar)
+
+`ReforcarTerminologiaCacheUseCase` aplica a terminologia da lore às traduções **já gravadas** no cache, sem retraduzir.
+
+- `POST /api/reforcar-terminologia-ensaio` percorre o cache e conta o que mudaria, por termo, **sem gravar nada**.
+- `POST /api/reforcar-terminologia-aplicar` grava, com backup e escrita atômica. Na tela, o botão **Aplicar** só destrava depois de um ensaio no mesmo alvo — trocar a pasta ou a obra trava de novo. No servidor, a rota responde `409` enquanto `correcao-cache.reforco-terminologia-aplicar-habilitado` estiver `false` (o padrão), sem ler nem escrever nada.
+
+---
+
+## Fluxos de arquivo — mudaram de lugar (e por quê)
+
+Esta página já descreveu também dois fluxos que atuam **direto no arquivo `.ass` entregue**. Eles
+cresceram, ganharam tela própria numerada no menu e **página própria** — manter a descrição aqui
+criaria duas fontes de verdade sobre o mesmo assunto, que é o que a invariante de fonte única
+proíbe.
 
 | era aqui | mora agora em | atua sobre |
 |---|---|---|
-| Fluxo 3 — revisão de concordância PT-BR via LLM | **[3.1 Revisão de Legendas](etapa-3.1-revisao-legendas.md)** | os `.ass` PT-BR entregues, com o inglês de referência |
-| Fluxo 4 — concordância de gênero determinística | **[3.3 Revisão de Concordância](etapa-3.3-revisao-concordancia.md)** | só o `.ass` PT-BR, sem inglês, sem cache e sem LLM |
+| revisão de concordância PT-BR via LLM, no `.ass` | **[3.1 Revisão de Legendas](etapa-3.1-revisao-legendas.md)** | os `.ass` PT-BR entregues, com o inglês de referência |
+| concordância de gênero determinística | **[3.3 Revisão de Concordância](etapa-3.3-revisao-concordancia.md)** | só o `.ass` PT-BR, sem inglês, sem cache e sem LLM |
 
 A diferença que decide qual usar:
 
@@ -116,8 +135,12 @@ graph LR
 | Endpoint | Payload | Canal SSE |
 |----------|---------|-----------|
 | `POST /api/corrigir-cache` | `{entrada?, contextoId?}` (padrão: pasta `cache`) | `correcao` |
-| `POST /api/corrigir-scraping` | `{entrada?}` | `correcao` |
+| `POST /api/corrigir-scraping` | `{entrada?, contextoId?}` | `correcao` |
 | `POST /api/revisar-cache` | `{entrada?, contextoId?}` | `correcao` |
+| `POST /api/reforcar-terminologia-ensaio` | `{entrada?, contextoId?}` | `correcao` |
+| `POST /api/reforcar-terminologia-aplicar` | `{entrada?, contextoId?}` — `409` com a escrita desligada | `correcao` |
+
+Em todas, `entrada` vazia usa a pasta `cache`, e `contextoId` desconhecido responde `400`.
 
 Os endpoints que atuam no `.ass` (`/api/revisar-legendas`, `/api/revisar-legendas-concordancia`,
 `/api/revisar-concordancia`) estão documentados nas páginas 3.1 e 3.3.
@@ -128,4 +151,4 @@ Os endpoints que atuam no `.ass` (`/api/revisar-legendas`, `/api/revisar-legenda
 
 | Anterior | Próximo |
 |----------|---------|
-| [← 2.1 Tradução Local](etapa-2.1-traducao-llm.md) | [3.1 Revisão de Legendas →](etapa-3.1-revisao-legendas.md) |
+| [← 2.2 Tradução sem Lore](etapa-2.2-traducao-sem-lore.md) | [3.1 Revisão de Legendas →](etapa-3.1-revisao-legendas.md) |

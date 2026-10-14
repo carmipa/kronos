@@ -13,7 +13,8 @@ dela, mas porque ninguém a lê no momento em que ela importa.
 Documentação não impõe nada. Um arquivo de instruções pode ser ignorado por qualquer agente que
 abra o projeto amanhã. **Um teste vermelho, não.**
 
-Daí a peça central da arquitetura do KRONOS: **36 guardas executáveis**, 138 testes, que não
+Daí a peça central da arquitetura do KRONOS: **45 guardas executáveis** (35 `Catraca*` + 10
+`Fronteira*`), 175 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
 verificam comportamento — verificam que **um padrão perigoso não voltou**. Elas leem o
 código-fonte, a estrutura de pacotes ou o HTML, e **reprovam o build** ao encontrar a forma do
 bug.
@@ -47,14 +48,14 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph A["🧱 Fronteira*ArchTest — 10 guardas, 59 testes"]
+    subgraph A["🧱 Fronteira*ArchTest — 10 guardas, 61 testes"]
         direction TB
         A1["Allowlist por TIPO EXATO,<br/>nunca por prefixo de pacote"]
         A2["Uma dependência nova reprova<br/>listando a aresta que apareceu"]
         A3["Homologar é decisão consciente:<br/>entra na lista, com justificativa"]
     end
 
-    subgraph B["🔒 Catraca*Test — 26 guardas, 79 testes"]
+    subgraph B["🔒 Catraca*Test — 35 guardas, 114 testes"]
         direction TB
         B1["Varre o FONTE atrás da<br/>forma de um defeito conhecido"]
         B2["Sem número congelado<br/>quando o invariante é universal"]
@@ -80,16 +81,17 @@ do código.
 
 ## O inventário completo
 
-Medido em **19/08/2026**, rodando a suíte inteira com `--rerun-tasks`: **36 guardas · 138 testes ·
-0 falhas**. A contagem por classe vem do relatório JUnit, não da memória.
+Contado em **14/10/2026** nas anotações `@Test` de cada classe: **45 guardas · 175 testes**
+(35 `Catraca*Test` com 114, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
+**3.013 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
 
-### Fronteiras — congelam *quem pode importar quem* (10 guardas, 59 testes)
+### Fronteiras — congelam *quem pode importar quem* (10 guardas, 61 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
 | `FronteiraTraducaoArchTest` | 15 | A fatia `traducao` (tier gold) ganhar qualquer aresta de saída para outra fatia funcional. Congela os tipos de `core` consumidos, um a um |
 | `FronteiraContextoArchTest` | 8 | O peer de lore passar a depender de fatia funcional. O nome é legado — o alvo hoje é `org.traducao.projeto.lore` |
-| `FronteiraTermoAssTest` | 8 | A mecânica de casamento de termo em ASS voltar a viver em 12 arquivos de 7 fatias, com as duas metades (fronteira e separador) divergindo |
+| `FronteiraTermoAssTest` | 10 | A mecânica de casamento de termo em ASS voltar a viver em 12 arquivos de 7 fatias, com as duas metades (fronteira e separador) divergindo |
 | `FronteiraTrocaTipoLegendaArchTest` | 6 | A regra de negócio do achatamento voltar para dentro da fatia, desfazendo o desacoplamento de 29/07/2026 |
 | `FronteiraCorretorCacheArchTest` | 5 | As quatro fatias da área de correção de cache (`traducaoCorrige`, `raspagemCorrecao`, `raspagemRevisao`, `correcaoLegendas`) se enroscarem de novo |
 | `FronteiraQualidadeTraducaoArchTest` | 5 | O peer de máscara de tags e validação anti-alucinação perder independência |
@@ -110,14 +112,18 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaEscritaDeFalaVetaMusicaConcordanciaTest` | 3 | Idem na **3.3** |
 | `CatracaFerramentaDeAcervoVetaMusicaTest` | 2 | Idem nas **ferramentas que varrem o acervo** — o caminho que não passa por tela nenhuma, e que reescreveu 103 linhas de romaji antes desta existir |
 
-### Catracas de interface (6 guardas, 18 testes)
+### Catracas de interface (10 guardas, 34 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
-| `CatracaAvisoSonoroNasTelasLongasTest` | 5 | Tela que espera a fila terminar em silêncio — e que o aviso vire uma segunda cópia do áudio em vez do módulo compartilhado |
+| `CatracaMenuPadronizadoTest` | 6 | Item de menu sem painel, etapa numerada `N.M` sem `docs/etapa-N.M-*.md`, página de `docs/` fora do painel de documentação e ícone repetido entre itens |
+| `CatracaAvisoSonoroNasTelasLongasTest` | 6 | Tela que espera a fila terminar em silêncio — e que o aviso vire uma segunda cópia do áudio em vez do módulo compartilhado |
 | `CatracaCartaoDoAlvoTemDonoUnicoTest` | 4 | Cada tela montar o próprio cartão de "para onde vou escrever". Três cópias já tinham divergido |
 | `CatracaConsoleOrfaoNaUiTest` | 3 | Console que nunca recebe nada — o defeito que faz job saudável parecer travado e leva o operador a matar o processo |
 | `CatracaSeletorDeObraRegistradoTest` | 3 | Seletor de obra que abre vazio: valida **nos dois sentidos** (toda tela registrada, todo registro com tela) |
+| `CatracaSeletorDeObraLigadoTest` | 3 | Seletor de obra ligado pela metade no `app.js`: cada um dos quatro pontos faltando produz um defeito diferente e silencioso (select preso em "Carregando…", banner que nunca preenche) |
+| `CatracaFichaDaOperacaoTest` | 3 | Tela que faz alguma coisa nascer sem a ficha que diz o que ela toca, o que exige e o que **não** faz — com selo (`escreve`, `llm`, `rede`, `perigo`, `seguro`) em cada item |
+| `CatracaBannerNomeiaOAlvoTest` | 2 | Banner de fechamento no console sem a linha `alvo:` — sem ela, o `[APLICADO]` de outro lote aparece logo abaixo de um pedido de simulação e não há como saber de quem é |
 | `CatracaBordaAssincronaConfereCaminhoTest` | 2 | Tela responder *"iniciado"* para trabalho que não tem como acontecer |
 | `CatracaTelaDestrutivaNasceEmDryRunTest` | 2 | Tela que reescreve o acervo abrir com "gravar" como padrão |
 
@@ -132,11 +138,13 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaCicatrizNaLoreSqlTest` | 2 | A cicatriz da lore (medição escrita em comentário `--` nos arquivos SQL) ser apagada. Conta fora de literal, sem os comentários `[gerado]`, com piso 673 |
 | `CatracaParidadeDaLoreTest` | 3 | O que é cópia entre obras divergir numa obra só: os 52 pares do núcleo UC nas 23 obras Gundam e as linhas do prompt-base em todos os prompts |
 
-### Catracas de arquitetura e formato (7 guardas, 19 testes)
+### Catracas de arquitetura e formato (9 guardas, 27 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
 | `CatracaCoberturaFatiaTelemetriaTest` | 4 | O mapa que decide em que aba do painel — e em que dataset publicado — cada operação aparece perder cobertura |
+| `CatracaTelemetriaKaraokeCompletaTest` | 6 | Contador novo da fatia de karaokê entrar no manifesto e sumir do dataset público (JSONL e CSV). Lê os records por reflexão: campo órfão reprova até alguém decidir, por escrito, se ele vai ao dataset |
+| `CatracaFonteSemByteNuloTest` | 2 | Byte NUL gravado dentro de um `.java` — compila, mas o arquivo vira "binário" para `grep`, diff e revisão, e o trecho some das buscas |
 | `CatracaOrdemDocumentacaoTest` | 4 | O menu, o nome do arquivo em `docs/` e o índice da documentação contarem histórias diferentes |
 | `CatracaEsqueletoDoProjetoAtualizadoTest` | 2 | O esqueleto desenhado em [Esqueleto do Projeto](ref-esqueleto-projeto.md) deixar de bater com o disco. Ela é o **gerador e a guarda** da página: regrava com `-Dkronos.esqueleto.regravar=true`, compara sem a flag |
 | `CatracaPaginaDeDocumentacaoAbreTest` | 3 | Página existir em `docs/` e **não abrir** na tela. As 14 páginas numeradas passaram 13 dias devolvendo HTTP 400 depois da renomeação para `etapa-G.N-nome.md` — a guarda de ordem conferia o NOME, e nenhuma perguntava se a página carrega |
@@ -144,7 +152,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaPadraoMusicalTemDonoUnicoTest` | 2 | Um arquivo novo decidir alguma coisa a partir de "palavra musical" em silêncio |
 | `CatracaRegraDuplicadaEntreFatiasTest` | 2 | Duplicação silenciosa. Duplicar é permitido — esconder que duplicou, não |
 
-### Catracas de ambiente e portão (4 guardas, 15 testes)
+### Catracas de ambiente e portão (4 guardas, 14 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
@@ -153,6 +161,30 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaPortaoDistinguePastaGenericaTest` | 2 | Um único aviso servir a dois casos que pedem consertos **opostos** — "obra sem lore" e "pasta genérica" |
 | `CatracaSuiteSemDriveWindowsTest` | 2 | Caminho absoluto de Windows cravado no fonte do teste, que quebra a suíte dentro do contêiner Linux |
 
+### Catracas de instrumento de medição (2 guardas, 8 testes)
+
+| Guarda | Testes | O que impede |
+|--------|-------:|--------------|
+| `CatracaHarnessDeMedicaoTest` | 5 | Harness de medição sem filtro por obra, sem estado NÃO VERIFICADO para o zero ou sem caso-controle. Linha de base **nominal**: a dívida listada só desce, e harness da lista que passa a cumprir a regra tem de sair dela |
+| `CatracaFerramentaDeMedicaoTest` | 3 | Reescrita de um script de `ferramentas/` apagar a guarda que ele carrega (ex.: `--rerun-tasks` no mutador, veredito lido do XML e não do código de saída, baseline do conferidor escolhida pelo SHA e nunca pelo nome do backup) |
+
+---
+
+## Guardas da vitrine pública
+
+A [vitrine pública](ref-docker.md#vitrine-pública-vps) mostra as telas e recusa toda função. Sete
+classes provam isso, e o portão as roda pelo filtro `org.traducao.projeto.*Vitrine*`:
+
+| Guarda | O que prova |
+|--------|-------------|
+| `VitrineRotasDoCodigoTest` (4) | Lê as rotas do **código compilado** (anotações Spring e JAX-RS), não da documentação: toda rota fora do gabarito revisado é recusada — inclusive a que nascer amanhã —, e toda entrada da lista de permitidos corresponde a uma rota real |
+| `VitrineConteudoPublicoTest` (4) | A pasta `static` só tem extensões da lista pública, e os dados de demonstração não carregam caminho, IP, máquina, dono ou chave; o detector é calibrado na fronteira (aprova `S01E01`, `1.5`, caminho já encurtado) |
+| `PoliticaVitrineTest` | A tabela de decisão (seguir, demonstrar, recusar), incluindo o mesmo caminho com outro método e caminhos disfarçados por barra dupla, ponto, maiúscula e codificação |
+| `GuardaVitrineHttpTest` | Com o servidor HTTP real e caminhos enviados por socket cru, o filtro está na frente do estático, do JAX-RS, das rotas Spring e do MCP |
+| `GuardaVitrineDesligadaTest` | O controle do outro lado: com a vitrine desligada as mesmas rotas respondem de verdade, então o 403 de lá vem da guarda e não de a rota não existir |
+| `ConferenciaArranqueVitrineTest` | A vitrine só sobe com `app.modo=WEB`, navegador automático e MCP desligados e filtro ligado; cada incoerência, sozinha, é recusada |
+| `ModoVitrineCamada2Test` | A segunda camada: mesmo que uma rota escapasse do filtro, a fila do pipeline e o executor de processo externo recusam antes de qualquer efeito — medido no mundo, com controle positivo |
+
 ---
 
 ## As três regras de operação
@@ -160,7 +192,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 ### 1. Guarda nasce de prejuízo real, nunca de bug hipotético
 
 Guarda preventiva é cerimônia, e cerimônia é a primeira coisa abandonada na pressa. Cada uma das
-36 carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
+35 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
 
 - `CatracaRegraDuplicadaEntreFatiasTest` — *"cópia não declarada foi a causa de três defeitos em
   03/08/2026, um deles vivo por nove dias."*
@@ -272,10 +304,15 @@ comitou alteração de lore com a suíte "verde" que era `UP-TO-DATE` do cache d
 nenhum teste havia rodado. Verde de cache é indistinguível de verde de execução, a não ser
 que se force a execução.
 
-**Cobertura declarada, não presumida.** O filtro pega a convenção de nome (`Catraca*`,
-`Fronteira*`, `Guarda*`) **mais** as duas guardas da seção acima, nomeadas explicitamente no
-script. Guarda nova com nome fora da convenção não entra sozinha — acrescente na lista do
-`$FILTROS`. Medido em 11/08/2026: 154 testes em 31 classes, 30 s.
+**Cobertura declarada, não presumida.** O filtro pega a convenção de nome (`*Catraca*`,
+`*Fronteira*`, `*Guarda*`) **mais** as duas guardas da seção acima (`*WebInterfaceTest`,
+`*SseConsoleDinamicoTest`), nomeadas explicitamente no script, e — desde 14/10/2026 —
+`org.traducao.projeto.*Vitrine*`, que traz as [guardas da vitrine pública](#guardas-da-vitrine-pública).
+Esta vai com o nome **qualificado** de propósito: no Windows o lançador Java expande curinga solto
+contra os arquivos da pasta, e `*Vitrine*` casaria com o `Dockerfile.vitrine` da raiz, que viraria
+nome de tarefa do Gradle. Guarda nova com nome fora da convenção não entra sozinha — acrescente na
+lista do `$FILTROS`. A medição de 11/08/2026 (154 testes em 31 classes, 30 s) ficou velha: as
+catracas, as fronteiras e a vitrine cresceram desde então — **meça de novo** antes de citar número.
 
 O passo 1 do portão confere `.claude/LEITURA-REGRA-ATUAL.md`: o SHA-256 e a contagem de linhas
 de cada documento-regra têm de bater com o arquivo em disco. Sem isso, "eu li a regra" é
@@ -323,11 +360,11 @@ discussão sem argumento novo:
 | Falha fechada / segredo fora do Git | ✅ `${VAR:?}` no compose, `.env` ignorado |
 | Construir não é publicar · não editar durante o build | ✅ declarado em [ref-docker](ref-docker.md) |
 | Bytes não provam tela | ✅ virou item 4 do Definition of Done |
-| Tela de erro com HTTP real (sem *soft 404*) | ✅ **já cumprido** — medido: `/pagina-que-nao-existe` devolve 404 |
+| Tela de erro com HTTP real (sem *soft 404*) | ✅ **já cumprido** — medido: `/pagina-que-nao-existe` devolve 404. Na [vitrine](ref-docker.md#vitrine-pública-vps), o que está fora da lista de permitidos devolve **403** |
 | Guardas de RLS, tenant, `casa_id` | ❌ não há banco nem inquilino |
-| `build.sh` / `deploy.sh` | ❌ não há publicação: o KRONOS roda na máquina de quem usa |
+| `build.sh` / `deploy.sh` | ❌ não há: o KRONOS roda na máquina de quem usa. A única coisa publicada é a [vitrine](ref-docker.md#vitrine-pública-vps) (`Dockerfile.vitrine`), que mostra as telas e não executa nada |
 | Build sempre capado | 🟡 declarado sem mecanismo — a VM do WSL2 já limita em ≈19,4 GB de 39,7 GB |
-| CSP proibindo estilo inline | ❌ não há CSP, e há 40 `style=` legítimos. Aplicação só no loopback: a guarda não protegeria nada e quebraria o que funciona |
+| CSP proibindo estilo inline | ❌ não há CSP, e há 40 `style=` legítimos. O KRONOS local escuta só no loopback. A vitrine é pública: o `GuardaVitrine` envia `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`, mas **não** CSP |
 | Canto inferior direito é território ocupado | 🟡 **medido, sem guarda**: o único ocupante é `.toast-container` (`fixed`, `bottom/right: 24px`), e ele tem `pointer-events: none` sem nenhum `.toast` reativando — ninguém disputa o canto. Sem cicatriz local, guarda é cerimônia |
 | Discrição com cor, nunca `opacity` | ❌ sem incidente correspondente |
 

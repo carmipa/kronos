@@ -6,34 +6,38 @@
 
 ## Visão Geral
 
-O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Quarkus** (usando as extensões de compatibilidade Spring — `quarkus-spring-di`, `quarkus-spring-web`, `quarkus-spring-boot-properties`), organizada em **fatias verticais** (*vertical slices*) sob `org.traducao.projeto.*` — hoje são **20 fatias funcionais**, cada uma resolvendo uma etapa específica do pipeline de tradução de legendas de anime.
+O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Quarkus** (usando as extensões de compatibilidade Spring — `quarkus-spring-di`, `quarkus-spring-web`, `quarkus-spring-boot-properties`), organizada em **fatias verticais** (*vertical slices*) sob `org.traducao.projeto.*` — hoje são **21 fatias funcionais**, cada uma resolvendo uma etapa específica do pipeline de tradução de legendas de anime (a 21ª, `vitrine`, é a [vitrine pública](ref-docker.md#vitrine-pública-vps)).
 
-> **Os números desta página são contados, não estimados.** Medidos em **19/08/2026**:
+> **Os números desta página são contados, não estimados.** Medidos em **14/10/2026**:
 >
 > | o quê | quanto | como foi contado |
 > |---|---|---|
-> | fatias funcionais | **20** | pacotes sob `org.traducao.projeto`, menos peers e infra |
+> | fatias funcionais | **21** | 28 pacotes de topo sob `org.traducao.projeto`, menos 5 peers, `core` e `config` |
 > | peers | **5** | `legenda` · `cachetraducao` · `lore` · `qualidadeTraducao` · `llm` |
-> | classes / linhas em `src/main` | **471** / **63.049** | `find … -name '*.java'` |
-> | classes / linhas em `src/test` | **366** / **61.513** | idem — o teste pesa quase tanto quanto o código |
-> | controllers REST | **21** | anotações `@RestController` |
-> | obras de lore | **69** (um arquivo SQL por obra desde 09/10/2026), **68** na lista da UI | 1 obra é oculta (`apareceNaLista: false`); a UI foi perguntada em `/api/contextos` |
-> | guardas executáveis | **36** | 26 `Catraca*Test` + 10 `Fronteira*ArchTest`, somando 138 testes |
-> | suíte completa | **2.006** testes em **362** classes | `gradlew test --rerun-tasks`: 0 falhas, 35 pulados |
+> | classes / linhas em `src/main` | **513** / **79.281** | `find … -name '*.java'` |
+> | classes / linhas em `src/test` | **481** / **90.055** | idem — o teste já pesa mais que o código |
+> | rotas `/api` | **49** | 39 em **21** `@RestController` + 10 em **6** recursos JAX-RS (`@Path`) |
+> | lore | **70** arquivos SQL, um por obra: **69** do lado da tradução, **69** do lado da revisão; **68** na lista da UI | `sem_lore` só existe na tradução e é oculta (`aparece_na_lista = 0`); `macross_dyrl` só existe na revisão — ver `lore/esquema.sql` |
+> | guardas executáveis | **45** | 35 `Catraca*Test` + 10 `Fronteira*`, somando 175 testes — mais as 7 classes de guarda da vitrine |
+> | suíte completa | **3.013** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
 >
 > Divergência entre um número aqui e o código é bug de documentação, não licença poética.
 > O número anterior desta página (72 lores) vinha de contagem de classes Java; a lore virou
-> **dado** (`lore.yaml`) e a contagem passou a ser perguntada à produção.
+> **dado** — arquivos SQL (`lore/esquema.sql`, `lore/obras.lst` e um `lore/obras/<id>.sql` por
+> obra) que `lore.infrastructure.CatalogoLoreSqlite` carrega num SQLite em memória — e a contagem
+> passou a ser feita nos arquivos e perguntada à UI em `/api/contextos`.
 
 A arquitetura passou por uma refatoração longa (FASES A–I) que substituiu o antigo monólito de controllers por **fatias isoladas** cujas fronteiras são **congeladas por testes de fitness ArchUnit**. Duas categorias:
 
 - **Fatias funcionais** — uma etapa do pipeline cada (ex.: `traducao`, `legendasExtracao`, `analisadorMidia`, `remuxer`, `revisaoLore`). Uma fatia funcional **não pode** depender de outra: o teste `FronteiraTraducaoArchTest` prova, a cada build, que a Tradução Local tem **ZERO** arestas de saída para outra fatia.
-- **Peers** — bibliotecas internas *importáveis* por qualquer fatia, com a superfície pública **congelada por tipo exato**: `legenda` (modelo + I/O de `.ass`/`.srt`, 15 classes), `cachetraducao` (**dono único** do cache, 5 classes), `lore` (**69 obras** + terminologia canônica, 24 classes), `qualidadeTraducao` (máscara de tags, validação anti-alucinação, 14 classes) e `llm` (contrato `LlmPort` neutro, 4 classes). Cada peer tem seu próprio `Fronteira<Peer>ArchTest`.
+- **Peers** — bibliotecas internas *importáveis* por qualquer fatia, com a superfície pública **congelada por tipo exato**: `legenda` (modelo + I/O de `.ass`/`.srt`, 15 classes), `cachetraducao` (**dono único** do cache, 5 classes), `lore` (lore em 70 arquivos SQL — 69 obras por lado — + terminologia canônica, 24 classes), `qualidadeTraducao` (máscara de tags, validação anti-alucinação, 17 classes) e `llm` (contrato `LlmPort` neutro, 4 classes). Cada peer tem seu próprio `Fronteira<Peer>ArchTest`.
 
 > **O peer `contexto` virou `lore`.** O guarda dele ainda se chama `FronteiraContextoArchTest` — o
 > nome é legado, o alvo é `org.traducao.projeto.lore`. E o peso saiu do Java: as 93 classes de
 > contexto viraram **24 classes + a lore como dado**: um `lore.yaml` de 15.101 linhas até
-> 09/10/2026 e, desde então, um arquivo SQL por obra em `src/main/resources/lore/obras/`. Ver
+> 09/10/2026 e, desde então, arquivos SQL (`src/main/resources/lore/esquema.sql`, `obras.lst` e um
+> `obras/<id>.sql` por obra) que `CatalogoLoreSqlite` carrega num SQLite em memória — o
+> `lore.yaml` não existe mais. Ver
 > [Contextos & Lore](modulo-contextos-lore.md) e [3.2 Revisão de Lore](etapa-3.2-revisao-lore.md).
 
 Abaixo de tudo, `core` (fila de execução, I/O atômico, kernel web/SSE, mecânica de fronteira do formato ASS) e `config` (bootstrap de modo) são **infra transversal** — e o `core` é proibido, por regra permanente, de depender de qualquer fatia funcional.
@@ -57,16 +61,17 @@ a refatoração parou:
 
 O menu lateral agrupa os painéis em **6 grupos acordeão** que espelham o fluxo de trabalho, com numeração `GRUPO.POSIÇÃO`:
 
-| Grupo | Cor | Painéis |
-|-------|-----|---------|
-| Preparação | teal | `1.1 Análise de Mídia` · `1.2 Extração` · `1.3 Troca de Tipo de Legenda` · `1.4 Análise de Legenda` |
-| Tradução | verde | `2.1 Tradução Local` · `2.2 Tradução sem Lore` · `2.3 Correção de Cache` |
-| Qualidade | roxo | `3.1 Revisão de Legendas` · `3.2 Revisão de Lore` · `3.3 Revisão de Concordância` |
-| Karaokê | rosa | `4.1 Tradução de Karaokê` · `4.2 Correção de Karaokê` · `4.3 Karaokê Simples` |
-| Finalização | âmbar | `5.1 Remuxer` · `5.2 Renomear Arquivos` |
-| Sistema | índigo | `Telemetria` · `Mapa do Projeto` · `Documentação` · `Sobre` — sem número, não são passos |
+| Grupo | Painéis |
+|-------|---------|
+| Preparação | `1.1 Análise de Mídia` · `1.2 Extração` · `1.3 Troca de Tipo de Legenda` · `1.4 Análise de Legenda` |
+| Tradução | `2.1 Tradução Local` · `2.2 Tradução sem Lore` · `2.3 Correção de Cache` |
+| Qualidade | `3.1 Revisão de Legendas` · `3.2 Revisão de Lore` · `3.3 Revisão de Concordância` |
+| Karaokê | `4.1 Karaokê` (tela única: traduz a letra e depois achata) · `4.2 Correção de Karaokê` |
+| Finalização | `5.1 Remuxer` · `5.2 Renomear Arquivos` |
+| Sistema | `Telemetria` · `Mapa do Projeto` · `Documentação` · `Sobre` — sem número, não são passos |
 
-Os grupos são recolhíveis e o estado é lembrado por navegador (`localStorage`). A numeração é
+O menu não colore os grupos: o cabeçalho de grupo é só um rótulo. As cores dos diagramas desta
+página são do desenho, não da tela. Os grupos são recolhíveis e o estado é lembrado por navegador (`localStorage`). A numeração é
 cobrada por teste: no grupo de ordem G, o item de posição N tem de começar com `G.N` — ver
 [Catracas e Fronteiras](catracas-e-fronteiras.md).
 
@@ -79,7 +84,14 @@ O desenho segue **Arquitetura Hexagonal (Ports & Adapters)** por módulo: cada p
 | `domain/` | Modelos, portas (interfaces), exceções de negócio | `LlmPort`, `AuditoriaResultado`, `LegendaInfo` |
 | `infrastructure/` | Implementações concretas das portas | `LlmClientAdapter`, `MkvmergeAdapter`, `FfprobeAdapter` |
 
-A aplicação roda **100% localmente** (`quarkus.http.host=127.0.0.1`) — não expõe nenhuma porta na rede, e a única dependência de rede externa opcional é para metadados de anime (Jikan/TMDB) e correção via Google Translate (scraping da API pública, não a API paga).
+A aplicação roda **localmente** (`quarkus.http.host=127.0.0.1`) — não expõe porta na rede. O que sai da máquina é opcional e nomeado:
+
+- **metadados de anime** — TMDB, AniList e Jikan, nessa ordem de preferência (`apiDadosAnime`);
+- **Google Translate** — só nas telas de correção/revisão que o usam (scraping da API pública, não a API paga). O fallback online da tradução (`tradutor.fallback-online.ativo`) está **desligado**: a 2.1 é 100% local;
+- **Redis** do fluxo ao vivo de telemetria (`quarkus.redis.hosts`) — sem ele o card mostra "desconectado" e nada mais muda;
+- **push do dataset público** no GitHub (`telemetria-dataset.repositorio-remoto`), só quando o operador clica em "Publicar Dataset".
+
+A exceção é a [vitrine pública](ref-docker.md#vitrine-pública-vps): outra imagem (`Dockerfile.vitrine`) que mostra as telas na rede e recusa toda função.
 
 ![Painel Inicial do KRONOS CORE](../src/main/resources/static/img/screenshots/painel-inicial.webp)
 
@@ -91,32 +103,32 @@ O código é dividido em **fatias funcionais** (uma etapa do pipeline cada) e **
 
 ```mermaid
 graph TB
-    subgraph FUNC["🧩 20 fatias funcionais — uma etapa do pipeline cada (NÃO importam umas às outras)"]
+    subgraph FUNC["🧩 21 fatias funcionais — uma etapa do pipeline cada (NÃO importam umas às outras)"]
         direction LR
         TRAD["🌐 traducao<br/><b>TIER GOLD</b>"]
-        PREP["🔍 analisadorMidia · legendasExtracao<br/>auditorConteudoLegendas"]
+        PREP["🔍 analisadorMidia · legendasExtracao<br/>trocaTipoLegenda · auditorConteudoLegendas"]
         QUALF["📖 revisaoLore · revisaoConcordancia<br/>raspagemRevisao · raspagemCorrecao<br/>correcaoLegendas · traducaoCorrige"]
         KAR["🎤 traducaoKaraoke · novoKaraoke"]
-        FIM["📦 trocaTipoLegenda · remuxer · renomearArquivos"]
-        SIS["⚙️ telemetria · mapaProjeto · apiDadosAnime · mcp · sistema"]
+        FIM["📦 remuxer · renomearArquivos"]
+        SIS["⚙️ telemetria · mapaProjeto · apiDadosAnime<br/>mcp · sistema · vitrine"]
     end
 
     subgraph PEERS["🧱 5 peers — importáveis por qualquer fatia · superfície congelada por tipo exato"]
         direction LR
         LEG["legenda<br/>modelo + I/O .ass/.srt"]
         CACHE["cachetraducao<br/>DONO ÚNICO do cache"]
-        CTX["lore<br/>69 obras · SQL por obra"]
+        CTX["lore<br/>70 arquivos SQL · SQLite em memória"]
         QUAL["qualidadeTraducao<br/>máscara de tags + validação"]
         LLM["llm<br/>contrato LlmPort neutro"]
     end
 
     subgraph BASE["⚙️ Infra transversal — core NÃO depende de fatia funcional"]
         direction LR
-        CORE["core<br/>fila · I/O atômico · SSE<br/>FronteiraTermoAss"]
+        CORE["core<br/>fila · I/O atômico · SSE<br/>FronteiraTermoAss · FonteVietnamitaLegada<br/>ModoVitrine"]
         CFG["config<br/>bootstrap de modo"]
     end
 
-    GUARD["🚦 36 guardas executáveis<br/>10 Fronteira*ArchTest + 26 Catraca*Test<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
+    GUARD["🚦 45 guardas executáveis<br/>10 Fronteira* + 35 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
 
     FUNC -->|"importa — arestas congeladas por tipo exato"| PEERS
     FUNC --> BASE
@@ -182,21 +194,23 @@ graph TB
         P_EX["✂️ Extração de Legendas"]
         P_AC["🔎 Análise de Conteúdo"]
         P_TR["🌐 Tradução Local"]
+        P_SL["🌐 Tradução sem Lore"]
         P_CO["🩹 Correção de Cache"]
         P_RE["📝 Revisão de Legendas"]
         P_RL["📖 Revisão de Lore"]
+        P_RC["⚖️ Revisão de Concordância"]
         P_TF["🔤 Troca Tipo Legenda"]
-        P_KS["🎵 Karaokê Simples"]
-        P_TK["🎤 Tradução de Karaokê"]
+        P_TK["🎤 Karaokê (traduz + achata)"]
         P_CU["🧵 Correção de Karaoke"]
         P_RX["📦 Remuxer"]
         P_LN["🧹 Renomear Arquivos"]
         P_MA["🗺️ Mapa do Projeto"]
         P_TE["📊 Telemetria"]
         P_DOC["📖 Documentação"]
+        P_SB["ℹ️ Sobre"]
     end
 
-    subgraph API["🎮 21 controllers REST (Spring-style, prefixo /api)"]
+    subgraph API["🎮 49 rotas /api — 21 controllers Spring-style + 6 recursos JAX-RS"]
         EP1["/analisar /extrair"]
         EP2["/traduzir /corrigir-* /revisar-*"]
         EP3["/correcao-legendas /remuxar /mapa"]
@@ -227,6 +241,7 @@ graph TB
         AD_MX["MkvmergeAdapter (remux)"]
         AD_JK["JikanApiClientAdapter"]
         AD_TM["TmdbApiClientAdapter"]
+        AD_AL["AniListApiClientAdapter"]
     end
 
     subgraph EXT["🌍 Sistemas Externos"]
@@ -236,6 +251,7 @@ graph TB
         GT[("translate.googleapis.com")]
         JIKAN[("api.jikan.moe (MAL)")]
         TMDB[("api.themoviedb.org")]
+        ANILIST[("graphql.anilist.co")]
     end
 
     subgraph FS["💾 Persistência em Disco"]
@@ -260,8 +276,9 @@ graph TB
     UC_TK --> CACHE
     UC_CU --> AD_LLM
     UC_RX --> AD_MX --> MKVT
-    API --> AD_JK --> JIKAN
     API --> AD_TM --> TMDB
+    API --> AD_AL --> ANILIST
+    API --> AD_JK --> JIKAN
     UC --> LOGS
     UC_AN --> REL
     API --> SSE --> UI
@@ -271,10 +288,10 @@ graph TB
     classDef adapt fill:#1e293b,stroke:#F59E0B,color:#F9FAFB
     classDef ext fill:#0f172a,stroke:#10B981,color:#F9FAFB
     classDef fs fill:#0f172a,stroke:#6B7280,color:#F9FAFB
-    class HOME,P_AN,P_EX,P_AC,P_TR,P_CO,P_RE,P_RL,P_TF,P_KS,P_TK,P_CU,P_RX,P_LN,P_MA,P_TE,P_DOC ui
+    class HOME,P_AN,P_EX,P_AC,P_TR,P_SL,P_CO,P_RE,P_RL,P_RC,P_TF,P_TK,P_CU,P_RX,P_LN,P_MA,P_TE,P_DOC,P_SB ui
     class UC_AN,UC_EX,UC_AC,UC_TR,UC_CO,UC_RE,UC_RL,UC_KS,UC_TK,UC_CU,UC_RX,UC_RN uc
-    class AD_FF,AD_MK,AD_LLM,AD_GT,AD_MX,AD_JK,AD_TM adapt
-    class LM,MKVT,FFM,GT,JIKAN,TMDB ext
+    class AD_FF,AD_MK,AD_LLM,AD_GT,AD_MX,AD_JK,AD_TM,AD_AL adapt
+    class LM,MKVT,FFM,GT,JIKAN,TMDB,ANILIST ext
     class CACHE,LOGS,REL fs
 ```
 
@@ -284,22 +301,21 @@ graph TB
 
 ```mermaid
 graph LR
-    A["📼 Vídeo Original<br/>.mkv/.mp4"] --> B["🔍 1. Análise de Mídia<br/>ffprobe: codecs, drift de sync"]
-    B --> C["✂️ 2. Extração de Legenda<br/>ASS / SRT / PGS"]
-    C --> QA["🔎 3. Análise de Conteúdo<br/>anomalias de LLM e efeitos"]
-    QA --> D["🌐 4. Tradução Local<br/>LLM via LM Studio + cache"]
+    A["📼 Vídeo Original<br/>.mkv/.mp4"] --> B["🔍 1.1 Análise de Mídia<br/>ffprobe: codecs, drift de sync"]
+    B --> C["✂️ 1.2 Extração de Legenda<br/>ASS / SRT / PGS"]
+    C --> H3["🔤 1.3 Troca Tipo Legenda<br/>fontes legadas → Unicode"]
+    H3 --> QA["🔎 1.4 Análise de Legenda<br/>anomalias de LLM e efeitos"]
+    QA --> D["🌐 2.1 Tradução Local<br/>LLM via LM Studio + cache"]
     D --> E{"Resíduo em<br/>inglês?"}
-    E -->|Sim| F["🩹 5. Correção Cache<br/>(cache LLM / Google scraping)"]
-    E -->|Não| G["📝 6. Revisão<br/>concordância PT-BR"]
+    E -->|Sim| F["🩹 2.3 Correção Cache<br/>(cache LLM / Google scraping)"]
+    E -->|Não| G["📝 3.1 Revisão de Legendas<br/>concordância PT-BR"]
     F --> G
-    G --> H2["📖 7. Revisão de Lore<br/>nomes, locais e termos de mundo"]
-    H2 --> H3["🔤 8. Troca Tipo Legenda<br/>fontes legadas → Unicode"]
-    H3 --> K1["🎵 9. Karaokê Simples<br/>KFX → linha limpa por frase"]
-    K1 --> K2["🎤 10. Tradução de Karaokê<br/>romaji preservado + letra EN → PT-BR"]
-    K2 --> H["🧵 11. Correção de Karaoke<br/>original como referência imutável"]
-    H --> I["📦 12. Remuxer<br/>mkvmerge: vídeo + legenda PT-BR"]
+    G --> H2["📖 3.2 Revisão de Lore<br/>nomes, locais e termos de mundo"]
+    H2 --> K2["🎤 4.1 Karaokê<br/>traduz a letra (romaji preservado)<br/>e depois achata (KFX → linha limpa)"]
+    K2 --> H["🧵 4.2 Correção de Karaoke<br/>original como referência imutável"]
+    H --> I["📦 5.1 Remuxer<br/>mkvmerge: vídeo + legenda PT-BR"]
     I --> J["🎬 MKV Final<br/>pronto para distribuição"]
-    J -.-> K["🧹 13. Renomear Arquivos<br/>padroniza nomes de arquivo (S01E01)"]
+    J -.-> K["🧹 5.2 Renomear Arquivos<br/>padroniza nomes de arquivo (S01E01)"]
 
     classDef prep fill:#0c4a6e,stroke:#38BDF8,color:#F9FAFB
     classDef trad fill:#312e81,stroke:#818CF8,color:#F9FAFB
@@ -307,15 +323,15 @@ graph LR
     classDef kara fill:#831843,stroke:#F472B6,color:#F9FAFB
     classDef fin fill:#7c2d12,stroke:#FB923C,color:#F9FAFB
     classDef midia fill:#1e293b,stroke:#3B82F6,color:#F9FAFB
-    class B,C,QA prep
+    class B,C,H3,QA prep
     class D,E,F trad
-    class G,H2,H3 qual
-    class K1,K2,H kara
+    class G,H2 qual
+    class K2,H kara
     class I,K fin
     class A,J midia
 ```
 
-> 🎨 **Cores por grupo do menu**: azul = Preparação, índigo = Tradução, verde = Qualidade, rosa = Karaokê, laranja = Finalização.
+> 🎨 **Cores do diagrama** (só do desenho — o menu não colore os grupos): azul = Preparação, índigo = Tradução, verde = Qualidade, rosa = Karaokê, laranja = Finalização. Os números são os do menu (`GRUPO.POSIÇÃO`); a 2.2 (tradução sem lore) e a 3.3 (concordância determinística) não aparecem neste fluxo resumido.
 
 > Cada etapa é **independente e re-executável** — o operador pode rodar só a extração de novo, ou só a revisão, sem repetir as etapas anteriores. O elo entre etapas é sempre o sistema de arquivos (pastas de entrada/saída informadas manualmente em cada painel).
 
@@ -334,27 +350,31 @@ sequenceDiagram
     participant LLM as LlmClientAdapter
     participant LMS as LM Studio (GPU local)
 
-    Op->>UI: Informa pasta + contexto (ex: "gundam-narrative")
+    Op->>UI: Informa pasta + contexto (ex: "gundam_nt")
     UI->>API: POST /api/traduzir {entrada, contextoId}
-    API->>Ctx: definirContextoAtivo(contextoId)
+    API->>Ctx: existeContexto(contextoId)
+    API->>API: guarda de caminho (pasta existe e não é saída de tradução)
+    API-->>UI: 200 "Tradução via LLM iniciada no servidor." (job na fila)
+
+    Note over API,LMS: daqui em diante, dentro do job assíncrono
     API->>LLM: verificarDisponibilidade()
     LLM->>LMS: GET /api/v0/models (state=loaded)
     LMS-->>LLM: modelo real carregado
-    API-->>UI: 200 "Tradução iniciada" (job assíncrono)
+    API->>Ctx: snapshotPorId + definirContextoAtivo(contextoId)
 
     loop Para cada arquivo .ass na pasta
         UC->>Cache: carregar cache existente (.cache.json)
         loop Para cada fala não traduzida
-            UC->>LLM: traduzir(lote de 1 linha)
+            UC->>LLM: traduzir(1 linha, ou a corrente de frase partida)
             LLM->>LMS: POST /v1/chat/completions
             LMS-->>LLM: tradução
             LLM-->>UC: TraducaoLote
-            UC->>Cache: salvar par (original → traduzido)
         end
         UC->>UC: reconstrói .ass com EscritorLegendaAss
+        UC->>Cache: grava os pares do arquivo (ao fim dele, ou os já validados se o job for interrompido)
     end
-    UC-->>API: relatório de lote (SSE: canal "traducao")
-    API-->>UI: stream de progresso em tempo real
+    UC-->>API: relatório de lote (SSE: canal "traducao" ou "traducao-sem-lore")
+    API-->>UI: stream de progresso e, no fim, o evento "traducao-finalizada" (ou "traducao-sem-lore-finalizada")
 ```
 
 ---
@@ -376,25 +396,30 @@ org.traducao.projeto/
 ├── correcaoLegendas/       ← Correção estrutural da PT-BR usando a original como referência imutável
 ├── traducaoCorrige/        ← Limpeza de cache (esvazia entradas de fallback)
 ├── trocaTipoLegenda/       ← Troca em lote de fontes legadas (TCVN3/VNI) por Unicode
-├── novoKaraoke/            ← Karaokê Simples: KFX (milhares de eventos) → linha limpa por frase
-├── traducaoKaraoke/        ← Tradução de Karaokê: romaji preservado + letra EN → PT-BR via LLM
+├── novoKaraoke/            ← 4.1, passo 2 (achatar): KFX (milhares de eventos) → linha limpa por frase
+├── traducaoKaraoke/        ← 4.1, passo 1 (traduzir): romaji preservado + letra EN → PT-BR via LLM
 ├── remuxer/                ← Combina vídeo original + legenda traduzida em MKV final (mkvmerge)
 ├── renomearArquivos/       ← Renomeação em lote "Nome - S01E01" com dry-run e undo
 ├── telemetria/             ← Painel de telemetria + SSE (lê o arquivo próprio da Tradução Local)
 ├── mapaProjeto/            ← Gera o mapa_projeto.md (varredura estática de docstrings)
-├── apiDadosAnime/          ← Metadados externos (Jikan/MAL, TMDB) — decorativo na UI
+├── apiDadosAnime/          ← Metadados externos (TMDB, AniList, Jikan/MAL) — decorativo na UI
 ├── mcp/                    ← Ferramentas MCP (Model Context Protocol) que expõem funções do KRONOS
 ├── sistema/                ← Ciclo de vida do processo (menu "Sair" — encerramento gracioso)
+├── vitrine/                ← Vitrine pública: GuardaVitrine (filtro na frente de todas as rotas), PoliticaVitrine,
+│                             ConferenciaArranqueVitrine, DadosDemonstracao — ver ref-docker.md
 │
 │  ── Peers (importáveis por qualquer fatia; superfície congelada por tipo exato) ──
 ├── legenda/                ← Modelo puro (DocumentoLegenda/EventoLegenda) + Leitor/Escritor .ass/.srt
 ├── cachetraducao/          ← DONO ÚNICO do cache: CacheTraducaoService, EntradaCache, ProvenienciaCache
-├── lore/                   ← 69 obras (resources/lore/obras/*.sql) + terminologia canonica (ex-peer "contexto")
+├── lore/                   ← 70 arquivos SQL (resources/lore/) num SQLite em memória (CatalogoLoreSqlite)
+│                             + terminologia canonica (ex-peer "contexto")
 ├── qualidadeTraducao/      ← MascaradorTags, ValidadorTraducaoService (anti-alucinação), ProtecaoLegendaAssService
 ├── llm/                    ← Contrato neutro do LLM: LlmPort, Lote, TraducaoLote, StatusLlm
 │
 │  ── Infra transversal (core NÃO depende de fatia funcional) ──
-├── core/                   ← FilaExecucaoPipeline (fila única de jobs LLM), I/O atômico, kernel web/SSE
+├── core/                   ← FilaExecucaoPipeline (fila única de jobs LLM), I/O atômico, kernel web/SSE,
+│                             texto.FonteVietnamitaLegada (regra única da fonte banida: 1.3, 4.1 e 5.1),
+│                             vitrine.ModoVitrine (fila e processo externo recusam na vitrine)
 └── config/                 ← Bootstrap (modo WEB vs CLI legado)
 ```
 
@@ -406,7 +431,7 @@ org.traducao.projeto/
 
 ### Por que Quarkus com compatibilidade Spring, e não Quarkus "puro" (JAX-RS/CDI nativo)?
 
-O projeto foi originalmente escrito sobre Spring Boot e migrado para Quarkus preservando as anotações `@RestController`, `@Component`, `@Service`, `@RequestMapping` via `quarkus-spring-web` e `quarkus-spring-di`. Isso permitiu ganhar o **modo dev com live reload** e o tempo de boot menor do Quarkus sem reescrever toda a camada web. Pontos onde SSE/JAX-RS puro é necessário (`LogStreamResource`, `TelemetriaStreamResource`) usam `@Path`/`@GET` nativos do Quarkus para evitar colisão de roteamento com o dispatcher Spring-style.
+O projeto foi originalmente escrito sobre Spring Boot e migrado para Quarkus preservando as anotações `@RestController`, `@Component`, `@Service`, `@RequestMapping` via `quarkus-spring-web` e `quarkus-spring-di`. Isso permitiu ganhar o **modo dev com live reload** e o tempo de boot menor do Quarkus sem reescrever toda a camada web. Seis classes usam JAX-RS nativo do Quarkus (`@Path`/`@GET`/`@POST`): os dois fluxos SSE (`LogStreamResource`, `TelemetriaStreamResource`), para evitar colisão de roteamento com o dispatcher Spring-style, e `NovoKaraokeController`, `TraducaoKaraokeController`, `RenomearArquivosController` e `AuditorConteudoController`.
 
 ### Por que LLM local (LM Studio) em vez de API paga?
 

@@ -130,9 +130,10 @@ tradutor:
   # Corrente LONGA sai melhor que curta (K=4 deu 3,5% de maiuscula contra 15,8% do K=2),
   # entao NAO ha teto de agrupamento.
   #
-  # DESLIGADA por padrao: ligar troca ~30% de conector errado por ~4% de deslocamento de
-  # conteudo -- linha com o texto da vizinha, contagem certa, que a validacao atual NAO pega.
-  # Quem intercepta isso e a GuardaCorrenteTraduzida, devolvendo a corrente ao fluxo individual.
+  # O padrao do CODIGO e desligado (TradutorProperties); AQUI esta LIGADA. Ligar troca ~30% de
+  # conector errado por ~4% de deslocamento de conteudo -- linha com o texto da vizinha,
+  # contagem certa -- e quem intercepta esse deslocamento e a GuardaCorrenteTraduzida, que
+  # devolve a corrente ao fluxo individual.
   agrupar-frase-partida: true
   # Estilos ASS que nao devem ser traduzidos (ex: letra original em romaji
   # usada para karaoke, que deve permanecer no idioma original).

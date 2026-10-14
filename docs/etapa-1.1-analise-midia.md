@@ -20,9 +20,11 @@ Primeira etapa do pipeline: **auditoria técnica** de arquivos de vídeo antes d
 
 | Classe | Papel |
 |--------|-------|
-| `AnalisarMidiaUseCase` (`application`) | Orquestra o lote: varre vídeos, chama o adapter, classifica as legendas, coleta sucessos e falhas e registra telemetria. **Não grava relatório em disco.** |
-| `FfprobeAdapter` (`infrastructure/adapters`) | Executa `ffprobe -show_format -show_streams -print_format json` e mapeia o JSON para os records de domínio |
-| `AuditoriaResultado`, `ContainerInfo`, `VideoInfo`, `AudioInfo`, `LegendaInfo` (`domain`) | Records imutáveis do resultado da auditoria |
+| `AnalisarMidiaUseCase` (`application`) | Só coordena o lote: pede os vídeos ao `LocalizadorVideosService`, roda o `ffprobe` em **paralelo** (de 2 a 8 por vez, em virtual threads) e coleta os resultados **na ordem dos arquivos**, delegando a classificação ao `ClassificadorLegendaService`, a telemetria ao `TelemetriaMidiaMapper` e o resumo textual ao `RelatorioMidiaTextoFormatter`. **Não grava relatório em disco.** |
+| `LocalizadorVideosService` (`application`) | Acha os vídeos: arquivo avulso ou pasta varrida recursivamente, pelas extensões `.mkv`, `.mp4`, `.avi`, `.mov`, `.flv`, `.wmv`, `.webm`, `.m4v`, `.ts` e `.m2ts` |
+| `ClassificadorLegendaService`, `TelemetriaMidiaMapper`, `RelatorioMidiaTextoFormatter` (`application`) | Classificação texto/bitmap de cada legenda, registro na telemetria e resumo textual por arquivo |
+| `FfprobeAdapter` (`infrastructure/adapters`) | Executa `ffprobe -v error -print_format json -show_format -show_streams -show_chapters` e mapeia o JSON (faixas, capítulos e anexos) para os records de domínio |
+| `AuditoriaResultado`, `ContainerInfo`, `VideoInfo`, `AudioInfo`, `LegendaInfo`, `CapituloInfo`, `AnexoInfo`, `FalhaAnalise` (`domain`) | Records imutáveis do resultado da auditoria |
 | `ResultadoAnaliseLote` (`domain`) | Retorno do use case: **`resultados`** (análises bem-sucedidas) + **`falhas`** (arquivos que erraram). Não contém `Path` de relatório salvo. |
 | `ConsoleAnalisadorLogger` (`presentation/ui`) | Formatação colorida para a CLI legada |
 
@@ -41,20 +43,26 @@ sequenceDiagram
 
     Op->>UI: Informa pasta/arquivo de vídeo
     UI->>API: POST /api/analisar {entrada, saida?}
+    API->>API: entrada vazia ou inexistente → 400, antes da fila
     API-->>UI: 200 "Análise de mídia iniciada" (job assíncrono)
-    API->>UC: executar(entrada, saida)
-    UC->>UC: encontrarVideos() — varre recursivamente por extensão
-    loop Para cada vídeo
+    API->>UC: executar(entrada) — saida é ignorada
+    UC->>UC: LocalizadorVideosService.localizar() — arquivo ou pasta recursiva, por extensão
+    par ffprobe em paralelo (2 a 8 por vez, virtual threads)
         UC->>FF: analisarMidia(video)
-        FF->>FF: ffprobe -show_streams -show_format
-        FF-->>UC: AuditoriaResultado (container, vídeos, áudios, legendas)
+        FF->>FF: ffprobe -show_format -show_streams -show_chapters
+        FF-->>UC: AuditoriaResultado (contêiner, faixas, capítulos, anexos)
         UC->>UC: classifica cada legenda (texto/bitmap, traduzível)
+    end
+    loop Coleta na ordem dos arquivos
         UC->>TEL: registrarMidia() — telemetria técnica anonimizada
     end
     UC-->>API: ResultadoAnaliseLote {resultados, falhas}
     API->>UI: SSE "analise-relatorio" com o JSON serializado do resultado
+    API->>UI: banner final no console: [SUCESSO] / [ATENÇÃO] / [FALHA]
     Op->>UI: (opcional) Exportar TXT — gerado no navegador sob demanda
 ```
+
+O banner final tem três estados: `[SUCESSO]` só sem nenhuma falha; `[ATENÇÃO]` quando houve falha mas algum arquivo foi analisado; `[FALHA]` quando nenhum arquivo foi analisado. A contagem de falhas sempre aparece.
 
 > O que a tela recebe é o **`ResultadoAnaliseLote` serializado diretamente em JSON** e transmitido via SSE no canal `analise-relatorio`. **Não** há gravação de `.txt`/`.json` da análise em disco, nem releitura de arquivo: a fonte da interface é o **domínio estruturado**. A exportação para TXT é **manual**, disparada pelo operador no navegador e produzida a partir dos mesmos dados estruturados. Apenas a **telemetria técnica** é persistida — separadamente, no destino canônico interno (`logs/telemetria_compartilhada.json`).
 
@@ -67,6 +75,9 @@ Codec, resolução, profundidade de cor, FPS, aspect ratio, bitrate.
 
 ### Áudio
 Idioma, codec, canais, taxa de amostragem, bitrate, título da faixa.
+
+### Capítulos e anexos (fontes embutidas)
+Capítulos: número, título, início e fim. Anexos do contêiner — em MKV, normalmente as **fontes embutidas**: nome do arquivo, tipo MIME e tamanho.
 
 ### Legenda — classificação por traduzibilidade
 
@@ -82,9 +93,9 @@ Para cada faixa, o módulo classifica o formato e deriva a traduzibilidade:
 
 ---
 
-## Formato de legenda detectado (resumo no topo do relatório em tela)
+## O que a tela mostra
 
-O resultado sempre abre com uma seção **"FORMATO DE LEGENDA DETECTADO"**, listando o tipo de cada faixa (ASS, SSA, SRT, PGS, VobSub, DVB, WebVTT, MOV_TEXT) antes de qualquer outro dado — costuma ser a primeira coisa que o operador precisa saber ao decidir se vale extrair aquele arquivo. Atenção à terminologia:
+Para cada arquivo, a tela monta **cartões** — Contêiner, Vídeo, Áudio, Capítulos e Anexos — e uma **tabela de Legendas** (número da faixa, idioma, formato, tipo, flags `default`/`forced`/acessibilidade e traduzibilidade: *Traduzível*, *OCR* ou *—*). Arquivo sem nenhuma faixa mostra "pode ser RAW; hardsub não confirmado por esta análise". Os arquivos que falharam aparecem numa lista à parte. O **TXT exportado** sai dos mesmos dados e começa com `RELATORIO DE ANALISE DE MIDIA`. Atenção à terminologia:
 
 - **PGS** e **VobSub** são legendas **bitmap** (imagem), não extraíveis para texto sem OCR — **não** são hardsub.
 - **Hardsub** é conteúdo **queimado na imagem do vídeo**; não aparece como faixa de legenda.
@@ -103,7 +114,9 @@ O resultado sempre abre com uma seção **"FORMATO DE LEGENDA DETECTADO"**, list
 }
 ```
 
-`entrada` é obrigatório (pasta ou arquivo de vídeo). `saida` é opcional.
+`entrada` é obrigatório (pasta ou arquivo de vídeo) e precisa existir: vazio ou inexistente responde `400` **antes** de entrar na fila. `saida` é aceito, mas **ignorado** — a análise não grava em disco.
+
+O seletor de **Obra / Contexto** do painel é opcional e serve só para exibir capa e metadados do anime; ele não é enviado à análise.
 
 **Resposta imediata:** `200 OK` com `{"mensagem": "Análise de mídia iniciada no servidor."}`. O job roda em segundo plano; o resultado chega via **SSE** no canal `analise-relatorio` como o **JSON do `ResultadoAnaliseLote`** (ver [API REST — Referência](ref-api-endpoints.md)).
 

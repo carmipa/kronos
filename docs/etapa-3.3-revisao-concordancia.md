@@ -1,14 +1,27 @@
 # 🔤 Etapa 3.3 — Revisão de Concordância
 
-[← 3.2 Revisão de Lore](etapa-3.2-revisao-lore.md) | [4.1 Tradução de Karaokê →](etapa-4.1-traducao-karaoke.md)
+[← 3.2 Revisão de Lore](etapa-3.2-revisao-lore.md) | [4.1 Karaokê →](etapa-4.1-traducao-karaoke.md)
 
 ---
 
 ## O que ela é
 
 A **única** tela do pipeline que trabalha **só com português**: não lê o inglês, não lê o cache, não
-chama o LLM. Ela abre o `.ass` PT-BR já entregue e conserta **concordância de gênero inequívoca**,
-por comparação de palavras.
+chama o LLM. Ela abre o `.ass` PT-BR já entregue e passa cada fala por **cinco corretores em
+cadeia**, nesta ordem:
+
+| ordem | corretor | o que conserta |
+|---|---|---|
+| 1 | `CorretorCaractereForaDoPortuguesService` | caractere fora do português (invisível, macron) que quebra a fronteira de palavra |
+| 2 | `CorretorConcordanciaGeneroService` | **concordância de gênero inequívoca**, por comparação de palavras |
+| 3 | `CorretorAcentoQueColideComVerboService` | acento de substantivo escrito como verbo, decidido por **POS tagger** (`RevisorGramaticalPort`) |
+| 4 | `CorretorAcentoPorPadraoService` | acento por padrão conhecido |
+| 5 | `CorretorAcentoDeDicionarioNaFalaService` | acento pelo dicionário pt_BR |
+
+A cadeia **repete enquanto a fala mudar, até 3 voltas** — um elo pode habilitar o anterior (com `ha`
+sem acento o POS tagger não analisa a frase; depois de `há`, analisa). Fala que bate no teto ainda
+mudando é contada e vai ao log. O banner final mostra a contagem **"Por corretor"** e as
+**"Guardas do dicionário"**.
 
 ```
 "o menina"      → "a menina"          determinante × substantivo
@@ -44,12 +57,12 @@ por comparação de palavras.
 
 ```mermaid
 graph TD
-    A["📁 Pasta com legendas<br/>PT-BR (.ass)"] --> B{"Arquivo é<br/>entrega?"}
+    A["📁 Pasta com legendas<br/>PT-BR (.ass), com subpastas"] --> B{"Arquivo é<br/>entrega?"}
     B -->|".parcial"| X["⏭️ [Ignorado]<br/>fora do alcance"]
-    B -->|"sim"| C["📖 Lê eventos Dialogue:"]
-    C --> D{"Estilo é<br/>musical?"}
-    D -->|"sim"| Y["🚫 VETO<br/>karaokê tem dona própria"]
-    D -->|"não"| E["🔍 CorretorConcordanciaGeneroService<br/>determinante × substantivo<br/>sujeito × predicativo"]
+    B -->|"sim"| C["📖 Lê os eventos"]
+    C --> D{"Estilo musical<br/>ou linha Comment:?"}
+    D -->|"sim"| Y["🚫 não toca<br/>karaokê tem dona própria"]
+    D -->|"não"| E["🔍 cadeia de 5 corretores<br/>caractere · gênero · acento (POS,<br/>padrão, dicionário) — até 3 voltas"]
     E --> F{"Mudou<br/>alguma fala?"}
     F -->|"não"| G["⬜ [OK]<br/>concordância conforme"]
     F -->|"sim"| H{"Modo?"}
@@ -82,8 +95,8 @@ o rótulo diz isso com todas as letras.
 
 Isto não foi sempre assim, e a cicatriz vale a linha: até 19/08/2026 o checkbox nascia
 **desmarcado** e o código fazia `aplicar = !simular`. Abrir a tela e apertar o único botão
-**gravava no acervo**. As telas irmãs (`4.3 Karaokê Simples`, `5.2 Renomear Arquivos`,
-`4.1 Tradução de Karaokê`) sempre tiveram **botão "Simular" separado**; a 3.3 era a exceção.
+**gravava no acervo**. As telas irmãs (`5.2 Renomear Arquivos`, `4.1 Karaokê` — que absorveu a
+antiga `4.3 Karaokê Simples`) sempre tiveram **botão "Simular" separado**; a 3.3 era a exceção.
 
 A guarda `CatracaTelaDestrutivaNasceEmDryRunTest` reprova o build se qualquer campo `*-simular`
 nascer sem `checked`.
@@ -122,7 +135,8 @@ A mesma da 3.1 e da 3.2 — o operador não deve precisar aprender uma linguagem
 | ⏭️ apagado | `[Ignorado]` | `.parcial` — fora do alcance por decisão, não por falha |
 
 O banner final segue a mesma regra, e o rótulo muda com o modo: em dry-run as falas **mudariam**;
-só em aplicação elas **foram corrigidas**.
+só em aplicação elas **foram corrigidas**. Abaixo de cada arquivo alterado (ou que seria alterado),
+o console lista **só as falas que mudaram**, no formato `antes -> depois`.
 
 > **Achado do caminho:** as contagens subiam **antes** do backup e da escrita. Uma falha ao criar o
 > backup deixava o arquivo intacto no disco e o banner dizia *"1 fala corrigida"*. As contagens
@@ -174,7 +188,7 @@ Documentar o caminho fechado vale tanto quanto o aberto — evita reabrir a mesm
 
 | proposta | veredito | evidência |
 |---|---|---|
-| **Análise morfológica** para separar verbo de substantivo | ❌ não vale | o dicionário analisa o sinal como o ruído: `isca → st:iscar`, `cortina → st:cortinar`, `orgulho → st:orgulhar`. Filtrar por radical em `-ar` mataria o alvo. Separar exigiria POS tagger (spaCy/UDPipe) — dependência e modelo novos |
+| **Análise morfológica do dicionário** para separar verbo de substantivo | ❌ não vale | o dicionário analisa o sinal como o ruído: `isca → st:iscar`, `cortina → st:cortinar`, `orgulho → st:orgulhar`. Filtrar por radical em `-ar` mataria o alvo. A separação veio depois por **POS tagger** (`RevisorGramaticalPort`), usado pelo corretor de acento — o corretor de gênero continua sem ele |
 | **`a` como artigo feminino** | ❌ removido | antes de substantivo masculino o `a` é **preposição** e está certo: `"Graças a Deus"` viraria `"Graças o Deus"`. Foram **15 de 16** falas alteradas no acervo — 14 estragos para 1 acerto. O lado masculino mantém o `o`, que nunca é preposição |
 | **Trocar só o possessivo** em `"a nossa orgulho"` | ❌ meia-correção | devolvia `"a nosso orgulho"` — discordância **nova** onde havia uma. Possessivo precedido de artigo não é tocado |
 | **20 candidatas** de gênero por terminação | ❌ recusadas | ambíguas (`guia`, `figura`, `caça`, `soldado`) ou de gênero fixo contrário à terminação (`pirata`, `mecha`, `foto`, `data`) |
@@ -210,8 +224,10 @@ A evolução da própria tela mostra o quanto a medição mudou o alvo:
 
 ## Backup — e a prova de que ele serve
 
-Cada arquivo tocado ganha `.bak` em `<pasta>/backup_revisao_concordancia/` **antes** da escrita.
-Se o backup falhar, o arquivo **não** é reescrito.
+A varredura é **recursiva** (entra nas subpastas). Cada arquivo tocado ganha cópia **antes** da
+escrita em `<pasta>/backup_revisao_concordancia/<subpasta espelhada>/<nome>.<yyyyMMdd_HHmmss_SSS>.bak`
+— a subpasta é espelhada para dois arquivos de mesmo nome em subpastas diferentes não se
+confundirem. Se o backup falhar, o arquivo **não** é reescrito.
 
 O `diff` do `.bak` contra o arquivo atual (ZZ S01E06) mostra exatamente as linhas trocadas, com
 tempo, estilo e tags idênticos — nada além do gênero mudou.
@@ -232,18 +248,24 @@ paralelo com tradução ou revisão.
 ## A fatia por dentro
 
 ```
-revisaoConcordancia/                                    4 classes · 511 linhas
+revisaoConcordancia/                                         9 classes · 2.877 linhas
 ├── application/
-│   ├── CorretorConcordanciaGeneroService.java   477 l  o motor determinístico
-│   └── RevisarConcordanciaUseCase.java          279 l  varredura, veto, backup, relatório
+│   ├── CorretorCaractereForaDoPortuguesService.java  233 l  elo 1: caractere fora do português
+│   ├── CorretorConcordanciaGeneroService.java        659 l  elo 2: gênero (determinístico)
+│   ├── CorretorAcentoQueColideComVerboService.java   346 l  elo 3: acento por POS tagger
+│   ├── CorretorAcentoPorPadraoService.java           343 l  elo 4: acento por padrão
+│   ├── CorretorAcentoDeDicionarioNaFalaService.java  309 l  elo 5: acento por dicionário
+│   └── RevisarConcordanciaUseCase.java               629 l  varredura, veto, cadeia, backup, relatório
 ├── domain/
-│   └── ResultadoConcordancia.java                41 l  value object do desfecho
+│   ├── ContagemCorretor.java                          88 l  placar de cada elo
+│   └── ResultadoConcordancia.java                     79 l  value object do desfecho
 └── presentation/
-    └── RevisaoConcordanciaController.java       142 l  POST + fila + console
+    └── RevisaoConcordanciaController.java            191 l  POST + fila + console
 ```
 
-**INBOUND 0** — nenhuma outra fatia a consome. **OUTBOUND 12 tipos** — `core` (5), `legenda` (5) e
-`telemetria` (2). **Zero aresta fatia → fatia.**
+**INBOUND 0** — nenhuma outra fatia a consome. **OUTBOUND 18 tipos** — `core` (10), os peers
+`legenda` (5) e `qualidadeTraducao` (1, `NormalizadorAcentosComuns`), e `telemetria` (2).
+**Zero aresta fatia → fatia.**
 
 > `arquivosAnalisados` conta o que foi **revisado**, não o que existe na pasta. O que ficou de fora
 > vai em `arquivosForaDoAlcance`, numa linha separada: somar os dois faria o relatório dizer
@@ -260,7 +282,7 @@ revisaoConcordancia/                                    4 classes · 511 linhas
 | `CatracaEscritaDeFalaVetaMusicaConcordanciaTest` | a fatia escrever em fala de estilo musical |
 | `CatracaAvisoSonoroNasTelasLongasTest` | a tela terminar o lote em silêncio |
 | `CatracaSeletorDeObraRegistradoTest` | o combo de obra abrir vazio |
-| `CatracaCartaoDoAlvoTemDonoUnicoTest` | o cartão do alvo divergir entre 3.1, 3.2 e 3.3 |
+| `CatracaCartaoDoAlvoTemDonoUnicoTest` | o cartão do alvo divergir entre 3.1, 3.2, 3.3 e 4.1 |
 
 ---
 
@@ -269,10 +291,11 @@ revisaoConcordancia/                                    4 classes · 511 linhas
 - **O tamanho real do defeito de concordância PT-only não está medido.** Os instrumentos de hoje
   acham pouco — e instrumento saturado em zero é hipótese, não conclusão. Ampliar famílias antes de
   medir é escrever corretor para defeito que ninguém provou existir.
-- **Portão de saída por dicionário (pt_BR) não existe ainda.** O hunspell desta máquina (312.369
-  entradas, 25.932 regras de afixo) sabe dizer o que **não existe** (`asdfgh` → `#`), mas **não é
-  oráculo de gênero** (`garota` → `st:garotar`). O uso correto seria: nenhuma palavra escrita pela
-  3.3 pode ser desconhecida do pt_BR.
+- **O dicionário pt_BR entra como corretor de acento, não como portão de saída.** O elo 5
+  (`CorretorAcentoDeDicionarioNaFalaService`) repõe acento no que o hunspell rejeita; não existe
+  uma checagem final que barre palavra desconhecida escrita pelos outros elos. O hunspell sabe
+  dizer o que **não existe** (`asdfgh` → `#`), mas **não é oráculo de gênero**
+  (`garota` → `st:garotar`).
 
 ---
 
@@ -280,4 +303,4 @@ revisaoConcordancia/                                    4 classes · 511 linhas
 
 | Anterior | Próximo |
 |----------|---------|
-| [← 3.2 Revisão de Lore](etapa-3.2-revisao-lore.md) | [4.1 Tradução de Karaokê →](etapa-4.1-traducao-karaoke.md) |
+| [← 3.2 Revisão de Lore](etapa-3.2-revisao-lore.md) | [4.1 Karaokê →](etapa-4.1-traducao-karaoke.md) |

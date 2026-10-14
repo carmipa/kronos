@@ -30,7 +30,7 @@ nanos de cada elo em `ResultadoConcordancia`, e é esse número que entra no rel
 ```mermaid
 flowchart TD
     A[MedicaoDesempenhoDoPipelineIT] --> CTRL{Caso-controle<br/>do relógio}
-    CTRL -->|5ms &lt; 40ms| OK[relógio anda e separa]
+    CTRL -->|40ms &gt; 2 × 5ms| OK[relógio anda e separa]
     CTRL -->|falhou| STOP["NÃO VERIFICADO<br/>nenhum tempo é afirmado"]
 
     OK --> L1[Leitura do .ass<br/>LeitorLegendaAss]
@@ -126,7 +126,7 @@ grande. Ler o total como custo por fala **superestima em quase 4×**.
 
 | guarda | o que ela impede |
 |--------|------------------|
-| **Caso-controle do relógio** | cronometra 5 ms e 40 ms e exige que a segunda saia maior. Um cronômetro quebrado devolveria zero para tudo, e o relatório sairia com todas as operações "instantâneas" — o modo de falha mais convincente que uma medição de desempenho pode ter |
+| **Caso-controle do relógio** | cronometra 5 ms e 40 ms e exige que as duas andem (maiores que zero) e que a segunda saia **maior que o dobro** da primeira. Um cronômetro quebrado devolveria zero para tudo, e o relatório sairia com todas as operações "instantâneas" — o modo de falha mais convincente que uma medição de desempenho pode ter |
 | **Relógio consultado, não recriado** | a cadeia já cronometra por elo; uma segunda medição por fora divergiria em silêncio |
 | **Artefato sempre gravado** | harness que afirma número e não deixa artefato obriga a repetir a corrida para conferir |
 | **Máquina e Java no relatório** | dois relatórios de máquinas diferentes se parecem; sem a identificação, comparar é inventar |

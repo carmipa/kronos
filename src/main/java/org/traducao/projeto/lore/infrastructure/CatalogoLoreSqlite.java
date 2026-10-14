@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * PROPÓSITO DE NEGÓCIO: lê a lore do KRONOS dos arquivos SQL ({@code /lore/esquema.sql},
  * {@code /lore/obras.lst} e um {@code /lore/obras/<id>.sql} por obra) e entrega as obras pelos mesmos
  * contratos de sempre ({@link ProvedorContexto} e {@link ProvedorPromptRevisaoLore}). Substitui o
- * {@code lore.yaml} de 1 MB por um arquivo de ~13 KB por obra — o que a IA e Paulo abrem para anexar
+ * {@code lore.yaml} de 1 MB por um arquivo de ~16 KB por obra (média de 70, medida em 14/10/2026) — o que a IA e Paulo abrem para anexar
  * ou corrigir lore — sem que nenhum dos consumidores saiba da troca.
  *
  * <h2>Como carrega</h2>
