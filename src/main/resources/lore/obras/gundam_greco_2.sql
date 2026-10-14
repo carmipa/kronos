@@ -31,6 +31,12 @@ INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Towasanga');
 INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Towasangan');
 INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Universal Standard');
 INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Wilmit Zenam');
+-- 14/10/2026: nomes que o dicionario acentuava na legenda gravada pela 2.1 (Barara->Barara com acento, Flaminia, Rosario, Lucifer),
+-- medidos relendo a saida contra a revisao; o termo composto protege cada palavra (CorretorOrtograficoLegenda, eddcb735).
+INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Barara Peor');
+INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Flaminia Kalle');
+INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'G-Lucifer');
+INSERT INTO termo_protegido VALUES ('gundam_greco_2', 'Rosario Ten');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_2', 'Armadura Móvel', 'Mobile Armor');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_2', 'Armadura Normal', 'Normal Suit');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_2', 'Armaduras Móveis', 'Mobile Armors');
