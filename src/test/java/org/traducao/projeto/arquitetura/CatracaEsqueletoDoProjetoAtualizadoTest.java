@@ -80,7 +80,7 @@ class CatracaEsqueletoDoProjetoAtualizadoTest {
         Map.entry("Finalização",
             List.of("remuxer", "renomearArquivos")),
         Map.entry("Sistema",
-            List.of("telemetria", "mapaProjeto", "apiDadosAnime", "mcp", "sistema")));
+            List.of("telemetria", "mapaProjeto", "apiDadosAnime", "mcp", "sistema", "vitrine")));
 
     @Test
     @DisplayName("o esqueleto desenhado na documentacao bate com o codigo em disco")

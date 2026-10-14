@@ -2,6 +2,7 @@ package org.traducao.projeto.core.execucao;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
+import org.traducao.projeto.core.vitrine.ModoVitrine;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -36,7 +37,17 @@ public class FilaExecucaoPipeline {
     // e (2) o botão "Parar" da UI cancelar tudo via parar().
     private final Set<Future<?>> tarefas = ConcurrentHashMap.newKeySet();
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: enfileira um job pesado do pipeline na thread única.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: na vitrine pública nenhum job entra na fila — a recusa vem
+     * antes do {@code submit}, então a tarefa nunca executa.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: na vitrine lança
+     * {@link org.traducao.projeto.core.vitrine.OperacaoBloqueadaNaVitrineException}.
+     */
     public Future<?> submeter(Runnable tarefa) {
+        ModoVitrine.exigirForaDaVitrine("fila do pipeline");
         Future<?> future = executor.submit(tarefa);
         registrar(future);
         return future;
@@ -50,8 +61,11 @@ public class FilaExecucaoPipeline {
      * NUNCA chame este método de dentro de uma tarefa que já roda NA fila:
      * o executor tem uma única thread, então esperar por outra tarefa da
      * mesma fila a partir dela é deadlock garantido.
+     * <p>
+     * Na vitrine pública recusa antes do {@code submit}, como {@link #submeter(Runnable)}.
      */
     public <T> T executarEAguardar(Callable<T> tarefa) throws Exception {
+        ModoVitrine.exigirForaDaVitrine("fila do pipeline");
         Future<T> future = executor.submit(tarefa);
         registrar(future);
         try {

@@ -22,12 +22,12 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 
 | | quantidade |
 |---|---:|
-| pacotes de topo | **27** |
-| fatias funcionais | **20** |
+| pacotes de topo | **28** |
+| fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **507** |
-| classes em `src/test` | **474** |
+| classes em `src/main` | **513** |
+| classes em `src/test` | **481** |
 
 ---
 
@@ -40,9 +40,9 @@ graph TB
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
-    G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (2)"]:::fatia
+    G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (2)<br/>vitrine (4)"]:::fatia
     PEERS["<b>🧱 peers</b><br/><i>importáveis por qualquer fatia</i><br/>cachetraducao (5)<br/>legenda (15)<br/>llm (4)<br/>lore (24)<br/>qualidadeTraducao (17)"]:::peer
-    BASE["<b>⚙️ infra transversal</b><br/>config (2)<br/>core (34)"]:::base
+    BASE["<b>⚙️ infra transversal</b><br/>config (2)<br/>core (36)"]:::base
     G0 --> PEERS
     G1 --> PEERS
     G2 --> PEERS
@@ -727,6 +727,21 @@ sistema/
     └── SistemaController.java
 ```
 
+#### `vitrine` — 4 classes
+
+```text
+vitrine/
+├── application/
+│   └── PoliticaVitrine.java
+├── infrastructure/
+│   └── DadosDemonstracao.java
+└── presentation/
+    ├── bootstrap/
+    │   └── ConferenciaArranqueVitrine.java
+    └── web/
+        └── GuardaVitrine.java
+```
+
 ---
 
 ## Peers — importáveis por qualquer fatia
@@ -859,7 +874,7 @@ config/
 └── ModoExecucaoStartup.java
 ```
 
-#### `core` — 34 classes
+#### `core` — 36 classes
 
 ```text
 core/
@@ -906,15 +921,18 @@ core/
 │   ├── FronteiraTermoAss.java
 │   ├── TextoSemTags.java
 │   └── TokenDeControleLlm.java
-└── util/
-    ├── ArquivoAtomicoUtil.java
-    ├── DuracaoUtil.java
-    └── ProcessoExternoUtil.java
+├── util/
+│   ├── ArquivoAtomicoUtil.java
+│   ├── DuracaoUtil.java
+│   └── ProcessoExternoUtil.java
+└── vitrine/
+    ├── ModoVitrine.java
+    └── OperacaoBloqueadaNaVitrineException.java
 ```
 
 ---
 
-## Testes — 474 classes
+## Testes — 481 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1056,7 +1074,7 @@ config/
 └── ModoExecucaoDispatcherTest.java
 ```
 
-#### `core` — 32 classes
+#### `core` — 33 classes
 
 ```text
 core/
@@ -1098,9 +1116,11 @@ core/
 │   ├── FronteiraTermoAssTest.java
 │   ├── TextoSemTagsTest.java
 │   └── TokenDeControleLlmTest.java
-└── util/
-    ├── DrenagemTimeoutNaoViraSaidaVaziaTest.java
-    └── ProcessoExternoUtilTest.java
+├── util/
+│   ├── DrenagemTimeoutNaoViraSaidaVaziaTest.java
+│   └── ProcessoExternoUtilTest.java
+└── vitrine/
+    └── ModoVitrineCamada2Test.java
 ```
 
 #### `correcaoLegendas` — 1 classes
@@ -1656,6 +1676,23 @@ trocaTipoLegenda/
 │   └── FronteiraTrocaTipoLegendaArchTest.java
 └── infrastructure/
     └── ClassificadorCamadaMusicalLegendaAdapterTest.java
+```
+
+#### `vitrine` — 6 classes
+
+```text
+vitrine/
+├── application/
+│   └── PoliticaVitrineTest.java
+├── arquitetura/
+│   ├── VitrineConteudoPublicoTest.java
+│   └── VitrineRotasDoCodigoTest.java
+└── presentation/
+    ├── bootstrap/
+    │   └── ConferenciaArranqueVitrineTest.java
+    └── web/
+        ├── GuardaVitrineDesligadaTest.java
+        └── GuardaVitrineHttpTest.java
 ```
 
 ---

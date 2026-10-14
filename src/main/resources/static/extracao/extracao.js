@@ -1,4 +1,4 @@
-import { logNoConsole } from '../js/app.js';
+import { logNoConsole, mensagemDoErro } from '../js/app.js';
 
 export function initExtracao() {
     const form = document.getElementById('form-extracao');
@@ -28,7 +28,7 @@ export function initExtracao() {
 
             if (!res.ok) {
                 const erroTexto = await res.text();
-                throw new Error(erroTexto || 'Erro interno ao iniciar extração');
+                throw new Error(mensagemDoErro(erroTexto, 'Erro interno ao iniciar extração'));
             }
 
             const data = await res.json();

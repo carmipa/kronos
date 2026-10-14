@@ -1,0 +1,3 @@
+Caso-controle da vitrine do KRONOS: arquivo estatico com extensao fora da lista publica.
+Com a vitrine ligada tem de responder 403; com ela desligada responde 200 (prova de que o 403 vem
+da guarda, e nao de o arquivo nao existir). Mora so no classpath de teste, nunca no jar.

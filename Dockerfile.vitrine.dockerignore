@@ -1,0 +1,37 @@
+# Contexto de build da imagem da VITRINE (Dockerfile.vitrine). O BuildKit usa este arquivo no
+# lugar do .dockerignore quando o Dockerfile é o Dockerfile.vitrine. Difere do .dockerignore em
+# UMA coisa: docs/ entra (as páginas do menu Documentação). O resto continua fora.
+
+.git
+.gradle
+.idea
+.vscode
+*.iml
+build/
+
+# Artefatos de assistentes de IA nunca entram em contexto de imagem (regra 26).
+.claude/
+.codex/
+.gemini/
+.cursor/
+.windsurf/
+.continue/
+.aider*
+.playwright-mcp/
+
+# Estado de execução da máquina de quem usa: nunca na vitrine.
+cache/
+logs/
+relatorios/
+backups/
+entrada/
+saida/
+bin/
+ferramentas/
+
+# Segredo: o application-local.yml carrega a chave do TMDB.
+src/main/resources/application-local.yml
+.env
+
+# Markdown da raiz não entra; só docs/*.md (ver acima).
+*.md

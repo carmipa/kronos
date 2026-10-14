@@ -2,6 +2,7 @@ package org.traducao.projeto.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traducao.projeto.core.vitrine.ModoVitrine;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -87,10 +88,13 @@ public final class ProcessoExternoUtil {
      * <p>COMPORTAMENTO EM CASO DE FALHA: falha ao ler um fluxo vira {@link IOException}; exceder
      * o {@code timeout} lança {@link TimeoutException} depois de solicitar o encerramento
      * forçado e aguardar (best-effort) a confirmação; uma interrupção durante a espera propaga
-     * {@link InterruptedException}, com precedência sobre o timeout ainda não entregue.
+     * {@link InterruptedException}, com precedência sobre o timeout ainda não entregue. Na
+     * vitrine pública, nenhum processo é criado: lança
+     * {@link org.traducao.projeto.core.vitrine.OperacaoBloqueadaNaVitrineException} antes do spawn.
      */
     public static Resultado executar(List<String> comando, Duration timeout, boolean mesclarErro)
             throws IOException, InterruptedException, TimeoutException {
+        ModoVitrine.exigirForaDaVitrine("processo externo");
         Process processo = new ProcessBuilder(comando).redirectErrorStream(mesclarErro).start();
 
         ExecutorService pool = Executors.newThreadPerTaskExecutor(FABRICA_DRENAGEM);

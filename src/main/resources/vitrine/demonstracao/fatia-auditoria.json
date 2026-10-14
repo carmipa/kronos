@@ -1,0 +1,303 @@
+{
+ "total": 33,
+ "fatia": "auditoria",
+ "operacoes": [
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Zeta Gundam - S01E18_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=2 | criticas=0",
+   "tempoTotalMs": 111,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-11T19:58:23.415017262Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Zeta Gundam - S01E18_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=2 | criticas=0",
+   "tempoTotalMs": 88,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-11T19:58:31.376647470Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Zeta Gundam - S01E18_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=2 | criticas=0",
+   "tempoTotalMs": 70,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-11T19:58:40.749150223Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E01 - Departure 0096_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 30,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:01.657824500Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E02 - First Blood_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 22,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:01.800826100Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E03 - They Called It Gundam_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 17,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:01.891184600Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E04 - Full Frontal's Pursuit_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 24,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.003587800Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E05 - Clash with the Red Comet_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 30,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.106262300Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E06 - Under the Mask_Track3_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 20,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.235498800Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E07 - The Battle of Palau_Track3_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 19,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.340686300Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E08 - Laplace, Where It All Began_Track3_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 22,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.438688100Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E09 - Retribution_Track3_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 17,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.528885400Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E10 - From the Scorching Earth_Track3_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 18,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.622412600Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E11 - Battle at Torrington_Track3_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 18,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.712779800Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E12 - A Private War_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 28,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.828306600Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E13 - Banagher Links, Soldier_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 22,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:02.972093600Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E14 - Clash of the Two Unicorns_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 24,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.068688100Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E15 - Waiting in Space_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 14,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.162248300Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E16 - The Side Co-Prosperity Sphere_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=2 | criticas=0",
+   "tempoTotalMs": 21,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.256246800Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E17 - Nahel Argama Recaptured_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 21,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.356246600Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E18 - Fateful Battle_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 12,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.438544300Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E19 - Another Cosmic Glow_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 14,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.524511200Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E20 - Laplace's Box_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 20,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.659657700Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E21 - To the World's End_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=1 | criticas=0",
+   "tempoTotalMs": 14,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.755657200Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E22 - Return_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=0 | criticas=0",
+   "tempoTotalMs": 15,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:03.839178500Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile Suit Gundam Unicorn Re0096 (2016) - S01E01 - Departure 0096_Track4_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=9 | criticas=0",
+   "tempoTotalMs": 17,
+   "arquivosProcessados": 1,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-29T15:11:50.848398Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "legendas_extraidas_ass/Mobile.Suit.Gundam.F91_Track2.ass | modo=ORIGINAL | formatoOriginal=ASS | formatoTraduzido=— | anomalias=41 | criticas=0",
+   "tempoTotalMs": 59,
+   "arquivosProcessados": 1,
+   "itensDetectados": 41,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-30T14:54:46.423790600Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo (.ass)",
+   "detalhe": "legednas -en/[2ndfire]Mobile_Suit_Gundam_Narrative[BD][1080p][AV1][10bit][981A36A1]_Track3.ass | anomalias=0 | criticas=0",
+   "tempoTotalMs": 75,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:01:22.327031Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile.Suit.Gundam.0080.War.in.the.Pocket.S01E01_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=25 | criticas=0",
+   "tempoTotalMs": 28,
+   "arquivosProcessados": 1,
+   "itensDetectados": 25,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T12:17:50.997315200Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile.Suit.Gundam.0080.War.in.the.Pocket.S01E01_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=25 | criticas=0",
+   "tempoTotalMs": 15,
+   "arquivosProcessados": 1,
+   "itensDetectados": 25,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T12:18:11.055113800Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile.Suit.Gundam.0080.War.in.the.Pocket.S01E01_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=25 | criticas=0",
+   "tempoTotalMs": 27,
+   "arquivosProcessados": 1,
+   "itensDetectados": 25,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T13:19:47.061873200Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile.Suit.Gundam.0080.War.in.the.Pocket.S01E01_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=25 | criticas=0",
+   "tempoTotalMs": 17,
+   "arquivosProcessados": 1,
+   "itensDetectados": 25,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T13:23:11.599023900Z"
+  },
+  {
+   "tipo": "Auditoria de Conteudo de Legendas",
+   "detalhe": "traducao_ptbr/Mobile.Suit.Gundam.0080.War.in.the.Pocket.S01E01_Track2_PT-BR.ass | modo=AMBAS | formatoOriginal=ASS | formatoTraduzido=ASS | anomalias=25 | criticas=0",
+   "tempoTotalMs": 42,
+   "arquivosProcessados": 1,
+   "itensDetectados": 25,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T13:26:41.346663600Z"
+  }
+ ]
+}

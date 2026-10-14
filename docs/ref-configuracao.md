@@ -132,6 +132,7 @@ quarkus.log.file.rotation.max-backup-index=5
 | `tmdb.api-key` | `dummy_key` | Configure em `application-local.yml` para metadados via TMDB |
 | `quarkus.http.port` | **`8099`** | Porta do servidor. O padrão do Quarkus é 8080; o KRONOS usa 8099 para coexistir com outros apps Quarkus na mesma máquina |
 | `quarkus.http.host` | `127.0.0.1` | Bind apenas local |
+| `kronos.vitrine.ativa` (env `KRONOS_VITRINE_ATIVA`) | `false` | Liga a **vitrine pública**: telas abertas, toda função recusada com 403, dados de demonstração no lugar do que leria disco/rede/LLM. Só a imagem `Dockerfile.vitrine` a liga — ver [Contêiner](ref-docker.md#vitrine-pública-vps) |
 
 ---
 

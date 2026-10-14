@@ -1,0 +1,1671 @@
+{
+ "total": 185,
+ "fatia": "cache",
+ "operacoes": [
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=1; falhas=0",
+   "tempoTotalMs": 44899,
+   "arquivosProcessados": 50,
+   "itensDetectados": 20,
+   "itensCorrigidos": 19,
+   "registradoEm": "2026-08-11T11:33:58.748518200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 470,
+   "arquivosProcessados": 23,
+   "itensDetectados": 26,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-28T16:41:53.207588200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=12; falhas=0",
+   "tempoTotalMs": 23085,
+   "arquivosProcessados": 23,
+   "itensDetectados": 26,
+   "itensCorrigidos": 14,
+   "registradoEm": "2026-07-28T16:42:42.569350500Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 11386,
+   "arquivosProcessados": 23,
+   "itensDetectados": 6,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-28T16:43:18.839971800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 510,
+   "arquivosProcessados": 23,
+   "itensDetectados": 13,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-28T16:45:19.000227200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1472,
+   "arquivosProcessados": 50,
+   "itensDetectados": 52,
+   "itensCorrigidos": 8,
+   "registradoEm": "2026-07-28T17:02:03.881454500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1345,
+   "arquivosProcessados": 50,
+   "itensDetectados": 52,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T17:03:22.504781100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=13; falhas=0",
+   "tempoTotalMs": 46602,
+   "arquivosProcessados": 50,
+   "itensDetectados": 52,
+   "itensCorrigidos": 39,
+   "registradoEm": "2026-07-28T17:04:12.903597900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1338,
+   "arquivosProcessados": 13,
+   "itensDetectados": 20,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T21:35:07.022417700Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=8; falhas=0",
+   "tempoTotalMs": 15782,
+   "arquivosProcessados": 13,
+   "itensDetectados": 20,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-07-28T21:35:28.836364900Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 6302,
+   "arquivosProcessados": 13,
+   "itensDetectados": 3,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-28T21:36:16.121755700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 15321,
+   "arquivosProcessados": 172,
+   "itensDetectados": 244,
+   "itensCorrigidos": 34,
+   "registradoEm": "2026-07-31T00:04:52.585545300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1318,
+   "arquivosProcessados": 23,
+   "itensDetectados": 17,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-31T00:20:17.997710400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=12; falhas=0",
+   "tempoTotalMs": 14422,
+   "arquivosProcessados": 23,
+   "itensDetectados": 17,
+   "itensCorrigidos": 5,
+   "registradoEm": "2026-07-31T00:20:37.630173200Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 8183,
+   "arquivosProcessados": 23,
+   "itensDetectados": 3,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-31T00:20:58.816945600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:07:31.410277200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:10:33.397173600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:10:33.416935600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:21:29.198169800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:21:29.220579900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:27:27.925270600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:27:27.947558500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:40:01.794400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:40:01.816644700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:49:11.507437200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:49:11.549673500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:52:01.931540100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:52:01.953409100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:55:30.290314Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:55:30.305852200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:57:05.879833200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=NENHUM_CACHE_ENCONTRADO; falhas=0",
+   "tempoTotalMs": 1,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:57:05.896670600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 378,
+   "arquivosProcessados": 1,
+   "itensDetectados": 357,
+   "itensCorrigidos": 357,
+   "registradoEm": "2026-07-13T20:10:02.214983900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 229,
+   "arquivosProcessados": 1,
+   "itensDetectados": 357,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:21:46.914467100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; falhas=0",
+   "tempoTotalMs": 2168,
+   "arquivosProcessados": 1,
+   "itensDetectados": 4,
+   "itensCorrigidos": 4,
+   "registradoEm": "2026-07-13T20:21:49.091554100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 219,
+   "arquivosProcessados": 1,
+   "itensDetectados": 353,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:25:00.100216100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 245,
+   "arquivosProcessados": 1,
+   "itensDetectados": 350,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:28:09.893277400Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 3511,
+   "arquivosProcessados": 1,
+   "itensDetectados": 3,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:28:24.456298300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 199568,
+   "arquivosProcessados": 1,
+   "itensDetectados": 350,
+   "itensCorrigidos": 348,
+   "registradoEm": "2026-07-13T20:31:54.982348800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CANCELADO; falhas=0",
+   "tempoTotalMs": 116,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:32:16.222137Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 122,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:52:02.370095200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1488,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:52:03.874557600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 137,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:53:14.814142900Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1559,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:53:16.391606500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 137,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:58:47.383420800Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 6429,
+   "arquivosProcessados": 1,
+   "itensDetectados": 8,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:59:31.830268500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 114,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:59:42.435022200Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 4043,
+   "arquivosProcessados": 1,
+   "itensDetectados": 8,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T20:59:48.592221800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1404,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:00:02.868099800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 169,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:00:43.764301500Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 11009,
+   "arquivosProcessados": 1,
+   "itensDetectados": 8,
+   "itensCorrigidos": 4,
+   "registradoEm": "2026-07-13T21:01:00.381544100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1377,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:01:10.849553800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 120,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:06:35.072810200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1478,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:06:36.565887300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 130,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:08:37.676707200Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 3804,
+   "arquivosProcessados": 1,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:08:50.963646Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1319,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:09:03.636493Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 119,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:10:07.270549700Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 51404,
+   "arquivosProcessados": 1,
+   "itensDetectados": 4,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-13T21:11:00.270593400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1342,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:11:05.972248600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 114,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:15:14.863637100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1445,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:15:16.321310300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 123,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:17:03.670700800Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 375,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:17:07.119718600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1356,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:17:13.605124200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 113,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:30:17.070580Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 111,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:31:19.385612Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1406,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:31:20.805683900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 99,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:34:51.213438900Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1424,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:34:52.651630100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 120,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:48:18.778145300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1466,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:48:20.259486800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 125,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:59:19.405973900Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1760,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T21:59:21.182172800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 106,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:02:03.104231Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1389,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:02:04.506281800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 108,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:02:58.367812800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1369,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:02:59.752485800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 107,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:10:23.723160300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1480,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:10:25.216752100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 122,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:11:01.367216300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1496,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:11:02.878526300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 109,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:18:24.962504800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1436,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:18:26.413925200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 112,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:35:04.412140400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1485,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:35:05.915988900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 146,
+   "arquivosProcessados": 1,
+   "itensDetectados": 7,
+   "itensCorrigidos": 5,
+   "registradoEm": "2026-07-13T22:47:26.984986300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=1; falhas=0",
+   "tempoTotalMs": 2529,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-13T22:47:29.528518700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 118,
+   "arquivosProcessados": 1,
+   "itensDetectados": 6,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:07:52.122131600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=2; falhas=0",
+   "tempoTotalMs": 2663,
+   "arquivosProcessados": 1,
+   "itensDetectados": 5,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-13T23:07:54.798258800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 160,
+   "arquivosProcessados": 1,
+   "itensDetectados": 3,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:31:42.288431800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 2398,
+   "arquivosProcessados": 1,
+   "itensDetectados": 3,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-13T23:31:44.711127900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 130,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:31:56.436170900Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1372,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:31:57.824099900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 107,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:32:30.589663900Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1391,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:32:31.994485200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 111,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:34:03.894791700Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1482,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T23:34:05.392492Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 380,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T09:39:41.373360800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=4; falhas=0",
+   "tempoTotalMs": 2764,
+   "arquivosProcessados": 10,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T09:39:44.172263300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 314,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T09:39:54.322489400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=4; falhas=0",
+   "tempoTotalMs": 2529,
+   "arquivosProcessados": 9,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T09:39:56.876876400Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 320,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T09:53:29.623382300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 314,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T10:42:33.457014Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=1; falhas=0",
+   "tempoTotalMs": 899,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T10:42:34.371358700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 306,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T10:55:28.341448600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=1; falhas=0",
+   "tempoTotalMs": 672,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T10:55:29.026689200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 308,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T11:04:25.433504800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=4; falhas=0",
+   "tempoTotalMs": 2645,
+   "arquivosProcessados": 10,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T11:04:28.094337500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 296,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T11:38:44.394758800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 293,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T11:46:37.237309100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=7; falhas=0",
+   "tempoTotalMs": 4029,
+   "arquivosProcessados": 13,
+   "itensDetectados": 7,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T11:46:41.279034200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 320,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T12:07:43.335484600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CANCELADO; pendentes=3; falhas=0",
+   "tempoTotalMs": 2823,
+   "arquivosProcessados": 1,
+   "itensDetectados": 5,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-14T12:07:46.176398900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 402,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T12:37:45.084041500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 312,
+   "arquivosProcessados": 14,
+   "itensDetectados": 9,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T12:38:21.074346700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 727,
+   "arquivosProcessados": 13,
+   "itensDetectados": 1818,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T22:54:13.365201600Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 476,
+   "arquivosProcessados": 13,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-14T22:54:18.721932700Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=7; falhas=0",
+   "tempoTotalMs": 771777,
+   "arquivosProcessados": 13,
+   "itensDetectados": 1349,
+   "itensCorrigidos": 1342,
+   "registradoEm": "2026-07-14T23:07:13.195887900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1829,
+   "arquivosProcessados": 13,
+   "itensDetectados": 41,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-15T00:35:22.698660300Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 7520,
+   "arquivosProcessados": 13,
+   "itensDetectados": 3,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-15T00:35:40.767722400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=7; falhas=0",
+   "tempoTotalMs": 26069,
+   "arquivosProcessados": 13,
+   "itensDetectados": 41,
+   "itensCorrigidos": 34,
+   "registradoEm": "2026-07-15T00:36:13.019552600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1784,
+   "arquivosProcessados": 13,
+   "itensDetectados": 7,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-15T00:36:24.391035500Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1617,
+   "arquivosProcessados": 13,
+   "itensDetectados": 7,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-15T00:51:22.402870400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=7; falhas=0",
+   "tempoTotalMs": 6922,
+   "arquivosProcessados": 13,
+   "itensDetectados": 7,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-15T00:51:31.473921600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 1127,
+   "arquivosProcessados": 14,
+   "itensDetectados": 1408,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-18T01:12:02.758133200Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 3330,
+   "arquivosProcessados": 14,
+   "itensDetectados": 4,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-18T01:12:15.537997100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=7; falhas=0",
+   "tempoTotalMs": 1027720,
+   "arquivosProcessados": 14,
+   "itensDetectados": 1408,
+   "itensCorrigidos": 1401,
+   "registradoEm": "2026-07-18T01:38:00.202452Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 650,
+   "arquivosProcessados": 13,
+   "itensDetectados": 217,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-20T14:33:39.087528Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 3687,
+   "arquivosProcessados": 13,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-20T14:33:53.273245100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=4; falhas=0",
+   "tempoTotalMs": 121916,
+   "arquivosProcessados": 13,
+   "itensDetectados": 217,
+   "itensCorrigidos": 213,
+   "registradoEm": "2026-07-20T14:36:12.823513200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 522,
+   "arquivosProcessados": 13,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:33:04.968303400Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 3536,
+   "arquivosProcessados": 13,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:33:14.030240800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=4; falhas=0",
+   "tempoTotalMs": 3156,
+   "arquivosProcessados": 13,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:33:32.181289300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 143,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:43:41.540142Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 442,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:43:44.128442500Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 1356,
+   "arquivosProcessados": 1,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:43:47.598424Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:18:37.493141200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:18:37.520811600Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:25:44.821993400Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:25:44.843201100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:34:09.124682600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:34:09.144954400Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:39:02.951735500Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:39:02.972786300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:41:02.408408300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:41:02.423551300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 5,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:45:28.313055500Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:45:28.338621200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:47:23.800525800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T14:47:23.822668200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T15:02:51.525598800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T15:02:51.554693100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T15:57:48.050160300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T15:57:48.074103Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:08:42.586263200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:08:42.603871900Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:17:08.936642800Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:17:08.960188Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:18:37.667759200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:18:37.690322200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:41:53.335369200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T16:41:53.351414100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 5,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:10:31.060290Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:10:31.086880400Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:19:21.293370Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:19:21.319898700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:24:59.346120300Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:24:59.372407200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:33:47.474619100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:33:47.501777100Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:38:48.568153100Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T17:38:48.592432700Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 4,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T18:10:10.501076500Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 3,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T18:10:10.522143800Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "traducao_animes_llm_local_quarkus/cache",
+   "tempoTotalMs": 2,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T19:07:31.388716Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 208,
+   "arquivosProcessados": 6,
+   "itensDetectados": 12,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T18:22:07.702587200Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 645,
+   "arquivosProcessados": 6,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T18:22:10.308952Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=2; falhas=0",
+   "tempoTotalMs": 7681,
+   "arquivosProcessados": 6,
+   "itensDetectados": 12,
+   "itensCorrigidos": 10,
+   "registradoEm": "2026-07-21T18:22:19.599031300Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 509,
+   "arquivosProcessados": 13,
+   "itensDetectados": 2,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-24T02:05:25.899237600Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; pendentes=1; falhas=0",
+   "tempoTotalMs": 2142,
+   "arquivosProcessados": 13,
+   "itensDetectados": 2,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-24T02:05:31.446777200Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; falhas=0",
+   "tempoTotalMs": 4971,
+   "arquivosProcessados": 13,
+   "itensDetectados": 5,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-24T02:06:23.969800200Z"
+  },
+  {
+   "tipo": "Limpeza de Cache",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 42,
+   "arquivosProcessados": 7,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-25T10:52:28.512705800Z"
+  },
+  {
+   "tipo": "Revisão Gramatical (cache LLM)",
+   "detalhe": "status=CONCLUIDO; falhas=0",
+   "tempoTotalMs": 85,
+   "arquivosProcessados": 7,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-25T10:53:12.868921200Z"
+  },
+  {
+   "tipo": "Correção Google (cache)",
+   "detalhe": "status=CONCLUIDO; pendentes=0; falhas=0",
+   "tempoTotalMs": 1954,
+   "arquivosProcessados": 7,
+   "itensDetectados": 2,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-25T10:53:18.418221500Z"
+  }
+ ]
+}

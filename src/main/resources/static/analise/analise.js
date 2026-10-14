@@ -1,4 +1,4 @@
-import { logNoConsole, montarTxtAnaliseMidia } from '../js/app.js';
+import { logNoConsole, montarTxtAnaliseMidia, mensagemDoErro } from '../js/app.js';
 
 export function initAnalise() {
     const btnExportar = document.getElementById('btn-exportar-analise');
@@ -43,7 +43,7 @@ export function initAnalise() {
 
             if (!res.ok) {
                 const erroTexto = await res.text();
-                throw new Error(erroTexto || 'Erro interno no servidor');
+                throw new Error(mensagemDoErro(erroTexto, 'Erro interno no servidor'));
             }
 
             const data = await res.json();

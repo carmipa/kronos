@@ -1,3 +1,5 @@
+import { mensagemDoErro } from '../js/app.js';
+
 export function initMapa() {
     const btnGerar = document.getElementById('btn-gerar-mapa');
     const btnExportar = document.getElementById('btn-exportar-mapa');
@@ -45,7 +47,7 @@ export function initMapa() {
 
                 if (!res.ok) {
                     const erro = await res.text();
-                    throw new Error(erro || 'Erro ao gerar o mapa');
+                    throw new Error(mensagemDoErro(erro, 'Erro ao gerar o mapa'));
                 }
 
                 const data = await res.json();

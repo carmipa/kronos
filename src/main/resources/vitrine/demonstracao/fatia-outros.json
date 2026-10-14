@@ -1,0 +1,15 @@
+{
+ "total": 1,
+ "fatia": "outros",
+ "operacoes": [
+  {
+   "tipo": "Karaokê Simples (simulação)",
+   "detalhe": "origem=[Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/traducao_ptbr-karaoke-ptbr; destino=[Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/legenda-simplificada; arquivosSemMudanca=0; estilosNaoReconhecidos=50; camadasInvertidas=0",
+   "tempoTotalMs": 1804,
+   "arquivosProcessados": 26,
+   "itensDetectados": 50,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-08T20:30:32.208283100Z"
+  }
+ ]
+}

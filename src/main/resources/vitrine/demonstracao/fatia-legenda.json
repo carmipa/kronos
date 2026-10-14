@@ -1,0 +1,456 @@
+{
+ "total": 50,
+ "fatia": "legenda",
+ "operacoes": [
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr_sem_lore; alterados=0; falas=0",
+   "tempoTotalMs": 37,
+   "arquivosProcessados": 3,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T20:00:36.822978400Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=22; falas=785",
+   "tempoTotalMs": 147,
+   "arquivosProcessados": 22,
+   "itensDetectados": 22,
+   "itensCorrigidos": 785,
+   "registradoEm": "2026-08-06T20:00:37.852065500Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=1; falas=58",
+   "tempoTotalMs": 16,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 58,
+   "registradoEm": "2026-08-06T20:00:38.652299900Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=49; falas=19495",
+   "tempoTotalMs": 372,
+   "arquivosProcessados": 49,
+   "itensDetectados": 49,
+   "itensCorrigidos": 19495,
+   "registradoEm": "2026-08-06T20:00:39.914490700Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=50; falas=8760",
+   "tempoTotalMs": 576,
+   "arquivosProcessados": 50,
+   "itensDetectados": 50,
+   "itensCorrigidos": 8760,
+   "registradoEm": "2026-08-06T20:00:41.025250700Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: ptbr; alterados=0; falas=0",
+   "tempoTotalMs": 24,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T20:00:41.387429900Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=22; falas=717",
+   "tempoTotalMs": 235,
+   "arquivosProcessados": 23,
+   "itensDetectados": 22,
+   "itensCorrigidos": 717,
+   "registradoEm": "2026-08-06T20:00:42.513011600Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=6; falas=2054",
+   "tempoTotalMs": 85,
+   "arquivosProcessados": 6,
+   "itensDetectados": 6,
+   "itensCorrigidos": 2054,
+   "registradoEm": "2026-08-06T20:00:43.273507800Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=15; falas=489",
+   "tempoTotalMs": 126,
+   "arquivosProcessados": 15,
+   "itensDetectados": 15,
+   "itensCorrigidos": 489,
+   "registradoEm": "2026-08-06T20:00:44.230768200Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=1; falas=2589",
+   "tempoTotalMs": 961,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 2589,
+   "registradoEm": "2026-08-06T20:00:45.985714500Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=1; falas=92",
+   "tempoTotalMs": 25,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 92,
+   "registradoEm": "2026-08-06T20:00:46.075140200Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=13; falas=1164",
+   "tempoTotalMs": 124,
+   "arquivosProcessados": 13,
+   "itensDetectados": 13,
+   "itensCorrigidos": 1164,
+   "registradoEm": "2026-08-06T20:00:47.014545100Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr_sem_lore; alterados=7; falas=20636",
+   "tempoTotalMs": 483,
+   "arquivosProcessados": 7,
+   "itensDetectados": 7,
+   "itensCorrigidos": 20636,
+   "registradoEm": "2026-08-06T20:00:48.288143800Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_ptbr; alterados=15; falas=2634",
+   "tempoTotalMs": 1453,
+   "arquivosProcessados": 15,
+   "itensDetectados": 15,
+   "itensCorrigidos": 2634,
+   "registradoEm": "2026-08-06T20:00:50.179320700Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 424,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T21:35:03.652188400Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: traducao_ptbr",
+   "tempoTotalMs": 320,
+   "arquivosProcessados": 26,
+   "itensDetectados": 24,
+   "itensCorrigidos": 24,
+   "registradoEm": "2026-08-08T13:27:12.756665200Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: traducao_ptbr-karaoke-ptbr",
+   "tempoTotalMs": 128,
+   "arquivosProcessados": 13,
+   "itensDetectados": 12,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-08-09T23:46:53.521195100Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: traducao_ptbr",
+   "tempoTotalMs": 513,
+   "arquivosProcessados": 50,
+   "itensDetectados": 50,
+   "itensCorrigidos": 50,
+   "registradoEm": "2026-08-10T01:41:47.145516100Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 374,
+   "arquivosProcessados": 22,
+   "itensDetectados": 22,
+   "itensCorrigidos": 120,
+   "registradoEm": "2026-08-12T14:33:44.598609Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_extraidas_ass; alterados=21; falas=0",
+   "tempoTotalMs": 1024,
+   "arquivosProcessados": 22,
+   "itensDetectados": 21,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-12T14:33:54.065293400Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 346,
+   "arquivosProcessados": 22,
+   "itensDetectados": 22,
+   "itensCorrigidos": 120,
+   "registradoEm": "2026-08-13T19:14:30.868833600Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 520,
+   "arquivosProcessados": 50,
+   "itensDetectados": 50,
+   "itensCorrigidos": 50,
+   "registradoEm": "2026-08-16T00:59:30.276781900Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 147,
+   "arquivosProcessados": 13,
+   "itensDetectados": 12,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-08-16T10:01:08.905831600Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: achatar-teste; alterados=1; falas=174",
+   "tempoTotalMs": 49,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 174,
+   "registradoEm": "2026-07-29T15:21:44.493766900Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: achatar-teste2; alterados=1; falas=174",
+   "tempoTotalMs": 30,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 174,
+   "registradoEm": "2026-07-29T16:00:53.127550900Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: achatar-teste3; alterados=1; falas=36",
+   "tempoTotalMs": 31,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 36,
+   "registradoEm": "2026-07-29T16:04:20.001983700Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas pt",
+   "tempoTotalMs": 32,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-13T22:56:46.267842500Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas ptbr",
+   "tempoTotalMs": 115,
+   "arquivosProcessados": 13,
+   "itensDetectados": 12,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-07-14T23:25:42.179518500Z"
+  },
+  {
+   "tipo": "Correcao de Legendas (.ass original->traduzida)",
+   "detalhe": "Original: [Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/legendas en | Traduzida: [Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/karaoke simples-karaoke-ptbr",
+   "tempoTotalMs": 244,
+   "arquivosProcessados": 13,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-15T00:57:54.221417700Z"
+  },
+  {
+   "tipo": "Correcao de Legendas (.ass original->traduzida)",
+   "detalhe": "Original: [Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/legendas en | Traduzida: [Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/karaoke simples-karaoke-ptbr",
+   "tempoTotalMs": 3473605,
+   "arquivosProcessados": 13,
+   "itensDetectados": 3080,
+   "itensCorrigidos": 3080,
+   "registradoEm": "2026-07-15T02:15:46.176344500Z"
+  },
+  {
+   "tipo": "Correcao de Legendas (.ass original->traduzida)",
+   "detalhe": "Original: [Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/legendas_extraidas_ass | Traduzida: [Joseki] Mobile Suit Gundam The 08th MS Team COMPLETE (1996)(BD AV1 1080p Opus)[Sub Eng]/simples-karaoke-ptbr",
+   "tempoTotalMs": 327,
+   "arquivosProcessados": 13,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-20T17:16:52.827814500Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 126,
+   "arquivosProcessados": 22,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-20T21:57:12.669060200Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 90,
+   "arquivosProcessados": 13,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-20T23:43:59.030570300Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_extraidas_ass; alterados=26; falas=631",
+   "tempoTotalMs": 629,
+   "arquivosProcessados": 26,
+   "itensDetectados": 26,
+   "itensCorrigidos": 631,
+   "registradoEm": "2026-07-21T00:48:41.028095800Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 443,
+   "arquivosProcessados": 26,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T00:48:44.481067Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_extraidas_ass; alterados=22; falas=566",
+   "tempoTotalMs": 517,
+   "arquivosProcessados": 22,
+   "itensDetectados": 22,
+   "itensCorrigidos": 566,
+   "registradoEm": "2026-07-21T00:55:05.088606700Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 343,
+   "arquivosProcessados": 22,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T00:55:11.286429100Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_extraidas_ass; alterados=6; falas=2054",
+   "tempoTotalMs": 168,
+   "arquivosProcessados": 6,
+   "itensDetectados": 6,
+   "itensCorrigidos": 2054,
+   "registradoEm": "2026-07-21T01:02:29.203546200Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 112,
+   "arquivosProcessados": 6,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:02:31.734360900Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: simples-karaoke-ptbr",
+   "tempoTotalMs": 171,
+   "arquivosProcessados": 13,
+   "itensDetectados": 12,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-07-21T01:40:18.893874200Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_ptbr; alterados=22; falas=6517",
+   "tempoTotalMs": 892,
+   "arquivosProcessados": 22,
+   "itensDetectados": 22,
+   "itensCorrigidos": 6517,
+   "registradoEm": "2026-08-06T18:13:01.143873400Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=23; falas=13232",
+   "tempoTotalMs": 1408,
+   "arquivosProcessados": 23,
+   "itensDetectados": 23,
+   "itensCorrigidos": 13232,
+   "registradoEm": "2026-08-06T20:00:36.345979900Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: legendas_ptbr_corrigidas; alterados=0; falas=0",
+   "tempoTotalMs": 29,
+   "arquivosProcessados": 6,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-06T20:00:36.448763600Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas pt",
+   "tempoTotalMs": 52,
+   "arquivosProcessados": 1,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T01:45:35.927507900Z"
+  },
+  {
+   "tipo": "Correcao de Legendas (.ass original->traduzida)",
+   "detalhe": "Original: Gundam Narrative NT/legednas -en | Traduzida: Gundam Narrative NT/simples-karaoke-ptbr",
+   "tempoTotalMs": 417817,
+   "arquivosProcessados": 1,
+   "itensDetectados": 969,
+   "itensCorrigidos": 969,
+   "registradoEm": "2026-07-21T01:53:51.015996900Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 106,
+   "arquivosProcessados": 15,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-21T02:01:09.872655200Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: legendas_extraidas_ass",
+   "tempoTotalMs": 101,
+   "arquivosProcessados": 13,
+   "itensDetectados": 12,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-07-21T23:30:27.359847200Z"
+  },
+  {
+   "tipo": "Achatar Estilos Decorativos",
+   "detalhe": "Diretório: traducao_ptbr; alterados=7; falas=393",
+   "tempoTotalMs": 43,
+   "arquivosProcessados": 7,
+   "itensDetectados": 7,
+   "itensCorrigidos": 393,
+   "registradoEm": "2026-07-25T11:03:42.396462Z"
+  },
+  {
+   "tipo": "Troca de Fontes ASS",
+   "detalhe": "Diretório: traducao_ptbr",
+   "tempoTotalMs": 101,
+   "arquivosProcessados": 7,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-25T11:03:45.458853900Z"
+  },
+  {
+   "tipo": "Correcao de Legendas (.ass original->traduzida)",
+   "detalhe": "Original: f1/en | Traduzida: f1/simples-karaoke-ptbr",
+   "tempoTotalMs": 86,
+   "arquivosProcessados": 1,
+   "itensDetectados": 64,
+   "itensCorrigidos": 64,
+   "registradoEm": "2026-07-25T11:18:21.658083600Z"
+  }
+ ]
+}

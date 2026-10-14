@@ -474,6 +474,9 @@ async function atualizarStatusConexao() {
         if (res.ok) {
             indicador.className = 'status-indicator online';
             statusText.textContent = 'Backend Online';
+            if (res.headers.get('X-Kronos-Vitrine') === '1') {
+                ativarFaixaVitrine();
+            }
         } else {
             throw new Error();
         }
@@ -484,6 +487,69 @@ async function atualizarStatusConexao() {
 
     // Repete a verificação a cada 10 segundos
     setTimeout(atualizarStatusConexao, 10000);
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: avisa quem visita a vitrine pública do KRONOS (VPS) que as telas estão
+ * abertas para conhecer o sistema, mas as funções só rodam na instalação local — para ninguém
+ * concluir que o site quebrou quando uma ação é recusada.
+ *
+ * INVARIANTES DO DOMÍNIO: só aparece quando o servidor manda o cabeçalho X-Kronos-Vitrine (a
+ * instalação local nunca o manda); é criada uma única vez; o texto visível já explica, e o
+ * tooltip (também pelo teclado, via tabindex) só acrescenta detalhe — ícone e tooltip reforçam,
+ * nunca substituem o texto.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: sem o contêiner principal na página, não faz nada.
+ */
+function ativarFaixaVitrine() {
+    if (document.querySelector('.faixa-vitrine')) return;
+    const principal = document.querySelector('.main-content');
+    if (!principal) return;
+
+    const faixa = document.createElement('div');
+    faixa.className = 'faixa-vitrine';
+    faixa.setAttribute('role', 'note');
+    faixa.tabIndex = 0;
+    faixa.setAttribute('data-tooltip',
+        'Vitrine: cada tela mostra como o KRONOS funciona. Executar, gravar e ler o acervo só acontece '
+        + 'na instalação local, na máquina de quem usa. Os números da Telemetria são um retrato '
+        + 'de 14/10/2026, não atualizam ao vivo.');
+
+    const icone = document.createElement('span');
+    icone.className = 'material-symbols-outlined';
+    icone.setAttribute('aria-hidden', 'true');
+    icone.setAttribute('translate', 'no');
+    icone.textContent = 'storefront';
+
+    const texto = document.createElement('span');
+    texto.textContent = 'Vitrine do KRONOS — conheça as telas à vontade; as funções só rodam na instalação local.';
+
+    faixa.append(icone, texto);
+    principal.insertBefore(faixa, principal.firstChild);
+    document.body.classList.add('modo-vitrine');
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: transforma o corpo de uma resposta de erro do servidor na frase que a
+ * pessoa deve ler — o servidor responde JSON ({mensagem} ou {erro}), e mostrar o JSON cru no
+ * console da tela esconde a mensagem dentro de chaves e aspas.
+ *
+ * INVARIANTES DO DOMÍNIO: preferência mensagem > erro > error; corpo que não é JSON volta como
+ * veio (proxy, 500 cru), sem esconder nada.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: corpo vazio devolve o texto padrão recebido.
+ */
+export function mensagemDoErro(texto, padrao) {
+    if (!texto) return padrao;
+    try {
+        const json = JSON.parse(texto);
+        if (json && typeof json === 'object') {
+            return json.mensagem || json.erro || json.error || padrao;
+        }
+    } catch (_) {
+        // não é JSON: devolve como veio
+    }
+    return texto;
 }
 
 /**
@@ -1647,7 +1713,16 @@ function inicializarBotaoSair() {
         btnCancelar.disabled = true;
         try {
             const res = await fetch('/api/sistema/sair', { method: 'POST' });
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                // Recusa (vitrine pública ou falha do servidor): a aplicação NÃO encerrou,
+                // então a tela de "encerrada" seria mentira.
+                mostrarAlerta(data.mensagem || data.erro || `Não foi possível encerrar (HTTP ${res.status}).`, 'aviso');
+                modal.classList.add('hidden');
+                btnConfirmar.disabled = false;
+                btnCancelar.disabled = false;
+                return;
+            }
             mostrarAlerta(data.mensagem || 'Encerrando a aplicação...', 'aviso');
             modal.classList.add('hidden');
             overlayEncerrado.classList.remove('hidden');

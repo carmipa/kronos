@@ -210,4 +210,72 @@ continua sendo o que falta para isso valer.
 (≈19,4 GB dos 39,7 GB da máquina), então o host sempre sobra. Num Docker Engine
 sobre Linux, onde o daemon divide a RAM com todo o resto, esse teto não existe e
 o `docker build` precisaria de `--memory`. Fica declarado, sem mecanismo: o
-KRONOS não sai desta máquina.
+KRONOS completo não sai desta máquina — o que vai à VPS é só a vitrine (abaixo),
+que não executa nada.
+
+## Vitrine pública (VPS)
+
+Decisão de Paulo em 14/10/2026: o KRONOS sobe na VPS como **vitrine** — as telas
+abrem e se mostram, mas **nenhuma função roda fora da máquina de quem usa**. É
+outra imagem, `Dockerfile.vitrine`, com o compose `docker-compose.vitrine.yml`.
+
+```powershell
+docker compose -f docker-compose.vitrine.yml up -d --build   # prova local em http://127.0.0.1:18099/
+```
+
+### Cinco camadas, cada uma recusa sozinha
+
+| camada | onde | o que impede |
+|---|---|---|
+| filtro na frente de **todas** as rotas | `vitrine/presentation/web/GuardaVitrine` (`@Observes Filters`) | roda antes do estático, do JAX-RS, das rotas Spring e do MCP; lista de **permitidos** (`PoliticaVitrine`): rota nova nasce bloqueada |
+| fila e processo externo | `core/vitrine/ModoVitrine`, chamado por `FilaExecucaoPipeline` e `ProcessoExternoUtil` | mesmo que uma rota escapasse, nenhum job entra na fila e nenhum processo é criado |
+| MCP desligado **no build** | `-Dquarkus.mcp.server.http.enabled=false` no `Dockerfile.vitrine` | o endpoint `/mcp` nem existe na imagem |
+| imagem sem ferramenta | `Dockerfile.vitrine` | sem ffmpeg, mkvtoolnix, git ou hunspell; sem acervo, cache ou dataset montados; disco somente leitura |
+| conferência no arranque | `vitrine/presentation/bootstrap/ConferenciaArranqueVitrine` | não sobe com `app.modo` ≠ WEB, navegador automático ou MCP ligados |
+
+### O que a tela recebe
+
+- **Real (só lê memória):** estáticos (`html js css webp png svg ico`),
+  `/api/status`, `/api/pipeline/status`, `/api/contextos`,
+  `/api/revisao-lore/contextos` e `/api/docs/*` (as 28 páginas desta pasta).
+- **Demonstração** (`src/main/resources/vitrine/demonstracao/`): telemetria,
+  fatias, fluxo, LLM e capacidade do diálogo. A telemetria é um **retrato saneado**
+  da real, de 14/10/2026: caminhos encurtados para os dois últimos segmentos e
+  listas cortadas nas entradas mais recentes. `VitrineConteudoPublicoTest` reprova
+  o build se aparecer caminho, IP, máquina, dono ou chave.
+- **Os dois SSE** são substitutos que mantêm a conexão com batimento (a tela
+  reconecta a cada 5 s se o fluxo cair) e nunca leem o console nem o cache real.
+- **Todo o resto: 403.** Chamada de script recebe JSON `{erro, mensagem, vitrine}`;
+  navegação direta recebe uma página legível com link de volta. A faixa amarela no
+  topo da tela avisa que é a vitrine.
+
+### Por que o filtro não é JAX-RS
+
+Filtro JAX-RS não alcança arquivo estático (servido antes) nem o MCP (rota do
+Vert.x) — cicatriz do binmapper em 02/09/2026. O `Filters` do Quarkus entra no
+roteador antes de qualquer rota, e o teste prova com um arquivo plantado só no
+classpath de teste (`prova-vitrine/nao-deve-vazar.txt`): 403 com a vitrine ligada,
+200 com ela desligada.
+
+### Deploy na VPS
+
+É decisão de Paulo (domínio e proxy). O contêiner publica só em
+`127.0.0.1:18099`; quem expõe é o NPM. **Nunca** publicar a imagem do `Dockerfile`
+comum na VPS: ela é o sistema completo.
+
+### O que já foi verificado (14/10/2026, notebook, Docker 29.3.1)
+
+| Verificação | Resultado |
+|---|---|
+| Imagem `kronos-vitrine:local` | **204 MB** (a completa tem 1,32 GB); boot em ~1,5 s; `[VITRINE] MODO VITRINE ATIVO` no log |
+| Contêiner | `ReadonlyRootfs=true`, `CapDrop=[ALL]`, usuário `kronos`, porta só em `127.0.0.1`; **~165–189 MiB** de 512 MiB |
+| Matriz de fora, por socket cru (49 rotas do código + MCP + `/q` + estáticos + caminhos disfarçados) | **83 medidas, 0 divergência**; o contêiner segue vivo depois de `POST /api/sistema/sair` |
+| Variável `KRONOS_VITRINE_ATIVA` removida do processo | o `config/application.properties` da imagem mantém a vitrine: `POST /api/mapa` e `/api/sistema/sair` = 403 |
+| Variável vazia (`KRONOS_VITRINE_ATIVA=`) | a aplicação **recusa subir** (valor booleano inválido) — falha fechada |
+| Vitrine desligada de propósito (`=false`) | `/mcp` e `/mcp/sse` = **404**: o endpoint não existe no build; `POST /api/mapa` = 500 (disco somente leitura) |
+| Tela no navegador | faixa da vitrine visível; Telemetria com o retrato (9 fatias, 974 operações); Mapa, Tradução e Extração mostram a frase da vitrine; "Sair" avisa e **não** mostra a tela de encerrada; console só com os 403 esperados |
+| Testes | 132 da vitrine; **12 mutações** (política, fila, processo externo, arranque, filtro não registrado, contador do SSE) derrubaram os testes pela causa certa; suíte completa 3013/0 |
+
+**Não verificado:** a vitrine atrás do NPM na VPS (o deploy é decisão de Paulo) —
+em particular, se o proxy repassa o SSE sem bufferizar (o filtro já manda
+`X-Accel-Buffering: no`).

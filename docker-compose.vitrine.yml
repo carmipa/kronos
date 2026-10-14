@@ -1,0 +1,30 @@
+# KRONOS CORE — VITRINE pública (só as telas; nenhuma função executa). Ver Dockerfile.vitrine.
+#
+# Prova local: docker compose -f docker-compose.vitrine.yml up -d --build
+#              navegador em http://127.0.0.1:18099/
+#
+# Sem volume nenhum: a vitrine não vê acervo, cache, logs nem dataset da máquina. O disco da
+# imagem é somente leitura; logs/ e tmp/ vivem em memória e somem a cada reinício.
+name: kronos-vitrine
+
+services:
+  kronos-vitrine:
+    build:
+      context: .
+      dockerfile: Dockerfile.vitrine
+    image: kronos-vitrine:local
+    container_name: kronos-vitrine
+    restart: unless-stopped
+    # Só na interface local da máquina: quem publica para fora é o proxy (NPM na VPS).
+    ports:
+      - "127.0.0.1:18099:8099"
+    read_only: true
+    tmpfs:
+      - /app/logs:rw,noexec,nosuid,size=64m,mode=1777
+      - /app/tmp:rw,exec,nosuid,size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    pids_limit: 256

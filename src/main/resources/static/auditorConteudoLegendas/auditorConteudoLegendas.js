@@ -1,4 +1,4 @@
-import { logNoConsole, mostrarAlerta } from '../js/app.js';
+import { logNoConsole, mostrarAlerta, mensagemDoErro } from '../js/app.js';
 
 // v4.0: entraram as visões de tabela comparativa e gráfico. Subir a versão é obrigatório —
 // sem isso o navegador serve o HTML antigo em cache e os contêineres novos não existem, o
@@ -145,7 +145,7 @@ function vincularEventos() {
 
             if (!response.ok) {
                 const errMsg = await response.text();
-                throw new Error(errMsg || 'Falha ao auditar.');
+                throw new Error(mensagemDoErro(errMsg, 'Falha ao auditar.'));
             }
 
             const relatorio = await response.json();

@@ -1,0 +1,222 @@
+{
+ "total": 24,
+ "fatia": "terminologia",
+ "operacoes": [
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 8531,
+   "arquivosProcessados": 50,
+   "itensDetectados": 1,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-11T11:52:59.274834100Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia",
+   "detalhe": "status=CONCLUIDO; pulados=0; falhas=0",
+   "tempoTotalMs": 9331,
+   "arquivosProcessados": 50,
+   "itensDetectados": 1,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-08-11T11:55:06.955509300Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 6398,
+   "arquivosProcessados": 47,
+   "itensDetectados": 3,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T00:22:50.045431700Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia",
+   "detalhe": "status=CONCLUIDO; pulados=0; falhas=0",
+   "tempoTotalMs": 4621,
+   "arquivosProcessados": 47,
+   "itensDetectados": 3,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-28T00:23:14.607734900Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 4668,
+   "arquivosProcessados": 50,
+   "itensDetectados": 4,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T00:23:46.811495100Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia",
+   "detalhe": "status=CONCLUIDO; pulados=0; falhas=0",
+   "tempoTotalMs": 4764,
+   "arquivosProcessados": 50,
+   "itensDetectados": 4,
+   "itensCorrigidos": 4,
+   "registradoEm": "2026-07-28T00:24:09.165700800Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 886,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T16:37:42.356250100Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 878,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T16:44:15.747026900Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 5149,
+   "arquivosProcessados": 50,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T17:02:24.553673900Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=CONCLUIDO_COM_FALHAS; pulados=0; falhas=1",
+   "tempoTotalMs": 1,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T17:03:07.858042300Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 5221,
+   "arquivosProcessados": 50,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T17:05:39.599105100Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 1265,
+   "arquivosProcessados": 13,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T21:34:51.998675700Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=CONCLUIDO_COM_FALHAS; pulados=0; falhas=1",
+   "tempoTotalMs": 1,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T21:35:01.163083600Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 1238,
+   "arquivosProcessados": 13,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T21:36:54.292601600Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=CONCLUIDO_COM_FALHAS; pulados=0; falhas=1",
+   "tempoTotalMs": 0,
+   "arquivosProcessados": 0,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-28T21:36:57.700925300Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 16944,
+   "arquivosProcessados": 172,
+   "itensDetectados": 186,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-31T00:03:21.647252700Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 828,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-31T00:21:02.071804500Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 745,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-31T00:21:59.347293100Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 944,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-07-31T00:30:39.541650700Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 5580,
+   "arquivosProcessados": 47,
+   "itensDetectados": 26,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-04T01:00:09.992626800Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 6172,
+   "arquivosProcessados": 47,
+   "itensDetectados": 26,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-04T01:03:30.166507100Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_SEM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 829,
+   "arquivosProcessados": 23,
+   "itensDetectados": 0,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-04T01:09:15.498688800Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 5172,
+   "arquivosProcessados": 47,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-04T10:08:15.275340900Z"
+  },
+  {
+   "tipo": "Reforço de Terminologia (ensaio)",
+   "detalhe": "status=ENSAIO_COM_PENDENCIAS; pulados=0; falhas=0",
+   "tempoTotalMs": 4944,
+   "arquivosProcessados": 47,
+   "itensDetectados": 2,
+   "itensCorrigidos": 0,
+   "registradoEm": "2026-08-04T10:59:17.558891600Z"
+  }
+ ]
+}

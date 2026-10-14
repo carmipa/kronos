@@ -1,0 +1,49 @@
+{
+ "fatias": [
+  {
+   "total": 483,
+   "fatia": "revisao",
+   "operacoes": []
+  },
+  {
+   "total": 185,
+   "fatia": "cache",
+   "operacoes": []
+  },
+  {
+   "total": 96,
+   "fatia": "extracao",
+   "operacoes": []
+  },
+  {
+   "total": 78,
+   "fatia": "karaoke",
+   "operacoes": []
+  },
+  {
+   "total": 50,
+   "fatia": "legenda",
+   "operacoes": []
+  },
+  {
+   "total": 33,
+   "fatia": "auditoria",
+   "operacoes": []
+  },
+  {
+   "total": 24,
+   "fatia": "arquivos",
+   "operacoes": []
+  },
+  {
+   "total": 24,
+   "fatia": "terminologia",
+   "operacoes": []
+  },
+  {
+   "total": 1,
+   "fatia": "outros",
+   "operacoes": []
+  }
+ ]
+}

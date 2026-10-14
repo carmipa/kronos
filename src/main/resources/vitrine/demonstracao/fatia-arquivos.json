@@ -1,0 +1,222 @@
+{
+ "total": 24,
+ "fatia": "arquivos",
+ "operacoes": [
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=1; ignorados=0; pendentes=1",
+   "tempoTotalMs": 148,
+   "arquivosProcessados": 26,
+   "itensDetectados": 25,
+   "itensCorrigidos": 25,
+   "registradoEm": "2026-08-08T20:18:11.415675100Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=1; ignorados=0; pendentes=1",
+   "tempoTotalMs": 111,
+   "arquivosProcessados": 26,
+   "itensDetectados": 25,
+   "itensCorrigidos": 25,
+   "registradoEm": "2026-08-08T20:18:57.470459300Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 79,
+   "arquivosProcessados": 13,
+   "itensDetectados": 13,
+   "itensCorrigidos": 13,
+   "registradoEm": "2026-08-09T22:59:01.481302300Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 43,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-13T23:13:51.687413900Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 30,
+   "arquivosProcessados": 1,
+   "itensDetectados": 1,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-13T23:17:07.672080600Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=10; ignorados=0; pendentes=10",
+   "tempoTotalMs": 358,
+   "arquivosProcessados": 13,
+   "itensDetectados": 3,
+   "itensCorrigidos": 3,
+   "registradoEm": "2026-07-15T01:12:45.022603400Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=1; ignorados=0; pendentes=1",
+   "tempoTotalMs": 400,
+   "arquivosProcessados": 13,
+   "itensDetectados": 12,
+   "itensCorrigidos": 12,
+   "registradoEm": "2026-07-15T01:14:23.855972300Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=12; pendentes=0",
+   "tempoTotalMs": 273,
+   "arquivosProcessados": 13,
+   "itensDetectados": 1,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-15T01:15:07.678573500Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 337,
+   "arquivosProcessados": 13,
+   "itensDetectados": 13,
+   "itensCorrigidos": 13,
+   "registradoEm": "2026-07-15T01:15:33.216563700Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 356,
+   "arquivosProcessados": 13,
+   "itensDetectados": 13,
+   "itensCorrigidos": 13,
+   "registradoEm": "2026-07-15T02:17:45.465518100Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 185,
+   "arquivosProcessados": 50,
+   "itensDetectados": 50,
+   "itensCorrigidos": 50,
+   "registradoEm": "2026-07-19T11:30:19.074305900Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 159,
+   "arquivosProcessados": 50,
+   "itensDetectados": 50,
+   "itensCorrigidos": 50,
+   "registradoEm": "2026-07-19T11:30:26.622879200Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=2; ignorados=0; pendentes=2",
+   "tempoTotalMs": 141,
+   "arquivosProcessados": 49,
+   "itensDetectados": 47,
+   "itensCorrigidos": 47,
+   "registradoEm": "2026-07-19T16:52:10.796963400Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 125,
+   "arquivosProcessados": 47,
+   "itensDetectados": 47,
+   "itensCorrigidos": 47,
+   "registradoEm": "2026-07-19T16:52:21.155163200Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 104,
+   "arquivosProcessados": 22,
+   "itensDetectados": 22,
+   "itensCorrigidos": 22,
+   "registradoEm": "2026-07-20T20:59:03.746307800Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=11; ignorados=0; pendentes=11",
+   "tempoTotalMs": 93,
+   "arquivosProcessados": 13,
+   "itensDetectados": 2,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-20T23:50:54.221644800Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=11; ignorados=0; pendentes=11",
+   "tempoTotalMs": 100,
+   "arquivosProcessados": 13,
+   "itensDetectados": 2,
+   "itensCorrigidos": 2,
+   "registradoEm": "2026-07-20T23:52:06.025039800Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO_COM_PENDENCIAS; conflitos=12; ignorados=0; pendentes=12",
+   "tempoTotalMs": 74,
+   "arquivosProcessados": 13,
+   "itensDetectados": 1,
+   "itensCorrigidos": 1,
+   "registradoEm": "2026-07-20T23:53:06.356364900Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 230,
+   "arquivosProcessados": 13,
+   "itensDetectados": 13,
+   "itensCorrigidos": 13,
+   "registradoEm": "2026-07-21T00:16:34.843390600Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 180,
+   "arquivosProcessados": 13,
+   "itensDetectados": 13,
+   "itensCorrigidos": 13,
+   "registradoEm": "2026-07-21T00:17:24.639295400Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 329,
+   "arquivosProcessados": 26,
+   "itensDetectados": 26,
+   "itensCorrigidos": 26,
+   "registradoEm": "2026-07-21T00:50:38.172351100Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 143,
+   "arquivosProcessados": 26,
+   "itensDetectados": 26,
+   "itensCorrigidos": 26,
+   "registradoEm": "2026-07-21T00:50:45.625409600Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 111,
+   "arquivosProcessados": 6,
+   "itensDetectados": 6,
+   "itensCorrigidos": 6,
+   "registradoEm": "2026-07-21T01:06:34.248755200Z"
+  },
+  {
+   "tipo": "Renomear Arquivos",
+   "detalhe": "status=CONCLUIDO; conflitos=0; ignorados=0; pendentes=0",
+   "tempoTotalMs": 76,
+   "arquivosProcessados": 6,
+   "itensDetectados": 6,
+   "itensCorrigidos": 6,
+   "registradoEm": "2026-07-21T01:06:39.982804600Z"
+  }
+ ]
+}

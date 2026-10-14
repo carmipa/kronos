@@ -2332,3 +2332,48 @@ span.console-action-icon.material-symbols-outlined {
     background: rgba(255, 255, 255, 0.08);
     font-size: 0.82em;
 }
+
+/* Faixa da VITRINE pública (VPS): aparece só quando o servidor manda X-Kronos-Vitrine.
+   Texto visível explica; o tooltip acrescenta detalhe e abre também pelo teclado. */
+.faixa-vitrine {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 1.5%;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.08);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.faixa-vitrine .material-symbols-outlined {
+    color: var(--accent-yellow);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.faixa-vitrine:focus-visible {
+    outline: 2px solid var(--accent-yellow);
+    outline-offset: 2px;
+}
+
+/* A faixa fica no topo: o balão abre para baixo, senão sairia da tela. */
+.faixa-vitrine[data-tooltip]::after {
+    bottom: auto;
+    top: 110%;
+    max-width: 420px;
+}
+
+.faixa-vitrine[data-tooltip]::before {
+    display: none;
+}
+
+.faixa-vitrine[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

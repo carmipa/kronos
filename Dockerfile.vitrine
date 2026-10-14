@@ -1,0 +1,88 @@
+# syntax=docker/dockerfile:1
+#
+# KRONOS CORE — imagem da VITRINE pública (VPS).
+#
+# POR QUE ESTA IMAGEM EXISTE
+# Decisão de Paulo, 14/10/2026: o KRONOS sobe na VPS como VITRINE — as telas abrem e se mostram,
+# mas nenhuma função roda fora da máquina de quem usa. O sistema completo continua sendo a imagem
+# do `Dockerfile` (local, ao lado do LM Studio). Esta aqui é outra coisa, montada para NÃO FAZER:
+#
+#   1. o filtro da fatia `vitrine` fica na frente de TODAS as rotas (KRONOS_VITRINE_ATIVA=true,
+#      embutido abaixo) — o que não está na lista pública responde 403;
+#   2. o MCP é desligado NO BUILD (quarkus.mcp.server.http.enabled é fixada no build): o endpoint
+#      /mcp nem existe nesta imagem;
+#   3. sem ffmpeg, mkvtoolnix, git ou hunspell: mesmo que uma rota escapasse, a ferramenta não
+#      está aqui para rodar;
+#   4. o arranque recusa subir com app.modo != WEB, navegador automático ou MCP ligados.
+#
+# O que ela leva além do jar: só as 28 páginas de docs/ que o menu Documentação mostra (já
+# públicas no repositório, conferidas sem conteúdo do método em 14/10/2026).
+#
+# Uso local de prova: docker compose -f docker-compose.vitrine.yml up -d --build
+# Deploy na VPS: decisão de Paulo (domínio, NPM) — ver docs/ref-docker.md, seção Vitrine.
+
+# --------------------------------------------------------------------------
+# Estágio 1 — build, com o MCP desligado.
+# --------------------------------------------------------------------------
+FROM eclipse-temurin:25-jdk-noble AS build
+WORKDIR /build
+
+COPY gradle gradle
+COPY gradlew gradlew.bat settings.gradle build.gradle gradle.properties ./
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
+
+COPY src src
+RUN ./gradlew build -x test --no-daemon \
+        -Dquarkus.package.jar.type=fast-jar \
+        -Dquarkus.mcp.server.http.enabled=false
+
+# --------------------------------------------------------------------------
+# Estágio 2 — execução. Só o JRE e o curl do healthcheck.
+# --------------------------------------------------------------------------
+FROM eclipse-temurin:25-jre-noble
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl tzdata \
+ && rm -rf /var/lib/apt/lists/*
+
+# KRONOS_VITRINE_ATIVA liga o filtro e a segunda camada do core (fila e processo externo).
+# Os endereços de LLM e Redis apontam para a porta 9 (discard) do próprio contêiner: nada aqui
+# deve alcançá-los, e se algo tentar, falha na hora em vez de achar um serviço por acaso.
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    TZ=America/Sao_Paulo \
+    KRONOS_VITRINE_ATIVA=true \
+    APP_MODO=WEB \
+    APP_BROWSER_AUTO_OPEN=false \
+    QUARKUS_HTTP_HOST=0.0.0.0 \
+    KRONOS_LLM_BASE_URL=http://127.0.0.1:9/v1 \
+    KRONOS_REDIS_URL=redis://127.0.0.1:9
+
+WORKDIR /app
+
+COPY --from=build /build/build/quarkus-app/lib/     lib/
+COPY --from=build /build/build/quarkus-app/*.jar    ./
+COPY --from=build /build/build/quarkus-app/app/     app/
+COPY --from=build /build/build/quarkus-app/quarkus/ quarkus/
+COPY docs/ docs/
+
+# Segunda fonte da mesma chave: se alguém tirar KRONOS_VITRINE_ATIVA do ambiente na VPS, o
+# config/application.properties do diretório de trabalho (lido pelo Quarkus) continua ligando a
+# vitrine. Pertence ao root e o disco é somente leitura no compose.
+RUN mkdir -p /app/config \
+ && printf 'kronos.vitrine.ativa=true\napp.modo=WEB\napp.browser.auto-open=false\n' > /app/config/application.properties
+
+# Usuário sem privilégio. logs/ e tmp/ recebem tmpfs no compose (o disco da imagem é somente
+# leitura); tmp/ precisa de exec porque o driver do SQLite da lore extrai a biblioteca nativa lá.
+RUN groupadd -r kronos && useradd -r -g kronos -d /app kronos \
+ && mkdir -p /app/logs /app/tmp \
+ && chown -R kronos:kronos /app/logs /app/tmp
+
+USER kronos
+
+EXPOSE 8099
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:8099/api/status >/dev/null || exit 1
+
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-Djava.io.tmpdir=/app/tmp", "-jar", "/app/quarkus-run.jar"]

@@ -61,8 +61,14 @@ export function initTraducao() {
         const contextoId = contextoSelect ? contextoSelect.value : null;
         const permitirRetraducao = document.getElementById('traducao-liberar-protecao')?.checked === true;
 
-        if (!contextosCarregados || !contextoId) {
+        if (!contextosCarregados) {
             logNoConsole('console-traducao', 'Lista de contextos de tradução ainda não carregou. Aguarde ou recarregue a página antes de iniciar.', 'erro');
+            return;
+        }
+        // Lista carregada e nenhuma obra escolhida é outro estado: mandar recarregar a página
+        // aqui faria a pessoa repetir uma ação inútil em vez de só escolher a obra.
+        if (!contextoId) {
+            logNoConsole('console-traducao', 'Escolha a obra (lore) no seletor antes de iniciar a tradução.', 'erro');
             return;
         }
 
