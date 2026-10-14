@@ -7,10 +7,10 @@
 #panel-traducao-karaoke .card-desc code {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 4px;
-    padding: 1px 5px;
+    padding: 0.0625rem 0.3125rem;
     font-size: 0.9em;
 }
 
 #panel-traducao-karaoke .console-body {
-    min-height: 220px;
+    min-height: 13.75rem;
 }

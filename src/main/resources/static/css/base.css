@@ -69,8 +69,8 @@ h1, h2, h3, h4, h5, h6,
 
 /* Scrollbars Universais (Premium Tech) */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 0.625rem;
+    height: 0.625rem;
 }
 ::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.3); 
@@ -88,7 +88,7 @@ h1, h2, h3, h4, h5, h6,
 /* Limite e rolagem para viewers/tabelas (consoles usam regra dedicada abaixo) */
 pre, .telemetria-container, .table-responsive, .logs-container {
     height: 50vh;
-    min-height: 150px;
+    min-height: 9.375rem;
     max-height: 95vh;
     overflow-y: auto !important;
     overflow-x: auto !important;
@@ -128,8 +128,8 @@ body {
    ========================================================================== */
 
 .sidebar {
-    flex: 0 0 262px;
-    width: 262px;
+    flex: 0 0 16.375rem;
+    width: 16.375rem;
     background: linear-gradient(180deg, #0a0f1b, #070a12);
     border-right: 1px solid var(--border-color);
     display: flex;
@@ -141,15 +141,15 @@ body {
 }
 
 .brand {
-    padding: 32px 24px;
+    padding: 2rem 1.5rem;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .brand-logo {
-    width: 38px;
-    height: 38px;
+    width: 2.375rem;
+    height: 2.375rem;
     border-radius: 50%;
     background-color: rgba(45, 212, 191, 0.1);
     border: 1px solid rgba(45, 212, 191, 0.3);
@@ -169,14 +169,14 @@ body {
 }
 
 .brand-logo span {
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #2dd4bf;
 }
 
 .brand-info h2 {
     font-size: 0.95rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03125rem;
 }
 
 .brand-info span {
@@ -184,17 +184,17 @@ body {
     color: var(--text-muted);
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03125rem;
     display: block;
-    margin-top: 1px;
+    margin-top: 0.0625rem;
 }
 
 .nav-menu {
     flex: 1;
-    padding: 12px 16px;
+    padding: 0.75rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0.25rem;
 }
 
 /* Nível 2 da sidebar — item de submenu (link de tela).
@@ -206,13 +206,13 @@ body {
     outline: none;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    min-height: 40px;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    min-height: 2.5rem;
     border-radius: 10px;
     color: #8b97ad;
     font-family: var(--font-main);
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
@@ -230,7 +230,7 @@ body {
     border-left: 3px solid var(--accent-cyan);
     border-radius: 0 10px 10px 0;
     /* compensa a barra de 3px para o texto não deslocar */
-    padding-left: 11px;
+    padding-left: 0.6875rem;
     font-weight: 600;
 }
 
@@ -240,7 +240,7 @@ body {
     flex-shrink: 0;
 }
 span.nav-icon.material-symbols-outlined {
-    font-size: 19px;
+    font-size: 1.1875rem;
     display: inline-block;
     vertical-align: middle;
 }
@@ -250,23 +250,23 @@ span.nav-icon.material-symbols-outlined {
 }
 
 span.btn-icon.material-symbols-outlined {
-    font-size: 16px;
+    font-size: 1rem;
     display: inline-block;
     vertical-align: middle;
 }
 span.btn-inline-icon.material-symbols-outlined {
-    font-size: 16px;
+    font-size: 1rem;
     display: inline-block;
     vertical-align: middle;
 }
 span.console-action-icon.material-symbols-outlined {
-    font-size: 14px;
+    font-size: 0.875rem;
     display: inline-block;
     vertical-align: middle;
 }
 /* Ícone do toast (info/erro/sucesso/aviso) gerado via JS */
 .toast .material-symbols-outlined.toast-icon {
-    font-size: 18px;
+    font-size: 1.125rem;
     vertical-align: middle;
     line-height: 1;
 }
@@ -277,12 +277,12 @@ span.console-action-icon.material-symbols-outlined {
     vertical-align: middle;
 }
 .card-icon-container .material-symbols-outlined {
-    font-size: 22px;
+    font-size: 1.375rem;
 }
 
 .sidebar-footer {
-    height: 60px;
-    padding: 0 24px;
+    height: 3.75rem;
+    padding: 0 1.5rem;
     display: flex;
     align-items: center;
     border-top: 1px solid var(--border-color);
@@ -293,12 +293,12 @@ span.console-action-icon.material-symbols-outlined {
 .status-indicator {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .status-indicator .dot {
-    width: 6px;
-    height: 6px;
+    width: 0.375rem;
+    height: 0.375rem;
     border-radius: 50%;
 }
 
@@ -329,7 +329,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .main-header {
-    padding: 32px 48px;
+    padding: 2rem 3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -338,8 +338,8 @@ span.console-action-icon.material-symbols-outlined {
 .header-title h1 {
     font-size: 1.35rem;
     font-weight: 600;
-    letter-spacing: -0.3px;
-    margin-bottom: 2px;
+    letter-spacing: -0.01875rem;
+    margin-bottom: 0.125rem;
 }
 
 .header-title p {
@@ -350,17 +350,17 @@ span.console-action-icon.material-symbols-outlined {
 .quick-stats .stat-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 0.0625rem;
 }
 
 .quick-stats .stat-label {
     font-size: 0.65rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03125rem;
     color: var(--text-muted);
     font-weight: 600;
 }
@@ -374,14 +374,14 @@ span.console-action-icon.material-symbols-outlined {
 /* Container de Painéis */
 .panels-container {
     flex: 1;
-    padding: 0 48px 48px 48px;
+    padding: 0 3rem 3rem 3rem;
     overflow: visible;
 }
 
 .panel {
     display: none;
     flex-direction: column;
-    gap: 24px;
+    gap: 1.5rem;
 }
 
 .panel.active {
@@ -396,29 +396,29 @@ span.console-action-icon.material-symbols-outlined {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 24px;
+    padding: 1.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .glass-card h2 {
     font-size: 1.05rem;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
 }
 
 .glass-card .card-desc {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
     line-height: 1.5;
 }
 
 .glass-card .card-hint {
     font-size: 0.78rem;
     color: var(--text-secondary);
-    margin: -12px 0 20px;
+    margin: -0.75rem 0 1.25rem;
     line-height: 1.5;
-    padding: 10px 12px;
+    padding: 0.625rem 0.75rem;
     border-left: 3px solid var(--accent-green, #4ade80);
     background: rgba(74, 222, 128, 0.06);
     border-radius: 0 6px 6px 0;
@@ -431,14 +431,14 @@ span.console-action-icon.material-symbols-outlined {
 .standard-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    max-width: 650px;
+    gap: 1rem;
+    max-width: 40.625rem;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0.375rem;
 }
 
 .form-group label {
@@ -452,7 +452,7 @@ span.console-action-icon.material-symbols-outlined {
     background-color: #080b13;
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 0.625rem 0.875rem;
     color: var(--text-primary);
     font-family: var(--font-main);
     font-size: 0.875rem;
@@ -474,7 +474,7 @@ span.console-action-icon.material-symbols-outlined {
 
 .input-with-button {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
     align-items: center;
 }
 
@@ -487,7 +487,7 @@ span.console-action-icon.material-symbols-outlined {
     border: 1px solid #f59e0b;
     color: #05070e;
     border-radius: 8px;
-    padding: 10px 16px;
+    padding: 0.625rem 1rem;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -495,7 +495,7 @@ span.console-action-icon.material-symbols-outlined {
     transition: var(--transition-fast);
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.375rem;
 }
 
 .btn-procurar:hover {
@@ -512,8 +512,8 @@ span.console-action-icon.material-symbols-outlined {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 0.5rem;
+    padding: 0.625rem 1.125rem;
     border-radius: 8px;
     font-family: var(--font-main);
     font-size: 0.85rem;
@@ -671,7 +671,7 @@ span.console-action-icon.material-symbols-outlined {
 /* Linha de botões de ação em formulários (analise, extracao, traducao, correcao, revisao, remuxer) */
 .correcao-actions {
     display: flex;
-    gap: 12px;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
@@ -695,9 +695,9 @@ span.console-action-icon.material-symbols-outlined {
 .op-alvo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 4px 0 18px;
-    padding: 10px 14px;
+    gap: 0.625rem;
+    margin: 0.25rem 0 1.125rem;
+    padding: 0.625rem 0.875rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.02);
@@ -707,7 +707,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .op-alvo-icone {
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
     line-height: 1;
     color: var(--text-muted);
     flex-shrink: 0;
@@ -740,8 +740,8 @@ span.console-action-icon.material-symbols-outlined {
 .op-caixa-cabecalho {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 6px;
+    gap: 0.625rem;
+    margin-bottom: 0.375rem;
 }
 
 .op-caixa-cabecalho h3 {
@@ -751,14 +751,14 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .op-caixa-icone {
-    font-size: 20px !important;
+    font-size: 1.25rem !important;
     line-height: 1;
     color: var(--accent-cyan);
 }
 
 .op-caixa-etiqueta {
     margin-left: auto;
-    padding: 3px 10px;
+    padding: 0.1875rem 0.625rem;
     border-radius: 999px;
     border: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.03);
@@ -774,7 +774,7 @@ span.console-action-icon.material-symbols-outlined {
     font-size: 0.8rem;
     color: var(--text-secondary);
     line-height: 1.5;
-    margin: 0 0 4px;
+    margin: 0 0 0.25rem;
 }
 
 .op-caixa-desc strong {
@@ -793,8 +793,8 @@ span.console-action-icon.material-symbols-outlined {
    clique.
    --------------------------------------------------------------------------- */
 .destino-card {
-    margin: 18px 0;
-    padding: 14px 16px 6px;
+    margin: 1.125rem 0;
+    padding: 0.875rem 1rem 0.375rem;
     border: 1px solid rgba(45, 212, 191, 0.3);
     border-left: 3px solid var(--accent-cyan);
     border-radius: 10px;
@@ -804,12 +804,12 @@ span.console-action-icon.material-symbols-outlined {
 .destino-card-cabecalho {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 0.625rem;
+    margin-bottom: 0.75rem;
 }
 
 .destino-card-icone {
-    font-size: 22px !important;
+    font-size: 1.375rem !important;
     line-height: 1.1;
     color: var(--accent-cyan);
 }
@@ -817,7 +817,7 @@ span.console-action-icon.material-symbols-outlined {
 .destino-card-titulo {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0.125rem;
     min-width: 0;
 }
 
@@ -835,7 +835,7 @@ span.console-action-icon.material-symbols-outlined {
 
 .destino-card-etiqueta {
     margin-left: auto;
-    padding: 3px 10px;
+    padding: 0.1875rem 0.625rem;
     border-radius: 999px;
     border: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.03);
@@ -856,15 +856,15 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .destino-card .form-group {
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
 }
 
 .destino-card-rodape {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 0.5rem;
     margin: 0;
-    padding: 8px 0 10px;
+    padding: 0.5rem 0 0.625rem;
     border-top: 1px solid rgba(45, 212, 191, 0.16);
     font-size: 0.78rem;
     color: var(--text-secondary);
@@ -872,7 +872,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .destino-card-rodape .material-symbols-outlined {
-    font-size: 17px !important;
+    font-size: 1.0625rem !important;
     line-height: 1.35;
     color: var(--accent-cyan);
 }
@@ -901,7 +901,7 @@ span.console-action-icon.material-symbols-outlined {
 /* ---- Lista de operações ---- */
 .op-lista {
     list-style: none;
-    margin: 14px 0 0;
+    margin: 0.875rem 0 0;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -911,18 +911,18 @@ span.console-action-icon.material-symbols-outlined {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: start;
-    gap: 14px;
-    padding: 16px 0;
+    gap: 0.875rem;
+    padding: 1rem 0;
     border-top: 1px solid var(--border-color);
 }
 
 .op-linha:first-child {
     border-top: none;
-    padding-top: 4px;
+    padding-top: 0.25rem;
 }
 
 .op-linha:last-child {
-    padding-bottom: 2px;
+    padding-bottom: 0.125rem;
 }
 
 /* Marcador da operação. .op-num numera quando a ORDEM importa; .op-marca é o
@@ -932,8 +932,8 @@ span.console-action-icon.material-symbols-outlined {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 1.625rem;
+    height: 1.625rem;
     border-radius: 50%;
     border: 1px solid var(--border-active);
     background: rgba(255, 255, 255, 0.04);
@@ -946,7 +946,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .op-marca .material-symbols-outlined {
-    font-size: 15px !important;
+    font-size: 0.9375rem !important;
     line-height: 1;
 }
 
@@ -959,7 +959,7 @@ span.console-action-icon.material-symbols-outlined {
 .op-texto {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 0.375rem;
     min-width: 0;
 }
 
@@ -986,12 +986,12 @@ span.console-action-icon.material-symbols-outlined {
 .op-selos {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 2px;
+    gap: 0.375rem;
+    margin-top: 0.125rem;
 }
 
 .op-selo {
-    padding: 2px 9px;
+    padding: 0.125rem 0.5625rem;
     border-radius: 999px;
     font-size: 0.68rem;
     font-weight: 600;
@@ -1034,7 +1034,7 @@ span.console-action-icon.material-symbols-outlined {
 .op-linha > .btn,
 .op-acao-travada {
     align-self: center;
-    min-width: 210px;
+    min-width: 13.125rem;
 }
 
 .op-linha > .btn {
@@ -1045,7 +1045,7 @@ span.console-action-icon.material-symbols-outlined {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 6px;
+    gap: 0.375rem;
 }
 
 .op-acao-travada .btn {
@@ -1079,9 +1079,9 @@ span.console-action-icon.material-symbols-outlined {
 .op-escopo {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    margin-top: 14px;
-    padding: 10px 14px;
+    gap: 0.625rem;
+    margin-top: 0.875rem;
+    padding: 0.625rem 0.875rem;
     border-radius: 10px;
     border: 1px solid rgba(245, 158, 11, 0.3);
     background: rgba(245, 158, 11, 0.06);
@@ -1091,7 +1091,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .op-escopo .material-symbols-outlined {
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
     line-height: 1.3;
     color: var(--accent-yellow);
     flex-shrink: 0;
@@ -1126,10 +1126,10 @@ span.console-action-icon.material-symbols-outlined {
    ========================================================================== */
 
 .console-card {
-    padding: 20px;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
     overflow: visible;
 }
 
@@ -1143,14 +1143,14 @@ span.console-action-icon.material-symbols-outlined {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03125rem;
     color: var(--text-muted);
 }
 
 .console-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .btn-clear-console,
@@ -1160,7 +1160,7 @@ span.console-action-icon.material-symbols-outlined {
 .btn-refresh-telemetria {
     background-color: transparent;
     border: 1px solid var(--border-color);
-    padding: 4px 10px;
+    padding: 0.25rem 0.625rem;
     border-radius: 4px;
     color: var(--text-secondary);
     font-family: var(--font-main);
@@ -1183,7 +1183,7 @@ span.console-action-icon.material-symbols-outlined {
 .console-body {
     background-color: var(--bg-primary);
     border-radius: 6px;
-    padding: 14px;
+    padding: 0.875rem;
     font-family: var(--font-code);
     font-size: 0.8rem;
     line-height: 1.5;
@@ -1194,8 +1194,8 @@ span.console-action-icon.material-symbols-outlined {
     flex: none;
     align-self: stretch;
     width: 100%;
-    height: 380px;
-    min-height: 180px;
+    height: 23.75rem;
+    min-height: 11.25rem;
     max-height: 85vh;
     overflow-y: auto;
     resize: vertical;
@@ -1207,7 +1207,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .log-line {
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
 }
 
 /*
@@ -1219,11 +1219,11 @@ span.console-action-icon.material-symbols-outlined {
  */
 .console-novas-linhas {
     position: absolute;
-    right: 18px;
-    bottom: 14px;
+    right: 1.125rem;
+    bottom: 0.875rem;
     z-index: 5;
     display: none;
-    padding: 6px 12px;
+    padding: 0.375rem 0.75rem;
     border: 1px solid var(--border-color);
     border-radius: 999px;
     background-color: var(--bg-secondary, #1b1f2a);
@@ -1241,17 +1241,17 @@ span.console-action-icon.material-symbols-outlined {
 .relatorio-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0.625rem;
 }
 
 .relatorio-cabecalho {
     position: sticky;
-    top: -14px; /* compensa o padding do .console-body para colar no topo */
+    top: -0.875rem; /* compensa o padding do .console-body para colar no topo */
     z-index: 2;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 6px;
     background: rgba(139, 92, 246, 0.12);
     border: 1px solid rgba(139, 92, 246, 0.28);
@@ -1264,11 +1264,11 @@ span.console-action-icon.material-symbols-outlined {
 .relatorio-titulo {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.375rem;
 }
 
 .relatorio-cabecalho .relatorio-icone {
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
     color: var(--accent-purple);
 }
 
@@ -1282,7 +1282,7 @@ span.console-action-icon.material-symbols-outlined {
 
 .relatorio-salvo {
     margin: 0;
-    padding: 12px 14px;
+    padding: 0.75rem 0.875rem;
     font-family: var(--font-code);
     font-size: 0.78rem;
     line-height: 1.55;
@@ -1302,10 +1302,10 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .viewer-card {
-    padding: 20px;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
     overflow: visible;
 }
 
@@ -1319,14 +1319,14 @@ span.console-action-icon.material-symbols-outlined {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03125rem;
     color: var(--text-muted);
 }
 
 .viewer-body {
     background-color: var(--bg-primary);
     border-radius: 6px;
-    padding: 16px;
+    padding: 1rem;
     font-family: var(--font-code);
     font-size: 0.8rem;
     line-height: 1.5;
@@ -1337,7 +1337,7 @@ span.console-action-icon.material-symbols-outlined {
     align-self: stretch;
     width: 100%;
     height: 45vh;
-    min-height: 240px;
+    min-height: 15rem;
     max-height: 85vh;
     overflow: auto;
     resize: vertical;
@@ -1361,8 +1361,8 @@ span.console-action-icon.material-symbols-outlined {
 .viewer-body::-webkit-scrollbar,
 .panels-container::-webkit-scrollbar,
 .telemetria-details-container::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 0.625rem;
+    height: 0.625rem;
 }
 
 .console-body::-webkit-scrollbar-track,
@@ -1380,7 +1380,7 @@ span.console-action-icon.material-symbols-outlined {
     background: rgba(255, 255, 255, 0.28);
     border-radius: 5px;
     border: 2px solid rgba(10, 13, 20, 0.8);
-    min-height: 40px;
+    min-height: 2.5rem;
 }
 
 .console-body::-webkit-scrollbar-thumb:hover,
@@ -1398,15 +1398,15 @@ span.console-action-icon.material-symbols-outlined {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 14px;
-    height: 14px;
+    width: 0.875rem;
+    height: 0.875rem;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.04);
     color: var(--text-muted);
     font-size: 0.65rem;
     font-weight: 700;
     cursor: help;
-    margin-left: 6px;
+    margin-left: 0.375rem;
     vertical-align: middle;
     transition: var(--transition-fast);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1431,14 +1431,14 @@ span.console-action-icon.material-symbols-outlined {
     background-color: #0F131E;
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
-    padding: 8px 12px;
+    padding: 0.5rem 0.75rem;
     border-radius: 6px;
     font-size: 0.725rem;
     font-weight: 400;
     line-height: 1.4;
     white-space: normal;
     width: max-content;
-    max-width: 250px;
+    max-width: 15.625rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     opacity: 0;
     pointer-events: none;
@@ -1503,8 +1503,8 @@ span.console-action-icon.material-symbols-outlined {
    ========================================================================== */
 
 .app-footer {
-    height: 60px;
-    padding: 0 24px;
+    height: 3.75rem;
+    padding: 0 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1520,7 +1520,7 @@ span.console-action-icon.material-symbols-outlined {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.5rem;
     font-size: 0.85rem;
     color: var(--text-secondary);
 }
@@ -1556,8 +1556,8 @@ span.console-action-icon.material-symbols-outlined {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    margin: 6px 0;
+    gap: 0.5rem;
+    margin: 0.375rem 0;
 }
 
 .footer-shields a {
@@ -1573,14 +1573,14 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .footer-shields img {
-    height: 20px;
+    height: 1.25rem;
     border-radius: 3px;
     display: block;
 }
 
 .footer-meta {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .meta-badge {
@@ -1589,7 +1589,7 @@ span.console-action-icon.material-symbols-outlined {
     color: var(--text-muted);
     background-color: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
-    padding: 3px 8px;
+    padding: 0.1875rem 0.5rem;
     border-radius: 4px;
 }
 
@@ -1598,11 +1598,11 @@ span.console-action-icon.material-symbols-outlined {
    ========================================================================== */
 .toast-container {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: 1.5rem;
+    right: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
     z-index: 9999;
     pointer-events: none;
 }
@@ -1610,15 +1610,15 @@ span.console-action-icon.material-symbols-outlined {
 .toast {
     background: #0e1420;
     color: var(--text-primary);
-    padding: 16px 20px;
+    padding: 1rem 1.25rem;
     border-radius: 12px;
     border: 1px solid var(--border-color);
     border-left: 5px solid var(--border-color);
     box-shadow: 0 12px 32px rgba(0,0,0,0.5);
     font-size: 0.85rem;
     font-weight: 500;
-    width: 380px;
-    max-width: calc(100vw - 48px);
+    width: 23.75rem;
+    max-width: calc(100vw - 3rem);
     word-break: break-word;
     transform: translateX(120%);
     opacity: 0;
@@ -1660,20 +1660,20 @@ span.console-action-icon.material-symbols-outlined {
 
 .toast-content {
     flex-grow: 1;
-    margin-right: 24px;
+    margin-right: 1.5rem;
     line-height: 1.4;
 }
 
 .toast-close {
     position: absolute;
-    top: 14px;
-    right: 12px;
+    top: 0.875rem;
+    right: 0.75rem;
     background: none;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
     font-size: 1.2rem;
-    padding: 4px;
+    padding: 0.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1692,12 +1692,12 @@ span.console-action-icon.material-symbols-outlined {
 
 .anime-meta-banner {
     display: flex;
-    gap: 20px;
+    gap: 1.25rem;
     background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
     border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 24px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 15px rgba(59, 130, 246, 0.15);
     backdrop-filter: blur(12px);
     transition: all 0.3s ease-in-out;
@@ -1711,8 +1711,8 @@ span.console-action-icon.material-symbols-outlined {
 
 .meta-poster-container {
     flex-shrink: 0;
-    width: 100px;
-    height: 140px;
+    width: 6.25rem;
+    height: 8.75rem;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -1735,20 +1735,20 @@ span.console-action-icon.material-symbols-outlined {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .meta-header-titles {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0.125rem;
 }
 
 .meta-title-main {
     font-size: 1.25rem;
     font-weight: 700;
     color: #F8FAFC;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.01875rem;
     line-height: 1.3;
 }
 
@@ -1761,16 +1761,16 @@ span.console-action-icon.material-symbols-outlined {
 .meta-badges-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.5rem;
     align-items: center;
-    margin-top: 4px;
+    margin-top: 0.25rem;
 }
 
 .meta-badge {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
+    gap: 0.25rem;
+    padding: 0.1875rem 0.5rem;
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -1799,7 +1799,7 @@ span.console-action-icon.material-symbols-outlined {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    margin-top: 4px;
+    margin-top: 0.25rem;
 }
 
 /* ==========================================================================
@@ -1812,7 +1812,7 @@ span.console-action-icon.material-symbols-outlined {
 
 @media (max-width: 1200px) {
     .main-content {
-        padding: 24px 32px;
+        padding: 1.5rem 2rem;
     }
 }
 
@@ -1843,8 +1843,8 @@ span.console-action-icon.material-symbols-outlined {
         text-align: center;
     }
     .meta-poster-container {
-        width: 120px;
-        height: 168px;
+        width: 7.5rem;
+        height: 10.5rem;
     }
     .meta-badges-row {
         justify-content: center;
@@ -1873,7 +1873,7 @@ span.console-action-icon.material-symbols-outlined {
    ========================================================================== */
 
 .nav-item-sair {
-    margin-top: 8px;
+    margin-top: 0.5rem;
     color: var(--accent-red);
 }
 
@@ -1902,9 +1902,9 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .modal-box {
-    max-width: 480px;
-    width: calc(100% - 48px);
-    padding: 28px;
+    max-width: 30rem;
+    width: calc(100% - 3rem);
+    padding: 1.75rem;
     border: 1px solid var(--border-color);
     border-radius: 16px;
     background: var(--bg-card);
@@ -1912,20 +1912,20 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .modal-box h3 {
-    margin: 0 0 12px;
+    margin: 0 0 0.75rem;
     font-size: 1.15rem;
     color: var(--text-primary);
 }
 
 .modal-box p {
-    margin: 0 0 12px;
+    margin: 0 0 0.75rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.5;
 }
 
 .modal-aviso {
-    padding: 10px 12px;
+    padding: 0.625rem 0.75rem;
     border: 1px solid rgba(245, 158, 11, 0.35);
     border-radius: 6px;
     background: rgba(245, 158, 11, 0.08);
@@ -1939,8 +1939,8 @@ span.console-action-icon.material-symbols-outlined {
 .modal-acoes {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
 }
 
 /* ============================================================================
@@ -1951,16 +1951,16 @@ span.console-action-icon.material-symbols-outlined {
    transformaria a escolha num chute.
    ============================================================================ */
 .modal-navegador-box {
-    max-width: 760px;
+    max-width: 47.5rem;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0.875rem;
 }
 
 .navegador-barra {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .btn-navegador-subir {
@@ -1982,7 +1982,7 @@ span.console-action-icon.material-symbols-outlined {
     min-width: 0;
     overflow-x: auto;
     white-space: nowrap;
-    padding: 8px 12px;
+    padding: 0.5rem 0.75rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.03);
@@ -1991,7 +1991,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .navegador-lista {
-    min-height: 180px;
+    min-height: 11.25rem;
     max-height: 40vh;
     overflow-y: auto;
     border: 1px solid var(--border-color);
@@ -2002,9 +2002,9 @@ span.console-action-icon.material-symbols-outlined {
 .navegador-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.625rem;
     width: 100%;
-    padding: 9px 14px;
+    padding: 0.5625rem 0.875rem;
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     background: transparent;
@@ -2031,7 +2031,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .navegador-item .material-symbols-outlined {
-    font-size: 19px !important;
+    font-size: 1.1875rem !important;
     color: var(--accent-yellow);
 }
 
@@ -2039,7 +2039,7 @@ span.console-action-icon.material-symbols-outlined {
    subpastas e servidor sem raiz configurada são situações diferentes, e a
    mensagem tem de dizer qual das duas é. */
 .navegador-vazio {
-    padding: 28px 16px;
+    padding: 1.75rem 1rem;
     color: var(--text-muted);
     font-size: 0.85rem;
     text-align: center;
@@ -2068,7 +2068,7 @@ span.console-action-icon.material-symbols-outlined {
     font-family: 'Material Symbols Outlined' !important;
     font-weight: normal;
     font-style: normal;
-    font-size: 20px;
+    font-size: 1.25rem;
     line-height: 1;
     display: inline-flex;
     align-items: center;
@@ -2091,10 +2091,10 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .nav-icon {
-    font-size: 20px !important;
-    margin-right: 12px;
-    width: 20px;
-    height: 20px;
+    font-size: 1.25rem !important;
+    margin-right: 0.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2108,12 +2108,12 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .widget-icon .material-symbols-outlined {
-    font-size: 22px !important;
+    font-size: 1.375rem !important;
 }
 
 /* Hero Banner */
 .floating-tech-icon {
-    font-size: 48px !important;
+    font-size: 3rem !important;
 }
 
 /* Cards de Pipeline */
@@ -2124,7 +2124,7 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .card-icon-container .material-symbols-outlined {
-    font-size: 24px !important;
+    font-size: 1.5rem !important;
 }
 
 /* Botões com ícones */
@@ -2135,16 +2135,16 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .btn-icon {
-    font-size: 18px !important;
-    margin-right: 8px;
+    font-size: 1.125rem !important;
+    margin-right: 0.5rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
 .btn-inline-icon {
-    font-size: 16px !important;
-    margin-right: 6px;
+    font-size: 1rem !important;
+    margin-right: 0.375rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2157,8 +2157,8 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .console-action-icon {
-    font-size: 16px !important;
-    margin-right: 4px;
+    font-size: 1rem !important;
+    margin-right: 0.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2171,7 +2171,7 @@ span.console-action-icon.material-symbols-outlined {
 .nav-group {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0.125rem;
 }
 
 /* Nível 1 da sidebar — cabeçalho de grupo: apenas rótulo clicável para
@@ -2182,10 +2182,10 @@ span.console-action-icon.material-symbols-outlined {
     outline: none;
     display: flex;
     align-items: center;
-    padding: 14px 10px 7px;
+    padding: 0.875rem 0.625rem 0.4375rem;
     color: #5b6679;
     font-family: var(--font-main);
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -2205,7 +2205,7 @@ span.console-action-icon.material-symbols-outlined {
 /* Chevron: expand_more aberto; rotacionado -90° quando fechado
    (renderiza como chevron_right) */
 .nav-group-seta {
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
     color: inherit;
     transition: transform 0.18s ease;
 }
@@ -2217,7 +2217,7 @@ span.console-action-icon.material-symbols-outlined {
 .nav-group-itens {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0.125rem;
 }
 
 /* Colapso real: itens do nível 2 somem por completo */
@@ -2228,11 +2228,11 @@ span.console-action-icon.material-symbols-outlined {
 /* Recuo do submenu (14px) maior que o do cabeçalho (10px) para marcar
    subordinação; o ativo compensa a barra teal de 3px. */
 .nav-group-itens .nav-item {
-    padding-left: 14px;
+    padding-left: 0.875rem;
 }
 
 .nav-group-itens .nav-item.active {
-    padding-left: 11px;
+    padding-left: 0.6875rem;
 }
 
 /* Em telas baixas o menu agrupado ultrapassa a altura da janela; a rolagem
@@ -2366,7 +2366,7 @@ span.console-action-icon.material-symbols-outlined {
 .faixa-vitrine[data-tooltip]::after {
     bottom: auto;
     top: 110%;
-    max-width: 420px;
+    max-width: 26.25rem;
 }
 
 .faixa-vitrine[data-tooltip]::before {

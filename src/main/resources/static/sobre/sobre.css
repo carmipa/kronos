@@ -7,27 +7,27 @@
 #panel-sobre .sobre-page {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding-bottom: 24px;
+    gap: 1.25rem;
+    padding-bottom: 1.5rem;
 }
 
 #panel-sobre .sobre-hero-grid {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 28px;
+    gap: 1.75rem;
     align-items: center;
 }
 
 #panel-sobre .sobre-avatar-wrap {
     position: relative;
-    width: 160px;
-    height: 160px;
+    width: 10rem;
+    height: 10rem;
     flex-shrink: 0;
 }
 
 #panel-sobre .sobre-avatar {
-    width: 160px;
-    height: 160px;
+    width: 10rem;
+    height: 10rem;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid rgba(45, 212, 191, 0.35);
@@ -37,7 +37,7 @@
 
 #panel-sobre .sobre-avatar-ring {
     position: absolute;
-    inset: -6px;
+    inset: -0.375rem;
     border-radius: 50%;
     border: 2px solid transparent;
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)) border-box;
@@ -58,20 +58,20 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     color: var(--accent-cyan);
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
 }
 
 #panel-sobre .sobre-hero-text h2 {
     font-size: 1.85rem;
     font-weight: 700;
     letter-spacing: -0.03em;
-    margin-bottom: 6px;
+    margin-bottom: 0.375rem;
 }
 
 #panel-sobre .sobre-handle {
     color: var(--text-secondary);
     font-size: 0.95rem;
-    margin-bottom: 14px;
+    margin-bottom: 0.875rem;
 }
 
 #panel-sobre .sobre-handle a {
@@ -88,20 +88,20 @@
     color: var(--text-secondary);
     line-height: 1.65;
     font-size: 0.95rem;
-    max-width: 720px;
+    max-width: 45rem;
 }
 
 #panel-sobre .sobre-personal-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(120px, 1fr));
-    gap: 10px;
-    margin-top: 18px;
-    max-width: 780px;
+    grid-template-columns: repeat(4, minmax(7.5rem, 1fr));
+    gap: 0.625rem;
+    margin-top: 1.125rem;
+    max-width: 48.75rem;
 }
 
 #panel-sobre .sobre-personal-item {
     min-width: 0;
-    padding: 10px 12px;
+    padding: 0.625rem 0.75rem;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.02);
@@ -109,7 +109,7 @@
 
 #panel-sobre .sobre-personal-item span {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 0.25rem;
     color: var(--text-muted);
     font-size: 0.68rem;
     font-weight: 700;
@@ -133,16 +133,16 @@
 #panel-sobre .sobre-stats-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
 }
 
 #panel-sobre .sobre-stat-pill {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 88px;
-    padding: 10px 16px;
+    min-width: 5.5rem;
+    padding: 0.625rem 1rem;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
     border-radius: 12px;
@@ -164,14 +164,14 @@
 #panel-sobre .sobre-page h3 {
     font-size: 1.05rem;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
     color: var(--text-primary);
 }
 
 #panel-sobre .sobre-social-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 0.625rem;
 }
 
 #panel-sobre .sobre-social-link {
@@ -188,8 +188,8 @@
 #panel-sobre .net-chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
     border-radius: 11px;
     border: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.02);
@@ -202,7 +202,7 @@
 }
 
 #panel-sobre .net-chip .material-symbols-outlined {
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
     color: var(--c, var(--accent-blue));
 }
 
@@ -217,14 +217,14 @@
 #panel-sobre .tech-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 #panel-sobre .tech-chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 7px 13px;
+    gap: 0.5rem;
+    padding: 0.4375rem 0.8125rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.015);
@@ -236,8 +236,8 @@
 
 #panel-sobre .tech-chip::before {
     content: "";
-    width: 7px;
-    height: 7px;
+    width: 0.4375rem;
+    height: 0.4375rem;
     border-radius: 50%;
     background: var(--c, var(--accent-cyan));
     box-shadow: 0 0 7px color-mix(in srgb, var(--c, var(--accent-cyan)) 80%, transparent);
@@ -249,7 +249,7 @@
     font-size: 0.66rem;
     font-weight: 600;
     color: var(--text-muted);
-    padding: 1px 5px;
+    padding: 0.0625rem 0.3125rem;
     border-radius: 5px;
     background: rgba(255, 255, 255, 0.04);
 }
@@ -263,22 +263,22 @@
 #panel-sobre .sobre-two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 1.25rem;
 }
 
 #panel-sobre .sobre-timeline {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0.875rem;
 }
 
 #panel-sobre .sobre-timeline li {
     display: grid;
-    grid-template-columns: 52px 1fr;
-    gap: 14px;
+    grid-template-columns: 3.25rem 1fr;
+    gap: 0.875rem;
     align-items: start;
-    padding-bottom: 14px;
+    padding-bottom: 0.875rem;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -292,14 +292,14 @@
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--accent-purple);
-    padding-top: 2px;
+    padding-top: 0.125rem;
 }
 
 #panel-sobre .sobre-timeline strong {
     display: block;
     font-size: 0.9rem;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 0.125rem;
 }
 
 #panel-sobre .sobre-timeline span {
@@ -308,14 +308,14 @@
 }
 
 #panel-sobre .sobre-project-badges {
-    margin: 16px 0;
+    margin: 1rem 0;
 }
 
 #panel-sobre .sobre-repo-meta {
     color: var(--text-secondary);
     font-size: 0.84rem;
     line-height: 1.55;
-    margin: 0 0 14px;
+    margin: 0 0 0.875rem;
 }
 
 #panel-sobre .sobre-repo-meta a {
@@ -328,7 +328,7 @@
 }
 
 #panel-sobre .sobre-tech-group {
-    margin-bottom: 18px;
+    margin-bottom: 1.125rem;
 }
 
 #panel-sobre .sobre-tech-group:last-child {
@@ -341,19 +341,19 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-muted);
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
 }
 
 #panel-sobre .sobre-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 #panel-sobre .sobre-chip {
     font-size: 0.82rem;
-    padding: 6px 12px;
+    padding: 0.375rem 0.75rem;
     border-radius: 999px;
     background: rgba(59, 130, 246, 0.1);
     border: 1px solid rgba(59, 130, 246, 0.25);
@@ -364,7 +364,7 @@
     font-size: 0.85rem;
     color: var(--text-muted);
     border-top: 1px solid var(--border-color);
-    padding-top: 14px;
+    padding-top: 0.875rem;
 }
 
 #panel-sobre .sobre-footer-note a {

@@ -6,7 +6,7 @@
 
 #panel-cura .cura-actions {
     display: flex;
-    gap: 12px;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 

@@ -5,7 +5,7 @@
    ========================================================================== */
 
 #panel-mapa .mapa-controls {
-    margin-top: 4px;
+    margin-top: 0.25rem;
 }
 
 /* O mapa é texto de relatório (árvore ASCII + taxonomia) injetado via
