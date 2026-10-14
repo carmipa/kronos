@@ -61,6 +61,17 @@ public class ExtracaoLegendaController {
 
     /**
      * 2. EXTRAÇÃO DE LEGENDAS
+     *
+     * <p>PROPÓSITO DE NEGÓCIO: recebe da tela a pasta (ou o arquivo) de vídeos e o formato, e roda a
+     * extração na fila do servidor, devolvendo na hora só a confirmação de que o job foi aceito; o
+     * resultado aparece no console web, com a tabela por vídeo e um banner de fechamento.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: caminho vazio, formato inválido ou pasta inexistente são recusados
+     * ANTES de enfileirar; o banner só diz SUCESSO quando houve extração sem falha nem timeout — com
+     * qualquer um dos dois o título é ATENÇÃO, e os MKVs publicados que a extração pulou são contados.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: entrada inválida devolve 400 com a mensagem; erro dentro do
+     * job vira linha de ERRO no console e no log, sem derrubar a fila.
      */
     @PostMapping("/extrair")
     public ResponseEntity<RespostaPadrao> extrair(@RequestBody ExtracaoRequest req) {
@@ -142,19 +153,38 @@ public class ExtracaoLegendaController {
                     System.out.println("\u001B[33m========================================================================\n\u001B[0m");
                     log.warn("[ALERTA] Extração finalizada sem faixas geradas. 0 de {} vídeos possuíam faixa {}", rel.getArquivosDetectados(), formato.name());
                 } else {
-                    System.out.println("\n\u001B[32m========================================================================\u001B[0m");
-                    System.out.println("\u001B[32m  🎉 [SUCESSO] EXTRAÇÃO DE LEGENDAS FINALIZADA COM SUCESSO!\u001B[0m");
-                    System.out.println("\u001B[32m========================================================================\u001B[0m");
+                    // Com falha ou timeout o lote NÃO terminou com sucesso: o Gundam ZZ de 14/10/2026 saiu
+                    // "[SUCESSO] Extraídas: 92 de 95" com o episódio 28 corrompido no meio. A contagem em
+                    // vermelho existia, mas o título dizia o contrário — e é o título que se lê.
+                    boolean comFalha = rel.getFalhasInesperadas() > 0 || rel.getTimeouts() > 0;
+                    String cor = comFalha ? "\u001B[33m" : "\u001B[32m";
+                    System.out.println("\n" + cor + "========================================================================\u001B[0m");
+                    System.out.println(comFalha
+                        ? cor + "  ⚠️ [ATENÇÃO] EXTRAÇÃO FINALIZADA COM FALHA — confira os itens em vermelho\u001B[0m"
+                        : cor + "  🎉 [SUCESSO] EXTRAÇÃO DE LEGENDAS FINALIZADA COM SUCESSO!\u001B[0m");
+                    System.out.println(cor + "========================================================================\u001B[0m");
                     System.out.println("\u001B[36m  • Arquivos de Vídeo Analisados : " + rel.getArquivosDetectados() + "\u001B[0m");
                     System.out.println("\u001B[32m  • Faixas Extraídas com Sucesso : " + rel.getLegendasExtraidas() + " [" + formato.name() + "]\u001B[0m");
                     if (rel.getArquivosSemLegenda() > 0) {
                         System.out.println("\u001B[33m  • Vídeos sem Faixa " + formato.name() + "        : " + rel.getArquivosSemLegenda() + "\u001B[0m");
                     }
+                    if (rel.getSaidasDoRemuxIgnoradas() > 0) {
+                        System.out.println("\u001B[33m  • MKVs publicados ignorados   : " + rel.getSaidasDoRemuxIgnoradas()
+                            + " (_PTBR.mkv; a pasta tem os originais)\u001B[0m");
+                    }
                     if (rel.getFalhasInesperadas() > 0) {
                         System.out.println("\u001B[31m  • Falhas de Processamento     : " + rel.getFalhasInesperadas() + "\u001B[0m");
                     }
-                    System.out.println("\u001B[32m========================================================================\n\u001B[0m");
-                    log.info("[SUCESSO] Extração de legendas finalizada. Extraídas: {} de {}", rel.getLegendasExtraidas(), rel.getArquivosDetectados());
+                    if (rel.getTimeouts() > 0) {
+                        System.out.println("\u001B[31m  • Tempo Esgotado              : " + rel.getTimeouts() + "\u001B[0m");
+                    }
+                    System.out.println(cor + "========================================================================\n\u001B[0m");
+                    if (comFalha) {
+                        log.warn("[ATENÇÃO] Extração de legendas finalizada com falha. Extraídas: {} de {}, falhas: {}, timeouts: {}",
+                            rel.getLegendasExtraidas(), rel.getArquivosDetectados(), rel.getFalhasInesperadas(), rel.getTimeouts());
+                    } else {
+                        log.info("[SUCESSO] Extração de legendas finalizada. Extraídas: {} de {}", rel.getLegendasExtraidas(), rel.getArquivosDetectados());
+                    }
                 }
             } catch (Exception e) {
                 log.error("Erro na extração de legendas em background", e);

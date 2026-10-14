@@ -30,6 +30,7 @@ public class RelatorioExtracao {
     private boolean interrompidoPeloOperador = false;
     private int semFaixaComTextoNaoSuportado = 0;
     private int naoProcessadosPorParada = 0;
+    private int saidasDoRemuxIgnoradas = 0;
 
     private final List<ItemExtracao> itens = new ArrayList<>();
     private final FormatoLegenda formatoAlvo;
@@ -109,6 +110,19 @@ public class RelatorioExtracao {
      */
     public void registrarSemFaixaComTextoNaoSuportado() { semFaixaComTextoNaoSuportado++; }
     public int getSemFaixaComTextoNaoSuportado() { return semFaixaComTextoNaoSuportado; }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: conta os MKVs publicados pelo remux ({@code _PTBR.mkv}) que o percurso da
+     * pasta deixou de fora porque a mesma pasta tem os originais — para a tela dizer quantos foram
+     * pulados e por quê, em vez de o total de vídeos encolher sem explicação.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: não entra em {@code arquivosDetectados} (o vídeo pulado não foi
+     * processado); registra uma vez por execução.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: valor negativo vira zero; nunca lança.
+     */
+    public void registrarSaidasDoRemuxIgnoradas(int quantidade) { saidasDoRemuxIgnoradas = Math.max(0, quantidade); }
+    public int getSaidasDoRemuxIgnoradas() { return saidasDoRemuxIgnoradas; }
 
     public boolean isInterrompidoPeloOperador() { return interrompidoPeloOperador; }
     public int getNaoProcessadosPorParada() { return naoProcessadosPorParada; }

@@ -213,6 +213,85 @@ class ExtrairLegendaUseCaseTest {
             "o item tem de nomear a colisao: " + rel.getItens());
     }
 
+    /**
+     * Gundam ZZ, 14/10/2026: a pasta da obra tinha os originais em {@code en/} e os MKVs publicados
+     * ({@code _PTBR.mkv}, saída do remux 5.1) na raiz. A extração percorreu os dois: 95 vídeos para
+     * 48 originais, 47 legendas duplicadas e, nos dois PTBR sem faixa inglesa, a faixa PORTUGUESA
+     * extraída como se fosse origem. Com os originais na mesma pasta, a saída do remux não é origem.
+     */
+    @Test
+    void pastaComOriginaisESaidasDoRemuxNaoExtraiAsSaidas(@TempDir Path base) throws IOException {
+        Path obra = Files.createDirectory(base.resolve("obra"));
+        Files.createDirectory(obra.resolve("en"));
+        Files.writeString(obra.resolve("en").resolve("Obra - S01E01.mkv"), "fake");
+        Files.writeString(obra.resolve("en").resolve("Obra - S01E02.mkv"), "fake");
+        Files.writeString(obra.resolve("Obra.S01E01_PTBR.mkv"), "fake");
+        Files.writeString(obra.resolve("Obra.S01E02_PTBR.mkv"), "fake");
+        TelemetriaSpy tel = new TelemetriaSpy();
+
+        RelatorioExtracao rel = useCase(List.of(faixaAss()), Modo.SUCESSO, tel)
+            .executar(obra, base.resolve("out"), FormatoLegenda.ASS);
+
+        assertEquals(2, rel.getArquivosDetectados(), "so os originais entram: " + rel.getItens());
+        assertEquals(2, rel.getLegendasExtraidas());
+        assertFalse(Files.exists(base.resolve("out").resolve("Obra.S01E01_PTBR_Track2.ass")),
+            "a saida do remux nao pode virar legenda de origem");
+        assertEquals(2, rel.getSaidasDoRemuxIgnoradas());
+        assertTrue(tel.ultima.detalhe().contains("saídas do remux ignoradas: 2"), tel.ultima.detalhe());
+    }
+
+    /**
+     * CASO-CONTROLE (A1): pasta SÓ com MKVs publicados continua extraindo — é como o acervo do
+     * notebook foi regenerado em 12/10, a partir do publicado, quando a pasta de origem não existia.
+     */
+    @Test
+    void pastaSoComSaidasDoRemuxContinuaExtraindo(@TempDir Path base) throws IOException {
+        Path obra = Files.createDirectory(base.resolve("obra"));
+        Files.writeString(obra.resolve("Obra.S01E01_PTBR.mkv"), "fake");
+
+        RelatorioExtracao rel = useCase(List.of(faixaAss()), Modo.SUCESSO, new TelemetriaSpy())
+            .executar(obra, base.resolve("out"), FormatoLegenda.ASS);
+
+        assertEquals(1, rel.getLegendasExtraidas());
+        assertEquals(0, rel.getSaidasDoRemuxIgnoradas());
+    }
+
+    /** CASO-CONTROLE (A1): o MKV publicado escolhido DIRETAMENTE é extraído — o operador pediu aquele. */
+    @Test
+    void saidaDoRemuxEscolhidaDiretamenteContinuaExtraindo(@TempDir Path base) throws IOException {
+        Path obra = Files.createDirectory(base.resolve("obra"));
+        Files.writeString(obra.resolve("Obra - S01E01.mkv"), "fake");
+        Path publicado = obra.resolve("Obra.S01E01_PTBR.mkv");
+        Files.writeString(publicado, "fake");
+
+        RelatorioExtracao rel = useCase(List.of(faixaAss()), Modo.SUCESSO, new TelemetriaSpy())
+            .executar(publicado, base.resolve("out"), FormatoLegenda.ASS);
+
+        assertEquals(1, rel.getLegendasExtraidas());
+    }
+
+    /**
+     * Cópia de trabalho e backup do KRONOS ({@code _kronos_regen_*}, {@code _kronos_backup_*}) dentro
+     * da pasta da obra não são origem: com o mesmo nome do original, viravam colisão no lote. O
+     * controle (A1) é a pasta {@code kronos} sem o sublinhado, que é do operador e é percorrida.
+     */
+    @Test
+    void pastaDeTrabalhoDoKronosNaoEhOrigem(@TempDir Path base) throws IOException {
+        Path obra = Files.createDirectory(base.resolve("obra"));
+        Files.writeString(obra.resolve("Ep01.mkv"), "fake");
+        Files.createDirectory(obra.resolve("_kronos_backup_20261014"));
+        Files.writeString(obra.resolve("_kronos_backup_20261014").resolve("Ep01.mkv"), "fake");
+        Files.createDirectory(obra.resolve("kronos"));
+        Files.writeString(obra.resolve("kronos").resolve("Ep02.mkv"), "fake");
+
+        RelatorioExtracao rel = useCase(List.of(faixaAss()), Modo.SUCESSO, new TelemetriaSpy())
+            .executar(obra, base.resolve("out"), FormatoLegenda.ASS);
+
+        assertEquals(2, rel.getArquivosDetectados(), "Ep01 da obra e Ep02 da pasta kronos: " + rel.getItens());
+        assertEquals(2, rel.getLegendasExtraidas());
+        assertEquals(0, rel.getFalhasInesperadas(), "a copia de backup nao pode colidir com o original");
+    }
+
     /** E5: vídeo com legenda de TEXTO em mov_text não é "sem legenda/hardsub". Controle: só PGS (imagem). */
     @Test
     void legendaDeTextoNaoConvertidaEContadaAParte(@TempDir Path base) throws IOException {

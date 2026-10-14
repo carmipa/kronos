@@ -46,6 +46,8 @@ import java.util.stream.Stream;
 public class ExtrairLegendaUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(ExtrairLegendaUseCase.class);
+    private static final String SUFIXO_SAIDA_DO_REMUX = "_ptbr.mkv";
+    private static final String PREFIXO_PASTA_DE_TRABALHO = "_kronos_";
 
     private final List<ExtratorVideoPort> adaptadoresVideo;
     private final List<ExtratorStrategy> strategies;
@@ -87,7 +89,16 @@ public class ExtrairLegendaUseCase {
         // que só tem PGS, deixou uma legendas_extraidas_ass VAZIA ao lado — e a pasta vazia parece
         // "extraí e não sobrou nada" para quem passa por ela depois.
 
-        List<Path> videos = encontrarVideos(pastaVideos);
+        VideosDaEntrada entrada = encontrarVideos(pastaVideos);
+        List<Path> videos = entrada.videos();
+        if (entrada.saidasDoRemuxIgnoradas() > 0) {
+            relatorio.registrarSaidasDoRemuxIgnoradas(entrada.saidasDoRemuxIgnoradas());
+            System.out.printf("   [IGNORADOS] %d MKV(s) publicado(s) pelo remux (_PTBR.mkv): a pasta também tem "
+                + "os originais, e a saída do remux não é legenda de origem. Para extrair de um deles, "
+                + "escolha o arquivo.%n", entrada.saidasDoRemuxIgnoradas());
+            log.info("Extração ignorou {} MKV(s) publicado(s) pelo remux em {} (a pasta tem os originais)",
+                entrada.saidasDoRemuxIgnoradas(), pastaVideos);
+        }
 
         Set<ExtratorVideoPort> adaptadoresEmUso = new HashSet<>();
         videos.forEach(v -> resolverAdaptador(v).ifPresent(adaptadoresEmUso::add));
@@ -171,11 +182,14 @@ public class ExtrairLegendaUseCase {
         // (itensDetectados) e extraídas com sucesso (itensCorrigidos); formato,
         // falhas e timeouts vão no detalhe para o painel exibir a íntegra.
         String detalheTelemetria = String.format(
-            "%s | %s | faixas: %d, extraídas: %d, sem faixa: %d, já existiam: %d, falhas: %d, timeouts: %d%s",
+            "%s | %s | faixas: %d, extraídas: %d, sem faixa: %d, já existiam: %d, falhas: %d, timeouts: %d%s%s",
             pastaVideos.toAbsolutePath(), formato.name(),
             relatorio.getFaixasEncontradas(), relatorio.getLegendasExtraidas(),
             relatorio.getArquivosSemLegenda(), relatorio.getArquivosJaExistentes(),
             relatorio.getFalhasInesperadas(), relatorio.getTimeouts(),
+            relatorio.getSaidasDoRemuxIgnoradas() > 0
+                ? ", saídas do remux ignoradas: " + relatorio.getSaidasDoRemuxIgnoradas()
+                : "",
             relatorio.isInterrompidoPeloOperador()
                 ? ", PARADO pelo operador: " + relatorio.getNaoProcessadosPorParada() + " não processado(s)"
                 : "");
@@ -334,24 +348,90 @@ public class ExtrairLegendaUseCase {
         }
     }
 
-    private List<Path> encontrarVideos(Path entrada) {
+    /** Os vídeos que a execução vai processar e quantos MKVs publicados pelo remux ficaram de fora. */
+    private record VideosDaEntrada(List<Path> videos, int saidasDoRemuxIgnoradas) { }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: decide quais vídeos são ORIGEM de legenda numa entrada que pode ser um
+     * arquivo ou a pasta da obra inteira — e a pasta da obra, no acervo, guarda junto o que o próprio
+     * KRONOS produziu.
+     *
+     * <p>INVARIANTES DO DOMÍNIO:
+     * <ul>
+     *   <li>Arquivo escolhido diretamente é sempre processado: o operador pediu aquele.</li>
+     *   <li>Pasta {@code _kronos_*} (cópia de trabalho e backup da republicação) nunca é origem.</li>
+     *   <li>MKV publicado pelo remux ({@code X_PTBR.mkv}, o nome que o {@code MapeadorMidiaService}
+     *       do 5.1 gera) fica de fora quando a mesma pasta tem os originais. No Gundam ZZ, em
+     *       14/10/2026, a extração percorreu {@code en/} e os 47 publicados da raiz: 47 legendas
+     *       duplicadas e, nos dois PTBR sem faixa inglesa, a faixa PORTUGUESA extraída como origem.</li>
+     *   <li>Pasta SÓ com MKVs publicados continua extraindo: é como o acervo foi regenerado em 12/10,
+     *       a partir do publicado, quando a pasta de origem não existia nesta máquina.</li>
+     * </ul>
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: entrada que não é arquivo nem pasta lança
+     * {@link ExtratorException}; erro de leitura da pasta também. Nenhum arquivo é tocado aqui.
+     */
+    private VideosDaEntrada encontrarVideos(Path entrada) {
         if (Files.isRegularFile(entrada)) {
-            return resolverAdaptador(entrada).isPresent() ? List.of(entrada) : List.of();
+            return new VideosDaEntrada(resolverAdaptador(entrada).isPresent() ? List.of(entrada) : List.of(), 0);
         }
 
         if (!Files.isDirectory(entrada)) {
             throw new ExtratorException("Pasta de vídeos não existe ou não é um diretório: " + entrada);
         }
 
+        List<Path> todos;
         try (Stream<Path> walk = Files.walk(entrada)) {
-            return walk
+            todos = walk
                 .filter(Files::isRegularFile)
+                .filter(p -> !dentroDePastaDeTrabalho(entrada, p))
                 .filter(p -> resolverAdaptador(p).isPresent())
                 .sorted()
                 .toList();
         } catch (IOException e) {
             throw new ExtratorException("Falha ao ler o diretório " + entrada, e);
         }
+        List<Path> originais = todos.stream().filter(p -> !ehSaidaDoRemux(p)).toList();
+        if (originais.isEmpty() || originais.size() == todos.size()) {
+            return new VideosDaEntrada(todos, 0);
+        }
+        return new VideosDaEntrada(originais, todos.size() - originais.size());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: reconhece o MKV que o remux 5.1 publicou — o nome que ele gera termina em
+     * {@code _PTBR.mkv} (invariante do {@code MapeadorMidiaService.gerarNomeSaidaLimpo}).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: compara só o fim do nome, sem diferenciar maiúsculas.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nome nulo não é saída do remux; nunca lança.
+     */
+    private static boolean ehSaidaDoRemux(Path video) {
+        Path nome = video.getFileName();
+        return nome != null && nome.toString().toLowerCase(java.util.Locale.ROOT).endsWith(SUFIXO_SAIDA_DO_REMUX);
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: reconhece arquivo dentro de pasta de trabalho do KRONOS
+     * ({@code _kronos_regen_*}, {@code _kronos_backup_*}) abaixo da entrada — cópia do que já existe,
+     * que com o mesmo nome do original virava colisão no lote.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só as pastas ENTRE a entrada e o arquivo contam; a própria entrada
+     * pode se chamar {@code _kronos_*} (o operador escolheu aquela pasta) e é percorrida.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: caminho fora da entrada não conta como pasta de trabalho.
+     */
+    private static boolean dentroDePastaDeTrabalho(Path entrada, Path arquivo) {
+        if (!arquivo.startsWith(entrada)) {
+            return false;
+        }
+        Path relativo = entrada.relativize(arquivo);
+        for (int i = 0; i < relativo.getNameCount() - 1; i++) {
+            if (relativo.getName(i).toString().toLowerCase(java.util.Locale.ROOT).startsWith(PREFIXO_PASTA_DE_TRABALHO)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Optional<ExtratorVideoPort> resolverAdaptador(Path video) {
