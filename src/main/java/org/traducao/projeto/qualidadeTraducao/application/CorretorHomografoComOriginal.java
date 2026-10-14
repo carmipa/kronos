@@ -70,6 +70,9 @@ import java.util.regex.Pattern;
 public class CorretorHomografoComOriginal {
 
     /** Formas de {@code to be} no original. Sem elas não há verbo para o {@code é} traduzir. */
+    /** {@code \N}, {@code \n} e {@code \h} do ASS no original ingles: separadores para a prova. */
+    private static final Pattern QUEBRA_OU_ESPACO_ASS = Pattern.compile("\\\\[Nnh]");
+
     private static final Pattern VERBO_SER_INGLES = Pattern.compile(
         "\\b(?:is|are|am|was|were|be|been|isn't|aren't|wasn't|weren't)\\b"
             + "|(?<=\\w)'s\\b|(?<=\\w)'re\\b|(?<=\\w)'m\\b",
@@ -161,6 +164,11 @@ public class CorretorHomografoComOriginal {
             || originalIngles == null || originalIngles.isBlank()) {
             return traduzido;
         }
+        // O INGLES e lido como prova por padroes com \b, e o N da quebra \N do ASS e letra:
+        // "losing\Nand is quick" escondia o "and" (14/10/2026, Reconguista I, falas 344 e 1223 —
+        // a 2.1 publicou "perder\Né age"). A quebra, o \n e o espaco fixo \h viram espaco SO na
+        // copia usada como prova; o texto traduzido nao muda por isso.
+        originalIngles = QUEBRA_OU_ESPACO_ASS.matcher(originalIngles).replaceAll(" ");
         // O FUTURO NAO DEPENDE DO VERBO "to be", entao ele age ANTES do portao abaixo. Amarrar
         // as duas coisas faria "This war will end someday." -> "esta guerra acabara" sair sem
         // correcao, porque nao ha "is/are/was" no original.

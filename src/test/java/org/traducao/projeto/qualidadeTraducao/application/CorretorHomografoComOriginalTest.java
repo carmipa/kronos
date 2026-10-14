@@ -113,6 +113,27 @@ class CorretorHomografoComOriginalTest {
         }
 
         @Test
+        @DisplayName("o `and` colado na quebra \\N do INGLES tambem e coordenador")
+        void coordenadorColadoNaQuebraDoIngles() {
+            // 14/10/2026, Reconguista I (falas 344 e 1223): "He just hates losing\Nand is quick to
+            // act." -> a revisao escreveu "perder\Ne age rapido" e a 2.1 publicou "perder\Né age".
+            // O \b de "and" nao existe entre o N da quebra e o "a", entao o ingles parecia nao ter
+            // coordenador e todo `e` solto virou verbo.
+            String pt = "Ele só odeia perder\\Ne age rápido.";
+            assertSame(pt, corretor.corrigir("He just hates losing\\Nand is quick to act.", pt));
+            String pt2 = "vamos esmagar os que se aproximarem\\Ne iniciar a operação de distração.";
+            assertSame(pt2, corretor.corrigir(
+                "let's crush those that approach\\Nand commence the decoy operation.", pt2));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `is` colado na quebra \\N do ingles continua prova e corrige o `e`")
+        void verboColadoNaQuebraDoIngles() {
+            assertEquals("Ele\\Né rápido.", corretor.corrigir("He\\Nis fast.", "Ele\\Ne rápido."),
+                "o mesmo \\b cegava o verbo: sem enxergar `is`, a correcao certa nao acontecia");
+        }
+
+        @Test
         @DisplayName("virgula do ingles tambem faz abster -- e isso CUSTA correcao real")
         void virgulaTambemFazAbster() {
             // "In other words, my job is to collect" tem virgula, entao o corretor se abstem --
