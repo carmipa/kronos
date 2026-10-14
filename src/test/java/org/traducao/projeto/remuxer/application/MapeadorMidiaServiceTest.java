@@ -217,6 +217,95 @@ class MapeadorMidiaServiceTest {
             e01.caminhoLegenda().getFileName().toString());
     }
 
+    /**
+     * O 5.1 de 09/10/2026 no Gundam ZZ, com os nomes reais: o especial S00E01 (abertura sem créditos,
+     * 4 minutos) vinha antes na ordem dos nomes, caía no pareamento por episódio ("01" = "01") e
+     * levava a legenda do episódio 1. O episódio real ficou "sem legenda" e o MKV publicado tinha o
+     * vídeo do especial com a legenda de 24 minutos. Temporada explícita dos dois lados tem de bater.
+     */
+    @Test
+    void especialS00NaoLevaALegendaDoEpisodioRegular(@TempDir Path tempDir) throws IOException {
+        Path videos = Files.createDirectory(tempDir.resolve("videos"));
+        Path legendas = Files.createDirectory(tempDir.resolve("legendas"));
+        Path saida = Files.createDirectory(tempDir.resolve("saida"));
+        Files.createFile(videos.resolve("Mobile.Suit.Gundam.ZZ.S00E01.mkv"));
+        Files.createFile(videos.resolve("Mobile.Suit.Gundam.ZZ.S00E02.mkv"));
+        Files.createFile(videos.resolve("UC 0088 - Mobile Suit Gundam ZZ - S01E01.mkv"));
+        Files.createFile(videos.resolve("UC 0088 - Mobile Suit Gundam ZZ - S01E02.mkv"));
+        Files.createFile(legendas.resolve("Mobile.Suit.Gundam.ZZ.S01E01_Track2_PT-BR.ass"));
+        Files.createFile(legendas.resolve("Mobile.Suit.Gundam.ZZ.S01E02_Track2_PT-BR.ass"));
+
+        PlanoRemux plano = mapeador.construirPlano(videos, legendas, saida);
+
+        assertEquals(2, plano.tarefas().size(), "os dois episodios regulares entram: " + plano);
+        assertTrue(plano.tarefas().stream().allMatch(t -> t.nomeVideo().startsWith("UC 0088")),
+            "nenhum especial S00 pode levar legenda do S01: " + plano.tarefas());
+        assertTrue(plano.tarefas().stream().allMatch(t -> t.caminhoLegenda().getFileName().toString()
+            .contains(t.nomeVideo().substring(t.nomeVideo().length() - 10, t.nomeVideo().length() - 4))),
+            "cada episodio com a legenda do mesmo SxxEyy: " + plano.tarefas());
+        assertEquals(2, plano.videosSemLegenda(), "os dois especiais ficam sem legenda, com aviso");
+    }
+
+    /**
+     * A legenda sem temporada ("- 01") é do episódio regular quando o lote tem o regular e o especial
+     * de mesmo número. Antes, quem vinha primeiro na ordem dos nomes levava — e o especial costuma vir.
+     */
+    @Test
+    void legendaSemTemporadaFicaComORegularENaoComOEspecial(@TempDir Path tempDir) throws IOException {
+        Path videos = Files.createDirectory(tempDir.resolve("videos"));
+        Path legendas = Files.createDirectory(tempDir.resolve("legendas"));
+        Path saida = Files.createDirectory(tempDir.resolve("saida"));
+        Files.createFile(videos.resolve("Anime - S00E01.mkv"));
+        Files.createFile(videos.resolve("Anime - S01E01.mkv"));
+        Files.createFile(legendas.resolve("[Grupo] Anime - 01_PT-BR.ass"));
+
+        PlanoRemux plano = mapeador.construirPlano(videos, legendas, saida);
+
+        assertEquals(1, plano.tarefas().size(), "so o regular entra: " + plano);
+        assertEquals("Anime - S01E01.mkv", plano.tarefas().get(0).nomeVideo());
+        assertEquals(1, plano.videosSemLegenda());
+        assertTrue(plano.avisos().get(0).contains("S00E01"), "o aviso nomeia o especial: " + plano.avisos());
+    }
+
+    /** CASO-CONTROLE (A1): especial com legenda S00 EXPLÍCITA continua pareando, ao lado do regular. */
+    @Test
+    void especialComLegendaS00ExplicitaContinuaPareando(@TempDir Path tempDir) throws IOException {
+        Path videos = Files.createDirectory(tempDir.resolve("videos"));
+        Path legendas = Files.createDirectory(tempDir.resolve("legendas"));
+        Path saida = Files.createDirectory(tempDir.resolve("saida"));
+        Files.createFile(videos.resolve("UC 0088 - Mobile Suit Gundam ZZ - S00E01.mkv"));
+        Files.createFile(videos.resolve("UC 0088 - Mobile Suit Gundam ZZ - S01E01.mkv"));
+        Files.createFile(legendas.resolve("Mobile.Suit.Gundam.ZZ.S00E01_Track2_PT-BR.ass"));
+        Files.createFile(legendas.resolve("Mobile.Suit.Gundam.ZZ.S01E01_Track2_PT-BR.ass"));
+
+        PlanoRemux plano = mapeador.construirPlano(videos, legendas, saida);
+
+        assertEquals(2, plano.tarefas().size(), "os dois entram: " + plano);
+        for (RemuxTarefa t : plano.tarefas()) {
+            String sxe = t.nomeVideo().contains("S00E01") ? "S00E01" : "S01E01";
+            assertTrue(t.caminhoLegenda().getFileName().toString().contains(sxe), t.toString());
+        }
+    }
+
+    /**
+     * CASO-CONTROLE (A1): pasta só de especiais, com legenda sem temporada, continua pareando — sem
+     * episódio regular de mesmo número não há com quem confundir.
+     */
+    @Test
+    void soEspeciaisComLegendaSemTemporadaContinuamPareando(@TempDir Path tempDir) throws IOException {
+        Path videos = Files.createDirectory(tempDir.resolve("videos"));
+        Path legendas = Files.createDirectory(tempDir.resolve("legendas"));
+        Path saida = Files.createDirectory(tempDir.resolve("saida"));
+        Files.createFile(videos.resolve("Anime OVA - S00E01.mkv"));
+        Files.createFile(videos.resolve("Anime OVA - S00E02.mkv"));
+        Files.createFile(legendas.resolve("[Grupo] Anime OVA - 01_PT-BR.ass"));
+        Files.createFile(legendas.resolve("[Grupo] Anime OVA - 02_PT-BR.ass"));
+
+        PlanoRemux plano = mapeador.construirPlano(videos, legendas, saida);
+
+        assertEquals(2, plano.tarefas().size(), "os dois especiais entram: " + plano);
+    }
+
     /** CASO-CONTROLE (A1): o parcial SOZINHO continua sendo usado — a penalidade só desempata. */
     @Test
     void parcialSozinhoContinuaUsado(@TempDir Path tempDir) throws IOException {

@@ -43,6 +43,7 @@ public class MapeadorMidiaService {
     private static final Pattern EPISODIO_SEPARADOR = Pattern.compile(
         "(?i)(?:\\s+-\\s+|_-_|_[\\s]*-[\\s_-]*)\\s*?(\\d{1,3})(?!\\d)");
     private static final Pattern EPISODIO_FALLBACK = Pattern.compile("(?<!\\d)(\\d{2,3})(?!\\d)");
+    private static final Pattern TEMPORADA_OCIDENTAL = Pattern.compile("(?i)S(\\d{1,2})E\\d{1,3}(?!\\d)");
     private static final Pattern PARENTESES_TECNICOS = Pattern.compile(
         "(?i)\\([^)]*(?:720p|1080p|2160p|4k|x26[45]|av1|hevc|10bit|8bit|dual\\s*audio|bd(?:rip)?|web[- .]?dl)[^)]*\\)");
     private static final Pattern SUFIXOS_LEGENDA = Pattern.compile(
@@ -123,10 +124,16 @@ public class MapeadorMidiaService {
      * PT-BR para um vídeo, recusando empate silencioso.
      *
      * <p>INVARIANTES DO DOMÍNIO: igualdade de identidade é case-insensitive;
-     * fallback por episódio exige episódio igual e unicidade após pontuação.
+     * fallback por episódio exige episódio igual e unicidade após pontuação; quando
+     * vídeo e legenda trazem temporada ({@code SxxEyy}), a temporada também tem de ser
+     * igual; legenda SEM temporada não vai para o especial {@code S00} se o lote tem o
+     * episódio regular de mesmo número. Sem essas duas, o especial S00E01 do Gundam ZZ,
+     * que vem antes na ordem dos nomes, levou a legenda do episódio 1 em 09/10/2026 e o
+     * MKV publicado saiu com o vídeo de 4 minutos e a legenda de 24.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: devolve seleção vazia com motivo de
-     * ausência ou ambiguidade.
+     * ausência ou ambiguidade; o especial que perde a legenda sem temporada para o
+     * regular recebe um motivo que diz isso.
      */
     private SelecaoLegenda selecionarLegenda(Path mkv, List<Path> todosVideos, List<Path> legendas) {
         if (todosVideos.size() == 1 && legendas.size() == 1) {
@@ -144,14 +151,32 @@ public class MapeadorMidiaService {
             .toList();
 
         String episodio = extrairTagEpisodio(mkv.getFileName().toString());
+        boolean especialComRegularDoMesmoNumero = false;
         if (candidatas.isEmpty() && episodio != null) {
+            Integer temporadaVideo = extrairTemporada(mkv.getFileName().toString());
+            especialComRegularDoMesmoNumero = temporadaVideo != null && temporadaVideo == 0
+                && todosVideos.stream().filter(v -> !v.equals(mkv)).anyMatch(v -> {
+                    Integer t = extrairTemporada(v.getFileName().toString());
+                    return t != null && t > 0 && episodio.equals(extrairTagEpisodio(v.getFileName().toString()));
+                });
+            boolean especialPerdeSemTemporada = especialComRegularDoMesmoNumero;
             candidatas = legendas.stream()
                 .filter(p -> episodio.equals(extrairTagEpisodio(p.getFileName().toString())))
+                .filter(p -> {
+                    Integer temporadaLegenda = extrairTemporada(p.getFileName().toString());
+                    if (temporadaVideo != null && temporadaLegenda != null) {
+                        return temporadaVideo.equals(temporadaLegenda);
+                    }
+                    return !(temporadaLegenda == null && especialPerdeSemTemporada);
+                })
                 .toList();
         }
         if (candidatas.isEmpty()) {
-            return new SelecaoLegenda(null, false,
-                "Legenda ausente para " + mkv.getFileName() + ". Nenhum nome ou episódio compatível foi encontrado.");
+            String motivo = especialComRegularDoMesmoNumero
+                ? " É especial (S00) e o lote tem o episódio regular de mesmo número: legenda sem"
+                    + " temporada fica com o regular; para o especial, a legenda precisa dizer S00E" + episodio + "."
+                : " Nenhum nome ou episódio compatível foi encontrado.";
+            return new SelecaoLegenda(null, false, "Legenda ausente para " + mkv.getFileName() + "." + motivo);
         }
 
         List<Path> completas = candidatas.stream().filter(p -> !ehFaixaAuxiliar(p)).toList();
@@ -297,6 +322,23 @@ public class MapeadorMidiaService {
         String ultimo = null;
         while (fallback.find()) ultimo = fallback.group(1);
         return ultimo == null ? null : padLeft(ultimo);
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: lê a temporada declarada no nome ({@code S01E02} → 1,
+     * {@code S00E01} → 0, o especial), para que o pareamento por episódio não junte
+     * temporadas diferentes de mesmo número de episódio.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só a forma {@code SxxEyy} conta como temporada
+     * declarada; {@code S01} e {@code S1} são a mesma temporada.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nome sem {@code SxxEyy} devolve {@code null}
+     * (temporada não declarada), nunca lança.
+     */
+    private Integer extrairTemporada(String nome) {
+        if (nome == null) return null;
+        Matcher matcher = TEMPORADA_OCIDENTAL.matcher(nome);
+        return matcher.find() ? Integer.valueOf(matcher.group(1)) : null;
     }
 
     /**
