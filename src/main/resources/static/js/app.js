@@ -28,7 +28,7 @@ import { initRenomearArquivos } from '../renomearArquivos/renomearArquivos.js?v=
 // só o módulo/tela frontend próprio deixou de existir. Ver traducaoKaraoke.js.
 import { initTraducaoKaraoke } from '../traducaoKaraoke/traducaoKaraoke.js?v=1.4';
 import { initInicio } from '../inicio/inicio.js?v=1.0';
-import { inicializarI18n } from '../i18n/i18n.js?v=2.1';
+import { inicializarI18n } from '../i18n/i18n.js?v=2.2';
 
 // Definições de Títulos e Subtítulos por seção do menu
 const CONFIG_SECOES = {

@@ -1,8 +1,9 @@
 const CHAVE_IDIOMA = 'kronos.idioma.interface';
 const IDIOMAS = Object.freeze(['pt-BR', 'en-US', 'es-ES']);
 const CODIGOS_GOOGLE = Object.freeze({ 'pt-BR': 'pt', 'en-US': 'en', 'es-ES': 'es' });
+const PRAZO_TRADUCAO_MS = 10000;
 const SELETORES_PROTEGIDOS = Object.freeze([
-    'script', 'style', 'code', 'pre', 'input', 'select', 'option', 'textarea', 'table',
+    'script', 'style', 'code', 'pre', 'kbd', 'samp', 'input', 'select', 'option', 'textarea', 'table',
     '[contenteditable]', '[translate="no"]', '[data-i18n-ignore]',
     '.notranslate', '.material-symbols-outlined', '.console-body', '.auditor-evento-texto',
     '.auditor-anomalias-lista', '.markdown-body', '.mapa-code', '.mapa-tree',
@@ -11,8 +12,156 @@ const SELETORES_PROTEGIDOS = Object.freeze([
     '[class*="resultado"]', '[class*="relatorio"]'
 ]);
 
+/*
+ * As únicas frases que o próprio tradutor não pode traduzir: as dele mesmo. Quem escolheu inglês
+ * ou espanhol normalmente não lê português, e é justamente quando o Google falha que essas frases
+ * aparecem. Não é dicionário da interface — a interface inteira continua indo pelo widget.
+ */
+const TEXTOS_TRADUTOR = Object.freeze({
+    'pt-BR': Object.freeze({
+        carregando: 'Carregando o Google Tradutor…', aplicando: 'Aplicando idioma…',
+        falha: 'O tradutor do Google não respondeu; a página continua em português.',
+        denovo: 'Tentar de novo', abrir: 'Abrir no Google Tradutor', ficar: 'Ficar em português',
+        fechar: 'Fechar este aviso'
+    }),
+    'en-US': Object.freeze({
+        carregando: 'Loading Google Translate…', aplicando: 'Applying language…',
+        falha: 'Google Translate did not respond, so this page is still in Portuguese.',
+        denovo: 'Try again', abrir: 'Open in Google Translate', ficar: 'Stay in Portuguese',
+        fechar: 'Close this notice'
+    }),
+    'es-ES': Object.freeze({
+        carregando: 'Cargando el Traductor de Google…', aplicando: 'Aplicando idioma…',
+        falha: 'El Traductor de Google no respondió; la página sigue en portugués.',
+        denovo: 'Intentar de nuevo', abrir: 'Abrir en el Traductor de Google', ficar: 'Seguir en portugués',
+        fechar: 'Cerrar este aviso'
+    })
+});
+
 let idiomaAtual = 'pt-BR';
 let observadorProtecao = null;
+let avisoFalha = null;
+let observadorTraducao = null;
+let prazoTraducao = null;
+
+/**
+ * PROPÓSITO DE NEGÓCIO: entrega as frases do próprio tradutor no idioma que a pessoa pediu.
+ * INVARIANTES DO DOMÍNIO: só os três idiomas das bandeiras; o resto cai em português.
+ * COMPORTAMENTO EM CASO DE FALHA: idioma desconhecido devolve os textos em português.
+ */
+function textosDoTradutor(idioma) {
+    return TEXTOS_TRADUTOR[idioma] || TEXTOS_TRADUTOR['pt-BR'];
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: diz se o Google já aplicou a tradução nesta página.
+ * INVARIANTES DO DOMÍNIO: a marca é a classe que o próprio widget põe no `<html>`.
+ * COMPORTAMENTO EM CASO DE FALHA: sem DOM, responde falso.
+ */
+function paginaTraduzida() {
+    const classes = globalThis.document?.documentElement?.classList;
+    return Boolean(classes && (classes.contains('translated-ltr') || classes.contains('translated-rtl')));
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: decide se vale oferecer "abrir no Google Tradutor" — o proxy do Google só
+ * alcança endereço público; em localhost ou rede interna o botão seria mais um botão morto.
+ * INVARIANTES DO DOMÍNIO: exige https, nome com ponto e endereço fora das faixas privadas.
+ * COMPORTAMENTO EM CASO DE FALHA: sem `location`, responde falso.
+ */
+export function enderecoPublico(protocolo, hostname) {
+    const host = String(hostname || '');
+    return protocolo === 'https:' && host.indexOf('.') > 0
+        && !/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host);
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: tira o aviso de falha da tela quando ele deixou de ser verdade (a tradução
+ * chegou atrasada) ou quando a pessoa o dispensou.
+ * INVARIANTES DO DOMÍNIO: existe no máximo um aviso; remover é idempotente.
+ * COMPORTAMENTO EM CASO DE FALHA: aviso já removido é ignorado.
+ */
+function removerAvisoFalha() {
+    if (avisoFalha?.parentNode) avisoFalha.parentNode.removeChild(avisoFalha);
+    avisoFalha = null;
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: monta um botão do aviso de falha com o rótulo no idioma pedido.
+ * INVARIANTES DO DOMÍNIO: sempre `type="button"`, para nunca submeter formulário vizinho.
+ * COMPORTAMENTO EM CASO DE FALHA: não lança; a ação é chamada só no clique.
+ */
+function botaoDoAviso(rotulo, acao, classe = '') {
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = `idioma-aviso-botao ${classe}`.trim();
+    botao.textContent = rotulo;
+    botao.addEventListener('click', acao);
+    return botao;
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: quando o Google não entrega a tradução (rede, bloqueador, captcha por
+ * limite de uso), a bandeira parecia não fazer nada — botão morto justamente para quem não lê
+ * português. O aviso diz o que aconteceu NO IDIOMA PEDIDO e oferece os caminhos de saída: tentar de
+ * novo, abrir pelo Google Tradutor (só em endereço público https) ou ficar em português.
+ * INVARIANTES DO DOMÍNIO: um aviso só; `translate="no"` e `lang` do idioma pedido, para o
+ * tradutor não reescrever o próprio aviso; nunca muda o `lang` do documento.
+ * COMPORTAMENTO EM CASO DE FALHA: sem `body`, ou com a página já traduzida, não faz nada.
+ */
+function mostrarAvisoFalha(idiomaPedido) {
+    if (idiomaPedido === 'pt-BR' || avisoFalha || paginaTraduzida() || !document.body) return;
+    clearTimeout(prazoTraducao);
+    const textos = textosDoTradutor(idiomaPedido);
+    const codigo = CODIGOS_GOOGLE[idiomaPedido] || 'pt';
+    avisoFalha = document.createElement('div');
+    avisoFalha.id = 'idioma-aviso-falha';
+    avisoFalha.className = 'idioma-aviso-falha notranslate';
+    avisoFalha.setAttribute('translate', 'no');
+    avisoFalha.setAttribute('lang', idiomaPedido);
+    avisoFalha.setAttribute('role', 'status');
+    const texto = document.createElement('p');
+    texto.className = 'idioma-aviso-texto';
+    texto.textContent = textos.falha;
+    const acoes = document.createElement('div');
+    acoes.className = 'idioma-aviso-acoes';
+    acoes.appendChild(botaoDoAviso(textos.denovo, () => globalThis.location.reload()));
+    if (enderecoPublico(globalThis.location?.protocol, globalThis.location?.hostname)) {
+        const abrir = document.createElement('a');
+        abrir.className = 'idioma-aviso-botao idioma-aviso-abrir';
+        abrir.textContent = textos.abrir;
+        abrir.href = `https://translate.google.com/translate?sl=pt&tl=${encodeURIComponent(codigo)}`
+            + `&u=${encodeURIComponent(globalThis.location.href)}`;
+        abrir.rel = 'noopener noreferrer';
+        acoes.appendChild(abrir);
+    }
+    acoes.appendChild(botaoDoAviso(textos.ficar, () => definirIdioma('pt-BR', true, true)));
+    const fechar = botaoDoAviso('×', removerAvisoFalha, 'idioma-aviso-fechar');
+    fechar.setAttribute('aria-label', textos.fechar);
+    fechar.title = textos.fechar;
+    acoes.appendChild(fechar);
+    avisoFalha.append(texto, acoes);
+    document.body.appendChild(avisoFalha);
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: vigia a tradução pedida — se ela não chegar no prazo, avisa; se chegar
+ * depois do aviso, tira o aviso.
+ * INVARIANTES DO DOMÍNIO: um prazo e um observador por carregamento de página.
+ * COMPORTAMENTO EM CASO DE FALHA: navegador sem MutationObserver fica só com o prazo.
+ */
+function vigiarTraducao(idiomaPedido) {
+    if (prazoTraducao === null) {
+        prazoTraducao = setTimeout(() => {
+            if (!paginaTraduzida()) mostrarAvisoFalha(idiomaPedido);
+        }, PRAZO_TRADUCAO_MS);
+    }
+    if (observadorTraducao || typeof MutationObserver === 'undefined') return;
+    observadorTraducao = new MutationObserver(() => {
+        if (paginaTraduzida()) removerAvisoFalha();
+    });
+    observadorTraducao.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+}
 
 /**
  * PROPÓSITO DE NEGÓCIO: converte a preferência regional do navegador para um
@@ -189,7 +338,7 @@ function atualizarBandeiras() {
  * INVARIANTES DO DOMÍNIO: somente português, inglês e espanhol são oferecidos e
  * o seletor nativo do Google permanece oculto.
  * COMPORTAMENTO EM CASO DE FALHA: ausência da biblioteca restaura pt-BR e
- * apresenta orientação sem quebrar o restante da aplicação.
+ * apresenta o aviso de falha no idioma pedido, sem quebrar o restante da aplicação.
  */
 function inicializarWidgetGoogle() {
     try {
@@ -199,24 +348,24 @@ function inicializarWidgetGoogle() {
         atualizarStatus('');
     } catch (erro) {
         console.warn('Falha ao inicializar Google Translate:', erro);
-        idiomaAtual = 'pt-BR';
-        aplicarCookieIdioma(idiomaAtual);
-        atualizarBandeiras();
-        atualizarStatus('Google Translate indisponível. A interface permaneceu em português.', true);
+        tratarFalhaScriptGoogle();
     }
 }
 
 /**
- * PROPÓSITO DE NEGÓCIO: informa falha de rede ou bloqueio do script externo sem
- * confundir o operador com erros internos do navegador.
- * INVARIANTES DO DOMÍNIO: falha sempre restaura a seleção visual para pt-BR.
+ * PROPÓSITO DE NEGÓCIO: informa falha de rede, bloqueio ou captcha do script externo no idioma
+ * que a pessoa pediu, sem confundir o operador com erros internos do navegador.
+ * INVARIANTES DO DOMÍNIO: a seleção visual volta para pt-BR (a página está em português), mas a
+ * preferência salva fica — "tentar de novo" é só recarregar.
  * COMPORTAMENTO EM CASO DE FALHA: a interface operacional continua disponível.
  */
 function tratarFalhaScriptGoogle() {
+    const idiomaPedido = idiomaAtual;
     idiomaAtual = 'pt-BR';
     aplicarCookieIdioma(idiomaAtual);
     atualizarBandeiras();
-    atualizarStatus('Não foi possível carregar o Google Translate. Verifique a internet ou o bloqueador.', true);
+    atualizarStatus('');
+    mostrarAvisoFalha(idiomaPedido);
 }
 
 /**
@@ -231,7 +380,8 @@ function carregarGoogleTranslate() {
         tratarFalhaScriptGoogle();
         return;
     }
-    atualizarStatus('Carregando Google Translate…');
+    atualizarStatus(textosDoTradutor(idiomaAtual).carregando);
+    vigiarTraducao(idiomaAtual);
     globalThis.googleTranslateElementInit = inicializarWidgetGoogle;
     if (globalThis.google?.translate?.TranslateElement) {
         inicializarWidgetGoogle();
@@ -250,14 +400,16 @@ function carregarGoogleTranslate() {
  * PROPÓSITO DE NEGÓCIO: persiste a bandeira escolhida, sincroniza o cookie do
  * Google e opcionalmente recarrega a SPA para aplicar a tradução integral.
  * INVARIANTES DO DOMÍNIO: idioma sempre pertence ao conjunto suportado; pt-BR
- * limpa o cookie de tradução.
+ * limpa o cookie de tradução. O `lang` do `<html>` NUNCA é trocado aqui: ele declara o
+ * idioma real do texto, e quem o troca depois de traduzir é o próprio Google. Medido em
+ * 14/10/2026: com o Google bloqueado a página ficava em português declarando `en-US`, e o
+ * leitor de tela lia português com a voz inglesa.
  * COMPORTAMENTO EM CASO DE FALHA: localStorage bloqueado não impede o cookie e
  * idioma desconhecido usa o fallback internacional en-US.
  */
 export function definirIdioma(idioma, persistir = true, recarregar = true) {
     idiomaAtual = IDIOMAS.includes(idioma) ? idioma : normalizarIdioma(idioma);
     aplicarCookieIdioma(idiomaAtual);
-    document.documentElement.lang = idiomaAtual;
     if (persistir) {
         try { localStorage.setItem(CHAVE_IDIOMA, idiomaAtual); } catch (ignored) { /* cookie continua válido */ }
     }
@@ -276,7 +428,7 @@ export function definirIdioma(idioma, persistir = true, recarregar = true) {
 function tratarCliqueBandeira(evento) {
     const botao = evento.currentTarget;
     if (!botao?.dataset?.idioma) return;
-    atualizarStatus('Aplicando idioma…');
+    atualizarStatus(textosDoTradutor(botao.dataset.idioma).aplicando);
     definirIdioma(botao.dataset.idioma, true, true);
 }
 

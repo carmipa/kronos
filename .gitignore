@@ -86,3 +86,7 @@ GEMINI.md
 LEITURA-REGRA*
 EPOCA-*.txt
 CONTINUIDADE-TRABALHO*
+
+# --- Dependências dos roteiros de navegador (ferramentas/navegador) ---
+# O package.json e o package-lock.json são versionados; a pasta instalada, não.
+node_modules/

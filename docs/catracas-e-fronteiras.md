@@ -13,8 +13,8 @@ dela, mas porque ninguém a lê no momento em que ela importa.
 Documentação não impõe nada. Um arquivo de instruções pode ser ignorado por qualquer agente que
 abra o projeto amanhã. **Um teste vermelho, não.**
 
-Daí a peça central da arquitetura do KRONOS: **45 guardas executáveis** (35 `Catraca*` + 10
-`Fronteira*`), 175 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
+Daí a peça central da arquitetura do KRONOS: **46 guardas executáveis** (36 `Catraca*` + 10
+`Fronteira*`), 181 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
 verificam comportamento — verificam que **um padrão perigoso não voltou**. Elas leem o
 código-fonte, a estrutura de pacotes ou o HTML, e **reprovam o build** ao encontrar a forma do
 bug.
@@ -55,7 +55,7 @@ graph TB
         A3["Homologar é decisão consciente:<br/>entra na lista, com justificativa"]
     end
 
-    subgraph B["🔒 Catraca*Test — 35 guardas, 114 testes"]
+    subgraph B["🔒 Catraca*Test — 36 guardas, 120 testes"]
         direction TB
         B1["Varre o FONTE atrás da<br/>forma de um defeito conhecido"]
         B2["Sem número congelado<br/>quando o invariante é universal"]
@@ -81,9 +81,9 @@ do código.
 
 ## O inventário completo
 
-Contado em **14/10/2026** nas anotações `@Test` de cada classe: **45 guardas · 175 testes**
-(35 `Catraca*Test` com 114, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
-**3.013 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
+Contado em **14/10/2026** nas anotações `@Test` de cada classe: **46 guardas · 181 testes**
+(36 `Catraca*Test` com 120, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
+**3.019 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
 
 ### Fronteiras — congelam *quem pode importar quem* (10 guardas, 61 testes)
 
@@ -112,7 +112,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaEscritaDeFalaVetaMusicaConcordanciaTest` | 3 | Idem na **3.3** |
 | `CatracaFerramentaDeAcervoVetaMusicaTest` | 2 | Idem nas **ferramentas que varrem o acervo** — o caminho que não passa por tela nenhuma, e que reescreveu 103 linhas de romaji antes desta existir |
 
-### Catracas de interface (10 guardas, 34 testes)
+### Catracas de interface (11 guardas, 40 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
@@ -126,6 +126,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaBannerNomeiaOAlvoTest` | 2 | Banner de fechamento no console sem a linha `alvo:` — sem ela, o `[APLICADO]` de outro lote aparece logo abaixo de um pedido de simulação e não há como saber de quem é |
 | `CatracaBordaAssincronaConfereCaminhoTest` | 2 | Tela responder *"iniciado"* para trabalho que não tem como acontecer |
 | `CatracaTelaDestrutivaNasceEmDryRunTest` | 2 | Tela que reescreve o acervo abrir com "gravar" como padrão |
+| `CatracaI18nAutomaticaTest` | 6 | Script da tela trocar o `lang` do `<html>` — com o Google bloqueado, a página ficava em português declarando `en-US`, e o leitor de tela lia com a voz inglesa —, o aviso de falha do tradutor perder o inglês ou o espanhol, ícone e código saírem da lista protegida, o `element.js` virar síncrono ou nascer dicionário (`data-i18n=`). O comportamento no navegador é provado por `ferramentas/navegador/verificar-i18n.mjs` |
 
 ### Catracas de lore (6 guardas, 19 testes)
 
@@ -192,7 +193,7 @@ classes provam isso, e o portão as roda pelo filtro `org.traducao.projeto.*Vitr
 ### 1. Guarda nasce de prejuízo real, nunca de bug hipotético
 
 Guarda preventiva é cerimônia, e cerimônia é a primeira coisa abandonada na pressa. Cada uma das
-35 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
+36 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
 
 - `CatracaRegraDuplicadaEntreFatiasTest` — *"cópia não declarada foi a causa de três defeitos em
   03/08/2026, um deles vivo por nove dias."*
@@ -365,7 +366,7 @@ discussão sem argumento novo:
 | `build.sh` / `deploy.sh` | ❌ não há: o KRONOS roda na máquina de quem usa. A única coisa publicada é a [vitrine](ref-docker.md#vitrine-pública-vps) (`Dockerfile.vitrine`), que mostra as telas e não executa nada |
 | Build sempre capado | 🟡 declarado sem mecanismo — a VM do WSL2 já limita em ≈19,4 GB de 39,7 GB |
 | CSP proibindo estilo inline | ❌ não há CSP, e há 40 `style=` legítimos. O KRONOS local escuta só no loopback. A vitrine é pública: o `GuardaVitrine` envia `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` e `Referrer-Policy: no-referrer`, mas **não** CSP |
-| Canto inferior direito é território ocupado | 🟡 **medido, sem guarda**: o único ocupante é `.toast-container` (`fixed`, `bottom/right: 24px`), e ele tem `pointer-events: none` sem nenhum `.toast` reativando — ninguém disputa o canto. Sem cicatriz local, guarda é cerimônia |
+| Canto inferior direito é território ocupado | 🟡 **medido, sem guarda**: o ocupante fixo é `.toast-container` (`fixed`, `bottom/right: 24px`), com `pointer-events: none` sem nenhum `.toast` reativando. Desde 14/10/2026 o aviso de falha do tradutor ocupa a faixa de baixo inteira — só quando o Google não entrega a tradução pedida, e fecha no ×. Sem cicatriz local, guarda é cerimônia |
 | Discrição com cor, nunca `opacity` | ❌ sem incidente correspondente |
 
 ---

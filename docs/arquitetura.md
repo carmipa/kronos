@@ -14,12 +14,12 @@ O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Qu
 > |---|---|---|
 > | fatias funcionais | **21** | 28 pacotes de topo sob `org.traducao.projeto`, menos 5 peers, `core` e `config` |
 > | peers | **5** | `legenda` · `cachetraducao` · `lore` · `qualidadeTraducao` · `llm` |
-> | classes / linhas em `src/main` | **513** / **79.281** | `find … -name '*.java'` |
-> | classes / linhas em `src/test` | **481** / **90.055** | idem — o teste já pesa mais que o código |
+> | classes / linhas em `src/main` | **513** / **79.283** | `find … -name '*.java'` |
+> | classes / linhas em `src/test` | **482** / **90.216** | idem — o teste já pesa mais que o código |
 > | rotas `/api` | **49** | 39 em **21** `@RestController` + 10 em **6** recursos JAX-RS (`@Path`) |
 > | lore | **70** arquivos SQL, um por obra: **69** do lado da tradução, **69** do lado da revisão; **68** na lista da UI | `sem_lore` só existe na tradução e é oculta (`aparece_na_lista = 0`); `macross_dyrl` só existe na revisão — ver `lore/esquema.sql` |
-> | guardas executáveis | **45** | 35 `Catraca*Test` + 10 `Fronteira*`, somando 175 testes — mais as 7 classes de guarda da vitrine |
-> | suíte completa | **3.013** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
+> | guardas executáveis | **46** | 36 `Catraca*Test` + 10 `Fronteira*`, somando 181 testes — mais as 7 classes de guarda da vitrine |
+> | suíte completa | **3.019** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
 >
 > Divergência entre um número aqui e o código é bug de documentação, não licença poética.
 > O número anterior desta página (72 lores) vinha de contagem de classes Java; a lore virou
@@ -89,7 +89,19 @@ A aplicação roda **localmente** (`quarkus.http.host=127.0.0.1`) — não expõ
 - **metadados de anime** — TMDB, AniList e Jikan, nessa ordem de preferência (`apiDadosAnime`);
 - **Google Translate** — só nas telas de correção/revisão que o usam (scraping da API pública, não a API paga). O fallback online da tradução (`tradutor.fallback-online.ativo`) está **desligado**: a 2.1 é 100% local;
 - **Redis** do fluxo ao vivo de telemetria (`quarkus.redis.hosts`) — sem ele o card mostra "desconectado" e nada mais muda;
-- **push do dataset público** no GitHub (`telemetria-dataset.repositorio-remoto`), só quando o operador clica em "Publicar Dataset".
+- **push do dataset público** no GitHub (`telemetria-dataset.repositorio-remoto`), só quando o operador clica em "Publicar Dataset";
+- **tradução da tela** — ver [Idioma da interface](#idioma-da-interface-bandeiras), abaixo;
+- **fontes e ícones** (Outfit, JetBrains Mono, Material Symbols) carregados do Google Fonts a cada abertura da tela.
+
+### Idioma da interface (bandeiras)
+
+As três bandeiras no topo da barra lateral (Brasil, Estados Unidos, Espanha) traduzem a **tela inteira** pelo widget do Google Tradutor — sem dicionário: tela nova já nasce traduzível. A escolha fica no navegador (`localStorage`) e vira o cookie `googtrans` que o widget lê no recarregamento. Na primeira visita, sem escolha salva, vale o idioma do navegador.
+
+- **Português não carrega nada de terceiro.** O `element.js` do Google só é pedido quando o idioma é inglês ou espanhol.
+- **O que não se traduz:** consoles, resultados, relatórios, caminhos, tabelas, campos, metadados de anime, código e o nome dos ícones (traduzido, o glifo some) levam `translate="no"`, inclusive o que a tela pinta depois do carregamento.
+- **O `<html lang>` fica em `pt-BR`.** Quem o troca, depois de traduzir, é o próprio Google. Até 14/10/2026 o script trocava antes: com o Google bloqueado, a página ficava em português declarando `en-US`, e o leitor de tela lia com a voz inglesa.
+- **Quando o Google não responde** (rede, bloqueador, captcha por limite de uso, ou dez segundos sem tradução), um aviso no rodapé diz o que aconteceu **no idioma pedido** e oferece tentar de novo, ficar em português e — só em endereço público `https` — abrir a página pelo Google Tradutor.
+- **Guardas:** `CatracaI18nAutomaticaTest` no build; no navegador, `ferramentas/navegador/verificar-i18n.mjs` (tradução real com uma única carga ao Google, Google bloqueado, captcha, Google mudo, ícones intactos e calibração contra o script anterior).
 
 A exceção é a [vitrine pública](ref-docker.md#vitrine-pública-vps): outra imagem (`Dockerfile.vitrine`) que mostra as telas na rede e recusa toda função.
 
@@ -128,7 +140,7 @@ graph TB
         CFG["config<br/>bootstrap de modo"]
     end
 
-    GUARD["🚦 45 guardas executáveis<br/>10 Fronteira* + 35 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
+    GUARD["🚦 46 guardas executáveis<br/>10 Fronteira* + 36 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
 
     FUNC -->|"importa — arestas congeladas por tipo exato"| PEERS
     FUNC --> BASE
