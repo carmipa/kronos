@@ -41,6 +41,10 @@ INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Wilmit Zenam');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Barara Peor');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Flaminia Kalle');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Rosario Ten');
+-- 14/10/2026 (filme V): armas do G-Rach e do G-Self que a 2.1 mexia: 'Centipede' ganhava acento e 'Track fin!',
+-- igual ao ingles, voltava ao modelo como nao traduzida e saia 'Fim do rastreamento!'. Termo protegido autoriza manter.
+INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Centipede');
+INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Track fin');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Armadura Móvel', 'Mobile Armor');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Armadura Normal', 'Normal Suit');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Armaduras Móveis', 'Mobile Armors');
