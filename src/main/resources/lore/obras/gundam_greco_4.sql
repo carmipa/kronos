@@ -1,23 +1,20 @@
 -- [gerado] obra gundam_greco_4
--- FORA DO ESCOPO (10/10/2026): Paulo ja tem legenda PT-BR dos 5 filmes de Reconguista in G; a obra nao se traduz.
--- Esta lore foi gerada em lote em 15/07/2026 e nunca foi curada: nao serve de referencia de nome
--- nem de faccao (a legenda PT-BR usa Torre/Guarda/Exercito da Capital). Fica no catalogo sem uso.
+-- EM USO desde 14/10/2026 (decisao de Paulo: filme III com a legenda humana do F.N.U Fansubs; I, II, IV e V
+-- traduzidos pelo KRONOS). De 10/10 a 14/10 esteve FORA DO ESCOPO: Paulo tinha PT-BR dos 5 filmes, que sumiu.
+-- Faccoes e lugares seguem o F.N.U (filme III, medido em 14/10): Exercito da Capital x2, Exercito Ameriano,
+-- Guarda da Capital, Frota Dorette x8, Globo de Venus x6, Fundacao Hermes x9, Sankt Porto x4, Codigo Rayhunton;
+-- Capital Tower fica em ingles (F.N.U x2). A lore de 15/07 protegia as faccoes em ingles, o contrario disso.
 INSERT INTO obra VALUES ('gundam_greco_4');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Aida Rayhunton');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Aida Surugan');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Ameria');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Amerian Army');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Bellri Zenam');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Capital Army');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Capital Guard');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Capital Tower');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Cumpa Rusita');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Dorette Fleet');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'G-Arcane');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'G-IT');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'G-Lucifer');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'G-Self');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Hermes Foundation');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Kabakali');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Klim Nick');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'La Gu');
@@ -32,14 +29,12 @@ INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Noredo Nug');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Photon Battery');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Raraiya Akuparl');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Raraiya Monday');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Rayhunton Code');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Reconguista');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Regild Century');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'SU-Cordism');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Towasanga');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Towasangan');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Universal Standard');
-INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Venus Globe');
 INSERT INTO termo_protegido VALUES ('gundam_greco_4', 'Wilmit Zenam');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Armadura Móvel', 'Mobile Armor');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Armadura Normal', 'Normal Suit');
@@ -95,6 +90,14 @@ INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Uniforme Normal', '
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Uniformes Normais', 'Normal Suits');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Velho Tipo', 'Oldtype');
 INSERT INTO correcao_terminologia VALUES ('gundam_greco_4', 'Velhos Tipos', 'Oldtypes');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Amerian Army', 'Exército Ameriano');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Capital Army', 'Exército da Capital');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Capital Guard', 'Guarda da Capital');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Dorette Fleet', 'Frota Dorette');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Hermes Foundation', 'Fundação Hermes');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Rayhunton Code', 'Código Rayhunton');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Sankt Port', 'Sankt Porto');
+INSERT INTO traducao_obrigatoria VALUES ('gundam_greco_4', 'Venus Globe', 'Globo de Vênus');
 INSERT INTO lore_traducao VALUES ('gundam_greco_4', 'Gundam: Reconguista in G IV - Love That Cries Out in Battle', 1,
 'Você é um tradutor especializado em legendas de anime, traduzindo do inglês para português do Brasil.
 Contexto ativo da obra: Gundam Reconguista in G IV: Love That Cries Out in Battle.
@@ -112,9 +115,10 @@ Prioridades de tradução:
 Lore e terminologia obrigatória:
 - Obra: Gundam Reconguista in G IV: Love That Cries Out in Battle.
 - Personagens: Bellri Zenam (homem), Aida Surugan/Aida Rayhunton (mulher), Raraiya Monday/Raraiya Akuparl (mulher), Noredo Nug (mulher), Klim Nick (homem), Luin Lee/Mask (homem), Mick Jack (mulher), Manny Ambassada (mulher), La Gu (homem).
-- Facções: Venus Globe, G-IT, Hermes Foundation, Ameria.
+- Facções: Globo de Vênus (Venus Globe), G-IT, Fundação Hermes (Hermes Foundation), Ameria.
+- Facções e lugares SEMPRE em português, como na legenda PT-BR humana de referência (F.N.U Fansubs): Exército da Capital, Guarda da Capital, Exército Ameriano, Frota Dorette, Globo de Vênus, Fundação Hermes, Código Rayhunton, Sankt Porto. Capital Tower fica em inglês. Ameria é o país e NUNCA vira América nem americano.
 - Mobile suits e tecnologia: G-Self, G-Arcane, G-Lucifer, Kabakali, Photon Battery.
-- Termos do mundo: Venus Globe, Photon Battery, Regild Century, Hermes Foundation, Reconguista, Rayhunton Code, Amerian Army. Mantenha nomes próprios em inglês/romanizados. Não converter "Reconguista" para "Reconquista"; mantenha Reconguista.
+- Termos do mundo: Globo de Vênus (Venus Globe), Photon Battery, Regild Century, Fundação Hermes (Hermes Foundation), Reconguista, Código Rayhunton (Rayhunton Code), Exército Ameriano (Amerian Army). Mantenha nomes de pessoas, mechas e naves em inglês/romanizados; facções vão em português. Não converter "Reconguista" para "Reconquista"; mantenha Reconguista.
 
 Concordância de gênero, pronomes, tratamentos e verbos (obrigatório em TODAS as falas):
 - O inglês não marca gênero em adjetivos/particípios; infira pelo falante, interlocutor e personagens citados.
@@ -156,7 +160,8 @@ a menos que um nome proprio exija artigo/pronome coerente.
 Use a lore abaixo como fonte canonica de grafia e padrao:
 - Obra: Gundam Reconguista in G IV: Love That Cries Out in Battle.
 - Regra: nomes canonicos NAO sao localizados. Corrija so grafia de lore.
-- Nomes/termos: Venus Globe, G-IT, Hermes Foundation, Ameria, Amerian Army, G-Self, G-Arcane, G-Lucifer, Kabakali, Photon Battery, Regild Century, Rayhunton Code, Reconguista.
+- Nomes/termos: Globo de Vênus (Venus Globe), G-IT, Fundação Hermes (Hermes Foundation), Ameria, Exército Ameriano (Amerian Army), G-Self, G-Arcane, G-Lucifer, Kabakali, Photon Battery, Regild Century, Código Rayhunton (Rayhunton Code), Reconguista.
+- Faccoes e lugares em portugues (legenda humana de referencia, F.N.U Fansubs): Exército da Capital, Guarda da Capital, Exército Ameriano, Frota Dorette, Globo de Vênus, Fundação Hermes, Código Rayhunton, Sankt Porto. Capital Tower fica em ingles. Ameria NUNCA vira America/americano.
 - Personagens: Bellri Zenam, Aida Surugan/Aida Rayhunton, Raraiya Monday/Raraiya Akuparl, Noredo Nug, Klim Nick, Luin Lee/Mask, Mick Jack, Manny Ambassada, La Gu.
 - Alertas: Reconguista NUNCA vira "Reconquista"; Photon Battery nao vira "Bateria de Foton";
   nomes proprios em ingles/romanizados.
