@@ -1,0 +1,47 @@
+/* dica.css v1.0 (2026-10-05) — tooltip explicativo acessível (regra 6-A). Fonte canônica: instrucoes/tooltip-canonico/. Não editar no projeto. */
+:root {
+  --dica-bg: #1f2937;
+  --dica-fg: #ffffff;
+  --dica-gatilho: #1d4ed8;
+  --dica-largura: 20rem;
+  --dica-alvo: 1.5rem;            /* WCAG 2.5.8: mínimo 24px */
+}
+@media (pointer: coarse) { :root { --dica-alvo: 2.75rem; } } /* toque: 44px */
+
+.dica { position: relative; display: inline-flex; align-items: center; vertical-align: middle; }
+
+.dica__gatilho {
+  inline-size: var(--dica-alvo); block-size: var(--dica-alvo);
+  display: inline-grid; place-items: center; padding: 0; border: 0;
+  background: transparent; color: var(--dica-gatilho); cursor: help; border-radius: 50%;
+}
+.dica__gatilho svg { inline-size: 1rem; block-size: 1rem; }
+.dica__gatilho:focus-visible, .dica :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid currentColor; outline-offset: 2px;
+}
+
+.dica__texto {
+  position: fixed; z-index: 1000; left: 0; top: 0;      /* x/y calculados pelo dica.js; escapa de overflow:hidden|auto */
+  inline-size: max-content; max-inline-size: min(var(--dica-largura), calc(100vw - 1rem));
+  padding: .5rem .75rem; border-radius: .375rem; outline: 1px solid transparent; /* forced-colors */
+  background: var(--dica-bg); color: var(--dica-fg);
+  font: 400 .875rem/1.4 system-ui, sans-serif; text-align: start; white-space: normal;
+  font-weight: 400; text-transform: none; letter-spacing: normal;
+  visibility: hidden; opacity: 0;
+}
+/* ponte invisível: dá para passar o mouse do gatilho para o texto sem ele sumir (WCAG 1.4.13) */
+.dica__texto::before { content: ""; position: absolute; inset-inline: 0; inset-block-end: 100%; block-size: 8px; }
+.dica[data-lado="cima"] > .dica__texto::before { inset-block-end: auto; inset-block-start: 100%; }
+
+/* mostrar */
+.dica:hover > .dica__texto,
+.dica:focus-within > .dica__texto,
+.dica[data-aberta] > .dica__texto,
+.campo:focus-within .dica__texto,
+.campo:has(> :is(input, select, textarea):hover) .dica__texto { visibility: visible; opacity: 1; }
+/* dispensar com Esc (precisa vir DEPOIS) */
+.dica[data-fechada] > .dica__texto,
+.campo[data-fechada] .dica__texto { visibility: hidden; opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) { .dica__texto { transition: opacity .12s ease-out; } }
+@media (forced-colors: active) { .dica__texto { border: 1px solid CanvasText; } }

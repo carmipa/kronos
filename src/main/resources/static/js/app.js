@@ -157,7 +157,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     inicializarControlesConsole();
     inicializarBotoesProcurarCaminho();
     inicializarBotaoSair();
+    abrirPainelDoEndereco();
+    window.addEventListener('hashchange', abrirPainelDoEndereco);
 });
+
+/**
+ * PROPÓSITO DE NEGÓCIO: abre o painel nomeado no endereço (ex.: /#telemetria). É o que faz o
+ * "Ver telemetria" das páginas de erro levar à telemetria, e não ao Painel Inicial.
+ * INVARIANTES DO DOMÍNIO: só aceita o data-target de um item do menu que existe — o endereço não
+ * vira seletor arbitrário; "Sair" nunca é acionado pelo endereço; o grupo do item é expandido para
+ * o item ativo ficar visível.
+ * COMPORTAMENTO EM CASO DE FALHA: endereço sem âncora ou com âncora desconhecida não faz nada.
+ */
+function abrirPainelDoEndereco() {
+    const alvo = decodeURIComponent((location.hash || '').slice(1));
+    if (!alvo) return;
+    const botao = [...document.querySelectorAll('.nav-item[data-target]')]
+        .find(b => b.getAttribute('data-target') === alvo && b.id !== 'btn-menu-sair');
+    if (!botao) return;
+    const grupo = botao.closest('.nav-group');
+    if (grupo && grupo.classList.contains('fechado')) {
+        grupo.classList.remove('fechado');
+        grupo.querySelector('.nav-group-header')?.setAttribute('aria-expanded', 'true');
+    }
+    botao.click();
+}
 
 /**
  * Controla a troca de abas/painéis na sidebar e atualiza os títulos

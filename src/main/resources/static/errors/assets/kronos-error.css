@@ -1,0 +1,590 @@
+/* ============================================================================
+   KRONOS CORE — Páginas de erro — kronos-error.css
+   Versão: 1.1.0 (adaptação ao KRONOS do kit v1.0.0) | Autor: Paulo André Carminati
+   Tema escuro, mesmo sistema visual do painel. Sem dependências externas.
+   ----------------------------------------------------------------------------
+   Como funciona a cor: cada página declara <html data-code="404"> e o bloco
+   "MAPA DE CORES" abaixo define --accent para aquele código. Todo o restante
+   (glow, botão primário, marca d'água, ícone, barra de retry) deriva de
+   --accent via color-mix(), então uma nova cor = uma linha nova no mapa.
+
+   Diferenças para o kit v1.0.0, cada uma por uma regra do projeto:
+   - medidas em rem e laterais em %, px só em borda, sombra e breakpoint, e o
+     conteúdo ocupa a largura toda (sem coluna central de max-width);
+   - o tooltip é o componente canônico (/dica/dica.css): o .kc-tip do kit saiu,
+     e aqui só se ajustam os tokens dele ao tema escuro;
+   - o seletor de idioma usa as bandeiras do painel (/i18n/i18n.css), que leem
+     os tokens --border-color, --accent-purple etc. mapeados no :root abaixo;
+   - o topo quebra linha em tela estreita: no kit, a 390 px, o chip de status
+     saía cortado para fora da tela.
+   ========================================================================== */
+
+:root {
+  /* Superfícies (extraídas do painel KRONOS CORE) */
+  --bg: #0a0e16;
+  --bg-2: #0d121b;
+  --panel: #0f1520;
+  --panel-2: #121a26;
+  --line: #1b2432;
+  --line-2: #263040;
+
+  /* Texto */
+  --text: #e6edf5;
+  --text-2: #aab5c3;
+  --muted: #7d8a9b;
+  --faint: #4b5668;
+
+  /* Estados do backend */
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+
+  /* Cor de destaque padrão (sobrescrita pelo mapa de cores) */
+  --accent: #2dd4bf;
+  --accent-ink: #0a0e16; /* texto sobre botão de destaque */
+
+  --font: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "DejaVu Sans Mono", monospace;
+
+  --radius: 1rem;
+  --radius-s: .625rem;
+  --shadow: 0 20px 60px rgba(0, 0, 0, .35);
+
+  /* Tokens que as bandeiras e o aviso de idioma (/i18n/i18n.css) leem */
+  --border-color: var(--line-2);
+  --accent-purple: var(--accent);
+  --accent-yellow: var(--warn);
+  --text-muted: var(--muted);
+  --text-primary: var(--text);
+  --bg-card-solid: var(--panel);
+  --font-code: var(--mono);
+  --font-main: var(--font);
+
+  /* Tokens do tooltip canônico (/dica/dica.css), no tema escuro */
+  --dica-bg: #161e2b;
+  --dica-fg: var(--text);
+  --dica-gatilho: var(--muted);
+}
+
+/* ---------------------------------------------------------------------------
+   MAPA DE CORES — uma cor de destaque por erro, agrupadas por família
+   --------------------------------------------------------------------------- */
+/* Navegação */
+html[data-code="404"]     { --accent: #2dd4bf; } /* teal          */
+html[data-code="410"]     { --accent: #67e8f9; } /* ciano claro   */
+/* Validação */
+html[data-code="400"]     { --accent: #a3e635; } /* lima          */
+html[data-code="405"]     { --accent: #10b981; } /* esmeralda     */
+html[data-code="409"]     { --accent: #fb923c; } /* laranja claro */
+html[data-code="413"]     { --accent: #fde047; } /* amarelo claro */
+html[data-code="415"]     { --accent: #86efac; } /* verde claro   */
+html[data-code="422"]     { --accent: #e879f9; } /* fúcsia        */
+/* Acesso */
+html[data-code="401"]     { --accent: #f43f5e; } /* rosa-vermelho */
+html[data-code="403"]     { --accent: #ec4899; } /* pink          */
+/* Limites & Tempo */
+html[data-code="408"]     { --accent: #f59e0b; } /* âmbar         */
+html[data-code="429"]     { --accent: #ea580c; } /* laranja queimado */
+/* Servidor */
+html[data-code="500"]     { --accent: #ef4444; } /* vermelho      */
+html[data-code="502"]     { --accent: #8b5cf6; } /* violeta       */
+html[data-code="503"]     { --accent: #3b82f6; } /* azul          */
+html[data-code="504"]     { --accent: #a5b4fc; } /* índigo claro  */
+/* Cliente */
+html[data-code="offline"] { --accent: #0ea5e9; } /* azul-céu      */
+html[data-code="crash"]   { --accent: #e2e8f0; } /* neutro claro  */
+
+/* ---------------------------------------------------------------------------
+   BASE
+   --------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: dark; overflow-x: hidden; max-width: 100%; }
+
+/* O atributo hidden vence qualquer display de classe (ex.: .kc-btn, .dica) */
+[hidden] { display: none !important; }
+
+body.kc-error {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: .375rem;
+}
+
+/* ---------------------------------------------------------------------------
+   FUNDO: grade técnica + brilho na cor do erro + marca d'água do código
+   --------------------------------------------------------------------------- */
+.kc-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.kc-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  opacity: .28;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 100%);
+}
+
+.kc-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(45rem 30rem at 18% 12%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%),
+    radial-gradient(32.5rem 26.25rem at 92% 88%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
+}
+
+.kc-watermark {
+  position: absolute;
+  right: -1.5rem;
+  bottom: -4.5rem;
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(13.75rem, 30vw, 32.5rem);
+  line-height: 1;
+  letter-spacing: -.06em;
+  color: transparent;
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--accent) 18%, transparent);
+  user-select: none;
+}
+
+/* ---------------------------------------------------------------------------
+   TOPO
+   --------------------------------------------------------------------------- */
+.kc-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 2.5%;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.kc-brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.kc-brand svg { width: 2.625rem; height: 2.625rem; flex: none; }
+
+.kc-brand b {
+  display: block;
+  font-size: .9375rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.kc-brand small {
+  display: block;
+  margin-top: .125rem;
+  font-size: .625rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kc-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; }
+
+.kc-lang {
+  padding: .1875rem .25rem;
+  border-radius: 999px;
+  background: var(--panel);
+}
+
+.kc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4375rem .75rem;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: .75rem;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.kc-status i {
+  width: .5rem; height: .5rem;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+}
+
+.kc-status[data-state="wait"] i { background: var(--warn); animation: kc-pulse 1.2s ease-in-out infinite; }
+.kc-status[data-state="ok"]   i { background: var(--ok);   box-shadow: 0 0 10px var(--ok); }
+.kc-status[data-state="bad"]  i { background: var(--bad);  box-shadow: 0 0 10px var(--bad); }
+
+.kc-clock {
+  font: 500 .75rem/1 var(--mono);
+  color: var(--muted);
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   CONTEÚDO PRINCIPAL — largura cheia, laterais em %
+   --------------------------------------------------------------------------- */
+.kc-main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  padding: 3.5rem 5%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(20rem, 26.875rem);
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.kc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1.625rem;
+}
+
+.kc-tile {
+  width: 2.875rem; height: 2.875rem;
+  display: grid;
+  place-items: center;
+  border-radius: .75rem;
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 18%, transparent);
+  flex: none;
+}
+
+.kc-tile svg { width: 1.375rem; height: 1.375rem; }
+
+.kc-eyebrow span {
+  font: 700 .75rem/1 var(--mono);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.kc-code {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(5.5rem, 12.5vw, 10.25rem);
+  line-height: .95;
+  letter-spacing: -.055em;
+  color: var(--accent);
+  text-shadow: 0 0 44px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.kc-title {
+  margin: 1.125rem 0 .875rem;
+  font-size: clamp(1.75rem, 3.1vw, 2.625rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.012em;
+}
+
+/* O "?" do tooltip ao lado de título e código não herda o tamanho gigante */
+.kc-code .dica, .kc-title .dica { vertical-align: top; text-shadow: none; letter-spacing: normal; }
+
+.kc-desc {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.kc-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: .625rem;
+  margin: 1.375rem 0 0;
+  padding: .875rem 1rem;
+  max-width: 62ch;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  background: color-mix(in srgb, var(--accent) 7%, var(--panel));
+  font-size: .875rem;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+
+.kc-hint svg { width: 1.125rem; height: 1.125rem; flex: none; color: var(--accent); margin-top: 1px; }
+.kc-hint .dica svg { color: var(--dica-gatilho); margin-top: 0; }
+
+.kc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 2.125rem;
+}
+
+.kc-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5625rem;
+  min-height: 2.75rem;
+  padding: .75rem 1.25rem;
+  border-radius: .625rem;
+  border: 1px solid transparent;
+  font: 600 .875rem/1 var(--font);
+  letter-spacing: .01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .12s, box-shadow .15s, background .15s, border-color .15s;
+}
+
+.kc-btn svg { width: 1rem; height: 1rem; }
+.kc-btn:active { transform: translateY(1px); }
+
+.kc-btn--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.kc-btn--primary:hover { box-shadow: 0 12px 34px color-mix(in srgb, var(--accent) 42%, transparent); }
+
+.kc-btn--ghost {
+  background: var(--panel);
+  border-color: var(--line-2);
+  color: var(--text);
+}
+.kc-btn--ghost:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line-2)); }
+
+.kc-btn--link {
+  background: transparent;
+  color: var(--text-2);
+  padding-inline: .625rem;
+  text-decoration: underline dotted;
+  text-underline-offset: .25rem;
+}
+.kc-btn--link:hover { color: var(--text); }
+
+/* ---------------------------------------------------------------------------
+   PAINEL DE DIAGNÓSTICO
+   --------------------------------------------------------------------------- */
+.kc-diag {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding: 1.375rem 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.kc-diag header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.kc-diag h2 {
+  margin: 0;
+  font: 700 .6875rem/1 var(--mono);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kc-icon-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  min-height: 2.75rem;
+  padding: .375rem .625rem;
+  border-radius: .5rem;
+  border: 1px solid var(--line-2);
+  background: var(--panel);
+  color: var(--text-2);
+  font: 600 .71875rem/1 var(--font);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.kc-icon-btn svg { width: .875rem; height: .875rem; }
+.kc-icon-btn:hover { color: var(--text); border-color: color-mix(in srgb, var(--accent) 55%, var(--line-2)); }
+.kc-icon-btn[data-done="true"] { color: var(--accent); border-color: var(--accent); }
+
+.kc-diag dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: .5625rem 1rem;
+  margin: 0;
+  font: .78125rem/1.45 var(--mono);
+}
+
+.kc-diag [data-diag-row] { display: contents; }
+.kc-diag [data-diag-row][hidden] { display: none; }
+
+.kc-diag dt { color: var(--muted); white-space: nowrap; }
+.kc-diag dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
+
+.kc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding: .1875rem .5625rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.kc-retry {
+  margin-top: 1.125rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--line-2);
+}
+
+.kc-retry p {
+  margin: 0 0 .625rem;
+  font: 500 .78125rem/1.4 var(--font);
+  color: var(--text-2);
+}
+
+.kc-retry .kc-bar {
+  height: .375rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.kc-retry .kc-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  transition: width .9s linear;
+}
+
+.kc-retry .kc-retry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+
+/* ---------------------------------------------------------------------------
+   RODAPÉ
+   --------------------------------------------------------------------------- */
+.kc-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem 1.5rem;
+  padding: 1.125rem 2.5%;
+  border-top: 1px solid var(--line);
+  font-size: .75rem;
+  color: var(--muted);
+}
+
+.kc-foot a { color: var(--text-2); text-decoration: none; }
+.kc-foot a:hover { color: var(--text); }
+.kc-foot .kc-by b { color: var(--text); font-weight: 700; }
+
+.kc-foot .kc-gh {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  min-height: 1.5rem;
+  padding: .25rem .5625rem;
+  border: 1px solid var(--line-2);
+  border-radius: .375rem;
+  background: var(--panel);
+  margin-left: .625rem;
+}
+.kc-foot .kc-gh svg { width: .8125rem; height: .8125rem; }
+
+.kc-foot .kc-ref { font-family: var(--mono); letter-spacing: .06em; }
+
+/* ---------------------------------------------------------------------------
+   ANIMAÇÕES & RESPONSIVO
+   --------------------------------------------------------------------------- */
+@keyframes kc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .35; }
+}
+
+@keyframes kc-rise {
+  from { opacity: 0; transform: translateY(.625rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+.kc-hero, .kc-diag { animation: kc-rise .45s ease-out both; }
+.kc-diag { animation-delay: .12s; }
+
+@media (max-width: 1100px) {
+  .kc-main { grid-template-columns: minmax(0, 1fr) minmax(18.75rem, 23.75rem); gap: 2.5rem; }
+}
+
+@media (max-width: 920px) {
+  .kc-main { grid-template-columns: 1fr; gap: 2rem; padding: 2.25rem 5%; align-items: start; }
+  .kc-top { padding: .875rem 5%; }
+  .kc-watermark { font-size: 12.5rem; right: -1rem; bottom: -2.5rem; }
+  .kc-foot { padding: 1rem 5%; }
+}
+
+@media (max-width: 560px) {
+  .kc-brand small { display: none; }
+  .kc-actions > .dica, .kc-actions .kc-btn { width: 100%; justify-content: center; }
+  .kc-diag { padding: 1.125rem; }
+  .kc-diag dl { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+  .kc-diag dd { margin-bottom: .5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+@media print {
+  .kc-bg, .kc-top .kc-tools, .kc-actions, .kc-retry, .dica__gatilho { display: none !important; }
+  body.kc-error { background: #fff; color: #000; }
+  .kc-diag { box-shadow: none; }
+}
