@@ -235,6 +235,49 @@ public class CorretorOrtograficoLegenda {
         return false;
     }
 
+    /** Uma palavra dentro de um termo de lore, pela mesma régua de letras das candidatas. */
+    private static final java.util.regex.Pattern PECA_DE_TERMO = java.util.regex.Pattern.compile("\\p{L}+");
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: as palavras de dentro dos termos de lore COMPOSTOS ({@code "Aida
+     * Rayhunton"}, {@code "Apocalypse Virus"}, {@code "Para-RAID"}). A lista de intocáveis compara
+     * a candidata — UMA palavra — com o termo inteiro, então termo de duas palavras não protegia
+     * nenhuma das duas.
+     *
+     * <h2>O prejuízo, medido em 14/10/2026</h2>
+     * A Reconguista I saiu da 2.1 com {@code Aída} em 20 falas (o dicionário acentua "Aida", e a
+     * lore só a tem como {@code Aida Rayhunton} e {@code Aida Surugan}). O mesmo defeito já tinha
+     * sido visto em 12/10 no Guilty Crown ({@code Apocalypse Vírus}, 14 falas no acervo) e ficado
+     * fora do escopo. Pelo corretor de produção, das 927 palavras que só existem dentro de termo
+     * composto em todas as lores, 15 seriam acentuadas: Aida, Angelo, Claudia, Cleo, Domenico,
+     * Elmer, Genesis, Ilion, Jose, KaKa, Monica, Nadia, Norio, Oasis e Virus.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a peça vale com a CAIXA do termo. É o que separa o nome do
+     * substantivo comum com o mesmo sinal: {@code "Virus"} de {@code "Apocalypse Virus"} fica, e
+     * {@code "o virus se espalhou"} continua virando {@code "vírus"}. Termo de uma palavra só segue
+     * a regra antiga (sem caixa) no chamador.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: termo nulo é pulado; lista sem termo composto devolve
+     * conjunto vazio, e o comportamento fica o de antes.
+     */
+    private static Set<String> palavrasDeTermoComposto(Set<String> termos) {
+        Set<String> pecas = new java.util.HashSet<>();
+        for (String termo : termos) {
+            if (termo == null) {
+                continue;
+            }
+            java.util.List<String> desteTermo = new java.util.ArrayList<>();
+            java.util.regex.Matcher m = PECA_DE_TERMO.matcher(termo);
+            while (m.find()) {
+                desteTermo.add(m.group());
+            }
+            if (desteTermo.size() > 1) {
+                pecas.addAll(desteTermo);
+            }
+        }
+        return pecas;
+    }
+
     /**
      * PROPÓSITO DE NEGÓCIO: mesma correção de acento, com uma lista de palavras INTOCÁVEIS — os
      * termos de lore da obra. Nome próprio de ficção não leva acento do português, e o dicionário
@@ -256,9 +299,10 @@ public class CorretorOrtograficoLegenda {
      * <p>Consertar caso a caso no {@code correcoesTerminologia} funciona para o que já foi
      * traduzido; não impede a próxima obra de nascer com o mesmo dano.
      *
-     * <p>INVARIANTES DO DOMÍNIO: a comparação ignora caixa — o dicionário propõe forma
-     * capitalizada ou não conforme a posição na frase. Lista vazia reproduz exatamente o
-     * comportamento anterior.
+     * <p>INVARIANTES DO DOMÍNIO: a comparação com o termo inteiro ignora caixa — o dicionário
+     * propõe forma capitalizada ou não conforme a posição na frase. Palavra de dentro de termo
+     * composto ({@link #palavrasDeTermoComposto}) também é intocável, com a caixa do termo. Lista
+     * vazia reproduz exatamente o comportamento anterior.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula é tratada como vazia; texto nulo volta nulo.
      */
@@ -269,9 +313,10 @@ public class CorretorOrtograficoLegenda {
         try {
             Set<String> candidatas = CorretorAcentoPorDicionario.candidatas(texto);
             if (intocaveis != null && !intocaveis.isEmpty()) {
+                Set<String> pecas = palavrasDeTermoComposto(intocaveis);
                 Set<String> semLore = new java.util.LinkedHashSet<>();
                 for (String candidata : candidatas) {
-                    if (!contemIgnorandoCaixa(intocaveis, candidata)) {
+                    if (!contemIgnorandoCaixa(intocaveis, candidata) && !pecas.contains(candidata)) {
                         semLore.add(candidata);
                     }
                 }

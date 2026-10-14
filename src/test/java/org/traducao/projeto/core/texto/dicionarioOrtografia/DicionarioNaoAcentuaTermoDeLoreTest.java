@@ -51,7 +51,10 @@ class DicionarioNaoAcentuaTermoDeLoreTest {
             "apsaras", Set.of("apsarás"),
             "Bosnia", Set.of("Bósnia"),
             "Cardeas", Set.of("Cárdeas"),
-            "fatidico", Set.of("fatídico"));
+            "fatidico", Set.of("fatídico"),
+            "Aida", Set.of("Aída"),
+            "Virus", Set.of("Vírus"),
+            "virus", Set.of("vírus"));
 
         @Override
         public boolean disponivel() {
@@ -124,8 +127,38 @@ class DicionarioNaoAcentuaTermoDeLoreTest {
     }
 
     @Test
+    @DisplayName("o caso REAL da Reconguista I: a palavra de um termo COMPOSTO tambem e intocavel")
+    void palavraDeTermoCompostoAtravessaIntacta() {
+        Set<String> greco = Set.of("Aida Rayhunton", "Aida Surugan");
+
+        assertEquals("Aida Rayhunton. Pirata espacial.",
+            corretor.corrigir("Aida Rayhunton. Pirata espacial.", greco),
+            "a lista comparava a palavra \"Aida\" com o termo inteiro \"Aida Rayhunton\" e nao "
+                + "protegia nada: a 2.1 entregou \"Aída\" em 20 falas da Reconguista I");
+        assertEquals("Onde esta a Senhorita Aida?!",
+            corretor.corrigir("Onde esta a Senhorita Aida?!", greco),
+            "o filme chama a personagem so pelo primeiro nome, que e a forma mais comum");
+    }
+
+    @Test
+    @DisplayName("FRONTEIRA: o mesmo sinal em minuscula e substantivo comum e continua acentuado")
+    void substantivoComumComOMesmoSinalContinuaAcentuado() {
+        Set<String> guiltyCrown = Set.of("Apocalypse Virus");
+
+        assertEquals("O Apocalypse Virus voltou.",
+            corretor.corrigir("O Apocalypse Virus voltou.", guiltyCrown),
+            "12/10, Guilty Crown: 14 falas entregues como \"Apocalypse Vírus\"");
+        assertEquals("O vírus se espalhou pela cidade.",
+            corretor.corrigir("O virus se espalhou pela cidade.", guiltyCrown),
+            "a peca do termo vale com a caixa do termo: sem isso, a lore do Guilty Crown "
+                + "desligaria o acento do substantivo \"vírus\" na obra inteira");
+    }
+
+    @Test
     @DisplayName("CONTRA-TESTE: sem lista, o comportamento anterior continua")
     void semListaAcentuaComoAntes() {
+        assertEquals("Aída Rayhunton.", corretor.corrigir("Aida Rayhunton.", Set.of()),
+            "prova de que o dicionario REALMENTE acentuaria \"Aida\" sem a lista");
         assertEquals("Minha Apsarás, voce quer dizer?",
             corretor.corrigir("Minha Apsaras, voce quer dizer?", Set.of()),
             "lista vazia tem de reproduzir o comportamento de antes — e a prova de que o "
