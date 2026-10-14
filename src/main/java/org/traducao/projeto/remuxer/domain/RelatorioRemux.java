@@ -28,6 +28,7 @@ public class RelatorioRemux {
     private int videosSemLegenda;
     private int pareamentosAmbiguos;
     private int saidasJaExistentes;
+    private int legendasComFonteVietnamita;
     private long bytesMkvGeradosTotal;
     private boolean cancelado;
 
@@ -97,6 +98,14 @@ public class RelatorioRemux {
     public void registrarErroInesperado() { this.errosInesperados++; }
     /** PROPÓSITO DE NEGÓCIO: conta legenda inválida. INVARIANTES DO DOMÍNIO: nunca executa remux dessa tarefa. COMPORTAMENTO EM CASO DE FALHA: não lança. */
     public void registrarErroLegendaInvalida() { this.errosLegendaInvalida++; }
+    /**
+     * PROPÓSITO DE NEGÓCIO: conta legenda reprovada por fonte vietnamita antiga no que vai à tela —
+     * ela pede a 1.3 Troca de Tipo de Legenda antes do remux (ordem de Paulo, 14/10/2026).
+     * INVARIANTES DO DOMÍNIO: nunca executa remux dessa tarefa; é PENDÊNCIA (pede uma ação do
+     * operador), não falha técnica.
+     * COMPORTAMENTO EM CASO DE FALHA: não lança.
+     */
+    public void registrarLegendaComFonteVietnamita() { this.legendasComFonteVietnamita++; this.arquivosIgnorados++; }
 
     /**
      * PROPÓSITO DE NEGÓCIO: marca parada solicitada pelo Paulo ou encerramento da fila.
@@ -117,11 +126,12 @@ public class RelatorioRemux {
 
     /**
      * PROPÓSITO DE NEGÓCIO: soma itens que exigem correção ou decisão posterior.
-     * INVARIANTES DO DOMÍNIO: inclui ausência, ambiguidade e saída preservada.
+     * INVARIANTES DO DOMÍNIO: inclui ausência, ambiguidade, saída preservada e legenda reprovada por
+     * fonte vietnamita antiga (pede a 1.3 antes do remux).
      * COMPORTAMENTO EM CASO DE FALHA: sempre devolve inteiro não negativo.
      */
     public int getTotalPendencias() {
-        return videosSemLegenda + pareamentosAmbiguos + saidasJaExistentes;
+        return videosSemLegenda + pareamentosAmbiguos + saidasJaExistentes + legendasComFonteVietnamita;
     }
 
     /**
@@ -168,6 +178,8 @@ public class RelatorioRemux {
     public int getPareamentosAmbiguos() { return pareamentosAmbiguos; }
     /** PROPÓSITO DE NEGÓCIO: expõe destinos preservados. INVARIANTES DO DOMÍNIO: não são sobrescritos. COMPORTAMENTO EM CASO DE FALHA: retorna contador acumulado. */
     public int getSaidasJaExistentes() { return saidasJaExistentes; }
+    /** PROPÓSITO DE NEGÓCIO: expõe as legendas reprovadas por fonte vietnamita antiga. INVARIANTES DO DOMÍNIO: subconjunto das pendências. COMPORTAMENTO EM CASO DE FALHA: nunca negativo. */
+    public int getLegendasComFonteVietnamita() { return legendasComFonteVietnamita; }
     /** PROPÓSITO DE NEGÓCIO: informa cancelamento. INVARIANTES DO DOMÍNIO: estado é idempotente. COMPORTAMENTO EM CASO DE FALHA: retorna falso até cancelamento. */
     public boolean isCancelado() { return cancelado; }
 }

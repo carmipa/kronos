@@ -363,6 +363,59 @@ class TraduzirKaraokeUseCaseTest {
             "a letra ficou em ingles");
     }
 
+    /**
+     * Gundam ZZ, 14/10/2026: o diálogo publicado em {@code VnBook-Antiqua} (fonte vietnamita antiga)
+     * mostrava "Nóo, ộ a atraỗóo!" no lugar de "Não, é a atração!". Ordem de Paulo: fonte assim
+     * REPROVA e pede a 1.3 Troca de Tipo de Legenda — antes de gastar LLM e sem gravar saída.
+     */
+    @Test
+    void fonteVietnamitaNoDialogoReprovaOArquivoEPedeA13() throws IOException {
+        Files.writeString(pastaEntrada.resolve(NOME_ARQUIVO), legendaComFonteDoDialogo("VnBook-Antiqua"),
+            StandardCharsets.UTF_8);
+
+        List<ResultadoTraducaoKaraoke> resultados = useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+
+        assertTrue(resultados.isEmpty(), "o arquivo reprovado nao entra como processado");
+        DesfechoKaraoke desfecho = persistenciaMock.desfechoCapturado.get();
+        assertEquals(1, desfecho.falhas().size(), "a reprovacao fica no manifesto: " + desfecho);
+        String motivo = desfecho.falhas().getFirst().motivo();
+        assertTrue(motivo.contains("VnBook-Antiqua") && motivo.contains("1.3"), motivo);
+        assertEquals(0, llmFake.chamadasTraduzir, "reprovou antes de gastar LLM");
+        assertFalse(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO)),
+            "nada gravado para o arquivo reprovado");
+    }
+
+    /** CASO-CONTROLE (A1): a MESMA legenda com o diálogo em Arial é processada e gravada. */
+    @Test
+    void mesmaLegendaComDialogoEmArialSegueNormal() throws IOException {
+        Files.writeString(pastaEntrada.resolve(NOME_ARQUIVO), legendaComFonteDoDialogo("Arial"), StandardCharsets.UTF_8);
+
+        List<ResultadoTraducaoKaraoke> resultados = useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+
+        assertEquals(1, resultados.size());
+        assertTrue(persistenciaMock.desfechoCapturado.get().falhas().isEmpty());
+        assertTrue(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO)));
+    }
+
+    private static String legendaComFonteDoDialogo(String fonte) {
+        return String.join("\r\n",
+            "[Script Info]",
+            "Title: Teste",
+            "",
+            "[V4+ Styles]",
+            "Format: Name, Fontname, Fontsize",
+            "Style: Default," + fonte + ",75",
+            "Style: OP - Romaji,FrancophilSans,63",
+            "Style: OP - English,FrancophilSans,63",
+            "",
+            "[Events]",
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+            "Dialogue: 0,0:00:01.00,0:00:03.00,Default,,0,0,0,,Fala de diálogo intocável.",
+            "Dialogue: 0,0:01:00.00,0:01:05.00,OP - Romaji,,0,0,0,,kimi no heart ni fly away",
+            "Dialogue: 0,0:01:00.00,0:01:05.00,OP - English,,0,0,0,,Even if the world ends tomorrow",
+            "");
+    }
+
     @Test
     void aplicarTraduzCamadaInglesaEPreservaRomajiEDialogo() throws IOException {
         List<ResultadoTraducaoKaraoke> resultados = useCase.aplicar(pastaEntrada, CONTEXTO_08TH);

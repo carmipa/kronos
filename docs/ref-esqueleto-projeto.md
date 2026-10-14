@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **20** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **505** |
-| classes em `src/test` | **473** |
+| classes em `src/main` | **507** |
+| classes em `src/test` | **474** |
 
 ---
 
@@ -39,10 +39,10 @@ graph TB
     G1["<b>Tradução</b><br/>traducao (79)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
-    G4["<b>Finalização</b><br/>remuxer (15)<br/>renomearArquivos (6)"]:::fatia
+    G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
     G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (2)"]:::fatia
     PEERS["<b>🧱 peers</b><br/><i>importáveis por qualquer fatia</i><br/>cachetraducao (5)<br/>legenda (15)<br/>llm (4)<br/>lore (24)<br/>qualidadeTraducao (17)"]:::peer
-    BASE["<b>⚙️ infra transversal</b><br/>config (2)<br/>core (33)"]:::base
+    BASE["<b>⚙️ infra transversal</b><br/>config (2)<br/>core (34)"]:::base
     G0 --> PEERS
     G1 --> PEERS
     G2 --> PEERS
@@ -590,7 +590,7 @@ novoKaraoke/
 
 ### Finalização
 
-#### `remuxer` — 15 classes
+#### `remuxer` — 16 classes
 
 ```text
 remuxer/
@@ -598,6 +598,7 @@ remuxer/
 │   ├── MapeadorMidiaService.java
 │   └── RemuxarLoteUseCase.java
 ├── domain/
+│   ├── LegendaComFonteVietnamitaException.java
 │   ├── MkvToolNixNaoEncontradoException.java
 │   ├── PastaDeLegendaDoRemux.java
 │   ├── PlanoRemux.java
@@ -858,7 +859,7 @@ config/
 └── ModoExecucaoStartup.java
 ```
 
-#### `core` — 33 classes
+#### `core` — 34 classes
 
 ```text
 core/
@@ -901,6 +902,7 @@ core/
 │   │   ├── AchadoGramatical.java
 │   │   ├── LanguageToolRevisorAdapter.java
 │   │   └── RevisorGramaticalPort.java
+│   ├── FonteVietnamitaLegada.java
 │   ├── FronteiraTermoAss.java
 │   ├── TextoSemTags.java
 │   └── TokenDeControleLlm.java
@@ -912,7 +914,7 @@ core/
 
 ---
 
-## Testes — 473 classes
+## Testes — 474 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1054,7 +1056,7 @@ config/
 └── ModoExecucaoDispatcherTest.java
 ```
 
-#### `core` — 31 classes
+#### `core` — 32 classes
 
 ```text
 core/
@@ -1092,6 +1094,7 @@ core/
 │   ├── gramatica/
 │   │   ├── LanguageToolRevisorAdapterTest.java
 │   │   └── RevisorGramaticalMudo.java
+│   ├── FonteVietnamitaLegadaTest.java
 │   ├── FronteiraTermoAssTest.java
 │   ├── TextoSemTagsTest.java
 │   └── TokenDeControleLlmTest.java

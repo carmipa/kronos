@@ -112,6 +112,16 @@ public class TrocaTipoLegendaUseCase {
             legendaIo, auditoriaService, telemetria, auditoriaCache, backup);
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: diagnostica, sem gravar nada, quais legendas da pasta usam fonte que
+     * desenha a letra errada — é o "checar os outros animes" antes de trocar.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: olha os estilos do cabeçalho E o {@code \fn} dentro das falas, pela
+     * mesma regra única que reprova na 4.1 e no remux; só leitura.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: pasta inválida lança {@link TrocaTipoLegendaException};
+     * arquivo ilegível vira linha {@code ERRO_LEITURA} e o lote segue.
+     */
     public ResultadoGeralAuditoria escanear(Path diretorio) {
         validarDiretorio(diretorio);
 
@@ -122,7 +132,8 @@ public class TrocaTipoLegendaUseCase {
         for (Path arq : arquivos) {
             try {
                 DocumentoLegenda doc = legendaIo.ler(arq);
-                List<AuditoriaFonteInfo> fontes = auditoriaService.analisarCabecalho(doc.cabecalho());
+                List<AuditoriaFonteInfo> fontes = new ArrayList<>(auditoriaService.analisarCabecalho(doc.cabecalho()));
+                fontes.addAll(auditoriaService.analisarFontesNasFalas(doc.eventos()));
                 boolean temProblemas = fontes.stream().anyMatch(AuditoriaFonteInfo::problematica);
                 
                 if (temProblemas) {
@@ -153,6 +164,17 @@ public class TrocaTipoLegendaUseCase {
         return aplicar(diretorio, false);
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: troca por Arial a fonte vietnamita antiga das legendas da pasta — no
+     * cabeçalho e no {@code \fn} das falas —, que é o que a 4.1 e o remux pedem quando reprovam.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: backup ANTES de escrever; só a coluna Fontname e o nome depois do
+     * {@code \fn} mudam; arquivo sem fonte legada não é tocado (no modo forçado, todo estilo vira
+     * Arial, e o {@code \fn} legado das falas também).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: pasta inválida lança {@link TrocaTipoLegendaException}; erro
+     * num arquivo vira linha FALHA na auditoria e o lote segue; relatório que não grava vira aviso.
+     */
     public ResultadoTrocaFonte aplicar(Path diretorio, boolean forcarArial) {
         SessaoTroca sessao = new SessaoTroca();
         validarDiretorio(diretorio);
@@ -190,7 +212,8 @@ public class TrocaTipoLegendaUseCase {
 
             try {
                 DocumentoLegenda doc = legendaIo.ler(arq);
-                List<AuditoriaFonteInfo> fontes = auditoriaService.analisarCabecalho(doc.cabecalho());
+                List<AuditoriaFonteInfo> fontes = new ArrayList<>(auditoriaService.analisarCabecalho(doc.cabecalho()));
+                fontes.addAll(auditoriaService.analisarFontesNasFalas(doc.eventos()));
                 boolean temProblemas = fontes.stream().anyMatch(AuditoriaFonteInfo::problematica);
                 List<AuditoriaFonteInfo> fontesAlvo = fontes.stream()
                     .filter(f -> forcarArial ? !"Arial".equals(f.fonteAtual()) : f.problematica())
@@ -216,12 +239,16 @@ public class TrocaTipoLegendaUseCase {
                         ? auditoriaService.substituirTodasFontesPorArial(cabecalhoOriginal)
                         : auditoriaService.substituirFontesProblematicas(cabecalhoOriginal);
                 String cabecalhoNovo = substituicao.cabecalho();
-                int substituicoesNoArquivo = substituicao.substituicoes();
+                // O \fn dentro das falas: sem isto a 4.1 e o remux reprovariam pedindo uma troca que
+                // a 1.3 não fazia (o cabeçalho sozinho não alcança a tag escrita na fala).
+                AuditoriaFontesService.ResultadoSubstituicaoFalas falas =
+                    auditoriaService.substituirFontesNasFalas(doc.eventos());
+                int substituicoesNoArquivo = substituicao.substituicoes() + falas.substituicoes();
 
                 if (substituicoesNoArquivo > 0) {
                     DocumentoLegenda novoDoc = new DocumentoLegenda(
                         cabecalhoNovo,
-                        doc.eventos(),
+                        falas.eventos(),
                         doc.quebraDeLinha(),
                         doc.comBom()
                     );

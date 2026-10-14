@@ -8,6 +8,7 @@ import org.traducao.projeto.trocaTipoLegenda.domain.ports.ArmazenamentoBackupPor
 import org.traducao.projeto.trocaTipoLegenda.domain.ports.TelemetriaTrocaPort;
 import org.traducao.projeto.trocaTipoLegenda.infrastructure.ArmazenamentoBackupKronosAdapter;
 import org.traducao.projeto.trocaTipoLegenda.infrastructure.LegendaIoAssAdapter;
+import org.traducao.projeto.core.texto.FonteVietnamitaLegada;
 import org.traducao.projeto.legenda.infrastructure.EscritorLegendaAss;
 import org.traducao.projeto.legenda.infrastructure.LeitorLegendaAss;
 import org.traducao.projeto.trocaTipoLegenda.domain.AuditoriaLegendaResultado;
@@ -202,6 +203,50 @@ class TrocaTipoLegendaUseCaseTest {
         Path pastaBackup = Path.of(resultado.pastaBackup());
         String conteudoBackup = Files.readString(pastaBackup.resolve("legenda-ok.ass"), StandardCharsets.UTF_8);
         assertTrue(conteudoBackup.contains("Style: Dialogue,FrancophilSans"));
+    }
+
+    /**
+     * A lista de nomes exatos da 1.3 deixava passar {@code .VnTime} e {@code VNI-Times} (registrado em
+     * 12/10/2026). Com a regra única do kernel, toda variante vietnamita antiga é achada e trocada; a
+     * vietnamita moderna em Unicode ({@code VNF-}), com o mesmo sinal "começa com VN", fica (A1).
+     */
+    @Test
+    void variantesVietnamitasForaDaListaAntigaTambemSaoTrocadas(@TempDir Path tempDir) throws IOException {
+        criarLegendaDeTeste(tempDir, "vntime.ass", ".VnTime");
+        criarLegendaDeTeste(tempDir, "vni.ass", "VNI-Times");
+        criarLegendaDeTeste(tempDir, "vnf.ass", "VNF-Futura");
+
+        assertEquals(2, useCase.escanear(tempDir).totalComProblemas());
+        ResultadoTrocaFonte resultado = useCase.aplicar(tempDir);
+
+        assertEquals(2, resultado.totalAlterados());
+        assertTrue(Files.readString(tempDir.resolve("vntime.ass"), StandardCharsets.UTF_8).contains("Style: Dialogue,Arial"));
+        assertTrue(Files.readString(tempDir.resolve("vni.ass"), StandardCharsets.UTF_8).contains("Style: Dialogue,Arial"));
+        assertTrue(Files.readString(tempDir.resolve("vnf.ass"), StandardCharsets.UTF_8).contains("Style: Dialogue,VNF-Futura"));
+    }
+
+    /**
+     * {@code \fn} de fonte vietnamita antiga dentro da FALA não está no cabeçalho, e a 1.3 só trocava o
+     * cabeçalho — a reprovação da 4.1 e do remux pediria uma troca que a ferramenta não fazia. Agora a
+     * fala ganha {@code \fnArial}; o {@code \fn} de fonte comum fica. Depois da troca, a regra que
+     * reprova não acha mais nada no arquivo.
+     */
+    @Test
+    void fnVietnamitaDentroDaFalaTambemETrocado(@TempDir Path tempDir) throws IOException {
+        String conteudo = "[Script Info]\nTitle: Test Legend\n\n[V4+ Styles]\nFormat: Name, Fontname\n"
+            + "Style: Dialogue,Arial\n\n[Events]\nFormat: Layer, Start, End, Style, Text\n"
+            + "Dialogue: 0,0:00:01.00,0:00:03.00,Dialogue,{\\fn.VnTime\\fs40}Atração\n"
+            + "Dialogue: 0,0:00:04.00,0:00:05.00,Dialogue,{\\fnVerdana}Comum\n";
+        Files.writeString(tempDir.resolve("inline.ass"), conteudo, StandardCharsets.UTF_8);
+
+        assertEquals(1, useCase.escanear(tempDir).totalComProblemas());
+        ResultadoTrocaFonte resultado = useCase.aplicar(tempDir);
+
+        assertEquals(1, resultado.totalAlterados());
+        String corrigido = Files.readString(tempDir.resolve("inline.ass"), StandardCharsets.UTF_8);
+        assertTrue(corrigido.contains("{\\fnArial\\fs40}Atração"), corrigido);
+        assertTrue(corrigido.contains("{\\fnVerdana}Comum"), corrigido);
+        assertTrue(FonteVietnamitaLegada.achadosNoAss(corrigido).isEmpty(), "a 1.3 resolve o que a reprovacao cobra");
     }
 
     private void criarLegendaDeTeste(Path pasta, String nome, String fonte) throws IOException {

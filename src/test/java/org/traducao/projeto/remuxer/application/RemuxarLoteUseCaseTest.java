@@ -38,6 +38,93 @@ class RemuxarLoteUseCaseTest {
     }
 
     /**
+     * PROPÓSITO DE NEGÓCIO: legenda PT cujo diálogo está em fonte vietnamita antiga não vira MKV
+     * publicado — o Gundam ZZ saiu assim em 09/10/2026 ("Nóo, ộ a atraỗóo!" na tela). Ordem de
+     * Paulo (14/10): reprova e pede a 1.3 Troca de Tipo de Legenda.
+     * INVARIANTES DO DOMÍNIO: o mkvmerge não é chamado; o lote termina com pendência, não falha.
+     * COMPORTAMENTO EM CASO DE FALHA: chamada ao adaptador ou contador zerado reprovam.
+     */
+    @Test
+    void legendaComFonteVietnamitaReprovaEPedeATrocaDeFonte(@TempDir Path tempDir) throws IOException {
+        Cenario cenario = criarCenario(tempDir, legendaAssComFonteDoDialogo("VnBook-Antiqua"));
+
+        RelatorioRemux relatorio = criarUseCase(adapterQueFalhaSeExecutado())
+            .executar(cenario.videos(), cenario.legendas(), 0);
+
+        assertEquals(1, relatorio.getLegendasComFonteVietnamita());
+        assertEquals(0, relatorio.getMkvProcessadosSucesso());
+        assertEquals("CONCLUIDO_COM_PENDENCIAS", relatorio.getStatusFinal());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: CASO-CONTROLE (A1) — a MESMA legenda com o diálogo em Arial segue para o
+     * remux e é publicada.
+     * INVARIANTES DO DOMÍNIO: a reprovação depende só da fonte.
+     * COMPORTAMENTO EM CASO DE FALHA: status diferente de CONCLUIDO reprova.
+     */
+    @Test
+    void mesmaLegendaEmArialSegueParaORemux(@TempDir Path tempDir) throws IOException {
+        Cenario cenario = criarCenario(tempDir, legendaAssComFonteDoDialogo("Arial"));
+        MkvmergeAdapter adapter = new AdapterFake() {
+            /** PROPÓSITO DE NEGÓCIO: simula publicação. INVARIANTES DO DOMÍNIO: escreve o destino. COMPORTAMENTO EM CASO DE FALHA: erro de domínio. */
+            @Override
+            public void executarRemux(RemuxTarefa tarefa, long sync) {
+                try {
+                    Files.writeString(tarefa.caminhoSaida(), "MKV_VALIDADO");
+                } catch (IOException e) {
+                    throw new RemuxerException("falha fake", e);
+                }
+            }
+        };
+
+        RelatorioRemux relatorio = criarUseCase(adapter).executar(cenario.videos(), cenario.legendas(), 0);
+
+        assertEquals(0, relatorio.getLegendasComFonteVietnamita());
+        assertEquals("CONCLUIDO", relatorio.getStatusFinal());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: CASO-CONTROLE (A1) da leitura — legenda PT externa salva em ANSI
+     * (cp1252), com acento, continua indo ao remux; a verificação de fonte não pode transformá-la em
+     * FALHA I/O.
+     * INVARIANTES DO DOMÍNIO: leitura tolerante, como a do validador de entrada.
+     * COMPORTAMENTO EM CASO DE FALHA: status diferente de CONCLUIDO reprova.
+     */
+    @Test
+    void legendaEmAnsiSemFonteVietnamitaContinuaIndoAoRemux(@TempDir Path tempDir) throws IOException {
+        Cenario cenario = criarCenario(tempDir, "");
+        Files.write(cenario.legendas().resolve("Anime - S01E01_PT-BR.ass"),
+            legendaAssComFonteDoDialogo("Arial").getBytes(java.nio.charset.Charset.forName("windows-1252")));
+        MkvmergeAdapter adapter = new AdapterFake() {
+            /** PROPÓSITO DE NEGÓCIO: simula publicação. INVARIANTES DO DOMÍNIO: escreve o destino. COMPORTAMENTO EM CASO DE FALHA: erro de domínio. */
+            @Override
+            public void executarRemux(RemuxTarefa tarefa, long sync) {
+                try {
+                    Files.writeString(tarefa.caminhoSaida(), "MKV_VALIDADO");
+                } catch (IOException e) {
+                    throw new RemuxerException("falha fake", e);
+                }
+            }
+        };
+
+        RelatorioRemux relatorio = criarUseCase(adapter).executar(cenario.videos(), cenario.legendas(), 0);
+
+        assertEquals("CONCLUIDO", relatorio.getStatusFinal());
+        assertEquals(0, relatorio.getErrosPermissaoIo());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: ASS com estilo declarado e uma fala que o usa.
+     * INVARIANTES DO DOMÍNIO: passa na validação de entrada do remux.
+     * COMPORTAMENTO EM CASO DE FALHA: constante sempre válida.
+     */
+    private String legendaAssComFonteDoDialogo(String fonte) {
+        return "[Script Info]\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize\nStyle: Dialogue," + fonte + ",75\n\n"
+            + "[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+            + "Dialogue: 0,0:00:00.00,0:00:01.00,Dialogue,,0,0,0,,Irmão, é a atração!\n";
+    }
+
+    /**
      * PROPÓSITO DE NEGÓCIO: classifica destino preexistente como pendência segura,
      * não como sucesso nem falha destrutiva.
      * INVARIANTES DO DOMÍNIO: conteúdo existente permanece intacto.

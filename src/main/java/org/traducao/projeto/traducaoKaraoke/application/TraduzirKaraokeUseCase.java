@@ -31,6 +31,7 @@ import org.traducao.projeto.traducaoKaraoke.domain.ClasseLinhaKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.DesfechoKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.FalhaArquivoKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.StatusExecucaoKaraoke;
+import org.traducao.projeto.core.texto.FonteVietnamitaLegada;
 import org.traducao.projeto.core.texto.TextoSemTags;
 import org.traducao.projeto.traducaoKaraoke.domain.GradienteKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.ResultadoTraducaoKaraoke;
@@ -373,6 +374,31 @@ public class TraduzirKaraokeUseCase {
     }
 
     /**
+     * PROPÓSITO DE NEGÓCIO: reprova a legenda cujo texto vai à tela em fonte vietnamita antiga —
+     * "Não, é a atração!" sai "Nóo, ộ a atraỗóo!". O Gundam ZZ foi publicado assim em 09/10/2026 e a
+     * 4.1 não acusou. Ordem de Paulo (14/10): reprova e pede a 1.3 Troca de Tipo de Legenda.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a regra é a única do kernel ({@link FonteVietnamitaLegada}); só conta
+     * estilo usado por fala e {@code \fn} dentro de fala ({@code Comment:} e estilo sem fala não vão à
+     * tela). Vale para simular e para aplicar.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: com achado, lança {@link TraducaoKaraokeException} nomeando a
+     * fonte e a 1.3; sem achado, não faz nada.
+     */
+    private void reprovarFonteVietnamitaAntiga(DocumentoLegenda documento) {
+        List<FonteVietnamitaLegada.Fala> falas = documento.eventos().stream()
+            .filter(EventoLegenda::isDialogo)
+            .map(e -> new FonteVietnamitaLegada.Fala(e.estilo(), e.texto()))
+            .toList();
+        List<String> achados = FonteVietnamitaLegada.achados(documento.cabecalho(), falas);
+        if (!achados.isEmpty()) {
+            throw new TraducaoKaraokeException("REPROVADO: fonte vietnamita antiga na tela ("
+                + String.join("; ", achados) + ") desenha outra letra no lugar do acento. Rode a 1.3 "
+                + "Troca de Tipo de Legenda (Arial) nesta pasta e depois a 4.1 de novo.");
+        }
+    }
+
+    /**
      * PROPÓSITO DE NEGÓCIO: processa uma legenda .ass — preserva letra original/japonesa e
      * KFX, reaproveita cache e (só em modo gravar) traduz a camada inglesa via LLM, montando
      * o resumo de classificação do arquivo.
@@ -384,7 +410,9 @@ public class TraduzirKaraokeUseCase {
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: falha/alucinação do LLM numa linha mantém o texto
      * original e registra aviso, sem derrubar o arquivo; interrupção cooperativa encerra no
-     * próximo ponto seguro preservando o que já foi resolvido.
+     * próximo ponto seguro preservando o que já foi resolvido. Legenda com fonte vietnamita antiga
+     * no que vai à tela é REPROVADA antes de cache e LLM: lança {@link TraducaoKaraokeException}
+     * pedindo a 1.3, o arquivo entra nas falhas do manifesto e nada é gravado.
      */
     private ResultadoTraducaoKaraoke processarArquivo(Path arquivo, Path pastaDestino, boolean gravar,
                                                        AtomicInteger sequencialLote,
@@ -396,6 +424,7 @@ public class TraduzirKaraokeUseCase {
         logStream.publicarLog(CANAL_LOG, ">> " + nome);
 
         DocumentoLegenda documento = leitor.ler(arquivo);
+        reprovarFonteVietnamitaAntiga(documento);
         Path arquivoCache = cacheDoArquivo.arquivoDe(arquivo);
         Map<String, String> cacheExistente =
             cacheDoArquivo.carregar(arquivoCache, gravar, proveniencia, cacheIgnorado);

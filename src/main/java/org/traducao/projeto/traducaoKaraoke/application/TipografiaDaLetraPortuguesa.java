@@ -1,5 +1,6 @@
 package org.traducao.projeto.traducaoKaraoke.application;
 
+import org.traducao.projeto.core.texto.FonteVietnamitaLegada;
 import org.traducao.projeto.legenda.domain.DocumentoLegenda;
 import org.traducao.projeto.legenda.domain.EventoLegenda;
 import org.traducao.projeto.traducaoKaraoke.domain.ClasseLinhaKaraoke;
@@ -199,16 +200,14 @@ public final class TipografiaDaLetraPortuguesa {
      * atração" saiu "ã hora da atraÕóo".
      *
      * <p>INVARIANTES DO DOMÍNIO: a conferência de glifo responde se EXISTE desenho, não se ele é a
-     * letra certa; para essas famílias a resposta não vale, e a troca não acontece (A8).
+     * letra certa; para essas famílias a resposta não vale, e a troca não acontece (A8). Quem decide
+     * é a regra única do kernel: a cópia por prefixo que morava aqui ({@code .vn}, {@code vni-}) não
+     * reconhecia o {@code VnBook-Antiqua} SEM ponto do Gundam ZZ (14/10/2026).
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: nome nulo não é codificação antiga.
      */
     static boolean codificacaoAntiga(String familia) {
-        if (familia == null) {
-            return false;
-        }
-        String f = semArroba(familia).toLowerCase(java.util.Locale.ROOT);
-        return f.startsWith(".vn") || f.startsWith("vni-");
+        return FonteVietnamitaLegada.ehLegada(familia);
     }
 
     private static String fonteEfetiva(String traduzido, EstiloAss musica) {

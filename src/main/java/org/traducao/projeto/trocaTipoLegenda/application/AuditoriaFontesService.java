@@ -1,26 +1,41 @@
 package org.traducao.projeto.trocaTipoLegenda.application;
 
 import org.springframework.stereotype.Service;
+import org.traducao.projeto.core.texto.FonteVietnamitaLegada;
+import org.traducao.projeto.legenda.domain.EventoLegenda;
 import org.traducao.projeto.trocaTipoLegenda.domain.AuditoriaFonteInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
+/**
+ * PROPÓSITO DE NEGÓCIO: o diagnóstico e a troca da 1.3 — acha a fonte que desenha a letra errada
+ * (vietnamita de codificação antiga) no cabeçalho e nas falas de uma legenda ASS e a troca por Arial.
+ *
+ * <p>INVARIANTES DO DOMÍNIO: no cabeçalho só a coluna Fontname muda; nas falas só o nome depois do
+ * {@code \fn}; o que é "antiga" vem da regra única do kernel, a mesma que reprova na 4.1 e no remux.
+ *
+ * <p>COMPORTAMENTO EM CASO DE FALHA: cabeçalho ou falas ausentes devolvem resultado vazio, sem lançar.
+ */
 @Service
 public class AuditoriaFontesService {
 
-    // Mapeamento de fontes vietnamitas/ANSI problemáticas para Arial como padrão seguro.
-    private static final Map<String, String> FONTES_PROBLEMATICAS = Map.of(
-        ".VnBook-Antiqua", "Arial",
-        "VnBook-Antiqua", "Arial",
-        ".VnArial", "Arial",
-        "VnArial", "Arial",
-        ".VnTimes", "Arial",
-        "VnTimes", "Arial"
-    );
+    /**
+     * A fonte segura no lugar da vietnamita antiga. Quem decide QUAL é antiga é a regra única do
+     * kernel ({@link FonteVietnamitaLegada}); até 14/10/2026 esta classe tinha uma lista de seis nomes
+     * exatos, que deixava passar {@code .VnTime} e {@code VNI-Times}, enquanto a 4.1 tinha prefixos que
+     * deixavam passar {@code VnBook-Antiqua} — duas cópias da mesma verdade, cada uma cega numa ponta.
+     */
+    private static final String FONTE_SEGURA = "Arial";
+
+    /** Rótulo da linha do relatório para fonte escrita com {@code \fn} dentro das falas, fora do cabeçalho. */
+    static final String ESTILO_FN_NAS_FALAS = "\\fn nas falas";
+
+    public record ResultadoSubstituicaoFalas(List<EventoLegenda> eventos, int substituicoes) {}
 
     public record ResultadoSubstituicaoCabecalho(String cabecalho, int substituicoes) {}
 
@@ -199,8 +214,58 @@ public class AuditoriaFontesService {
         return new ResultadoSubstituicaoCabecalho(String.join(quebraLinha, linhas), substituicoes);
     }
 
-    public Map<String, String> getFontesProblematicas() {
-        return FONTES_PROBLEMATICAS;
+    /**
+     * PROPÓSITO DE NEGÓCIO: acha a fonte vietnamita antiga escrita com {@code \fn} DENTRO das falas,
+     * que a troca do cabeçalho não alcança — sem isto, a reprovação da 4.1 e do remux pediria uma
+     * troca que a 1.3 não faz.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só linhas {@code Dialogue} (as que vão à tela); uma linha por família,
+     * na ordem em que aparece; sempre {@code problematica}, com Arial como sugerida.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula ou sem {@code \fn} legado devolve lista vazia.
+     */
+    public List<AuditoriaFonteInfo> analisarFontesNasFalas(List<EventoLegenda> eventos) {
+        Set<String> familias = new LinkedHashSet<>();
+        for (EventoLegenda evento : eventos == null ? List.<EventoLegenda>of() : eventos) {
+            if (evento != null && evento.isDialogo()) {
+                FonteVietnamitaLegada.fontesInline(evento.texto()).stream()
+                    .filter(FonteVietnamitaLegada::ehLegada)
+                    .forEach(familias::add);
+            }
+        }
+        List<AuditoriaFonteInfo> resultado = new ArrayList<>();
+        for (String familia : familias) {
+            resultado.add(new AuditoriaFonteInfo(ESTILO_FN_NAS_FALAS, familia, FONTE_SEGURA, true));
+        }
+        return resultado;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: troca, nas falas, cada {@code \fn} de fonte vietnamita antiga por Arial.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só linhas {@code Dialogue}; texto visível, outras tags e {@code \fn}
+     * de fonte comum ficam byte a byte; a contagem é por ocorrência trocada.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula volta vazia com zero substituições; nunca lança.
+     */
+    public ResultadoSubstituicaoFalas substituirFontesNasFalas(List<EventoLegenda> eventos) {
+        List<EventoLegenda> saida = new ArrayList<>();
+        int substituicoes = 0;
+        for (EventoLegenda evento : eventos == null ? List.<EventoLegenda>of() : eventos) {
+            if (evento == null || !evento.isDialogo()) {
+                saida.add(evento);
+                continue;
+            }
+            long legadas = FonteVietnamitaLegada.fontesInline(evento.texto()).stream()
+                .filter(FonteVietnamitaLegada::ehLegada).count();
+            if (legadas == 0) {
+                saida.add(evento);
+                continue;
+            }
+            saida.add(evento.comTexto(FonteVietnamitaLegada.trocarFontesInlineLegadas(evento.texto(), FONTE_SEGURA)));
+            substituicoes += (int) legadas;
+        }
+        return new ResultadoSubstituicaoFalas(saida, substituicoes);
     }
 
     private boolean ehSecaoEstilos(String linha) {
@@ -216,14 +281,18 @@ public class AuditoriaFontesService {
         return -1;
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: diz qual fonte o estilo deve usar — Arial no lugar da vietnamita antiga,
+     * a própria fonte em qualquer outro caso.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a decisão é da regra única {@link FonteVietnamitaLegada#ehLegada}.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nome nulo devolve texto vazio.
+     */
     private String fonteSugerida(String nomeFonte) {
         if (nomeFonte == null) {
             return "";
         }
-        return FONTES_PROBLEMATICAS.entrySet().stream()
-            .filter(e -> e.getKey().equalsIgnoreCase(nomeFonte.trim()))
-            .map(Map.Entry::getValue)
-            .findFirst()
-            .orElse(nomeFonte);
+        return FonteVietnamitaLegada.ehLegada(nomeFonte) ? FONTE_SEGURA : nomeFonte;
     }
 }

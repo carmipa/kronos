@@ -3,9 +3,11 @@ package org.traducao.projeto.remuxer.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.traducao.projeto.core.texto.FonteVietnamitaLegada;
 import org.traducao.projeto.legendasExtracao.application.ValidadorSaidaExtracao;
 import org.traducao.projeto.legendasExtracao.domain.ExtratorException;
 import org.traducao.projeto.legendasExtracao.domain.FormatoLegenda;
+import org.traducao.projeto.remuxer.domain.LegendaComFonteVietnamitaException;
 import org.traducao.projeto.remuxer.domain.PlanoRemux;
 import org.traducao.projeto.remuxer.domain.RelatorioRemux;
 import org.traducao.projeto.remuxer.domain.RemuxTarefa;
@@ -16,8 +18,10 @@ import org.traducao.projeto.remuxer.presentation.ui.ConsoleRemuxerLogger;
 import org.traducao.projeto.telemetria.TelemetriaService;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -261,6 +265,10 @@ public class RemuxarLoteUseCase {
             } catch (SaidaRemuxJaExisteException e) {
                 relatorio.registrarSaidaJaExistente();
                 console.aviso("[PRESERVADO] " + e.getMessage());
+            } catch (LegendaComFonteVietnamitaException e) {
+                relatorio.registrarLegendaComFonteVietnamita();
+                console.erro("[REPROVADA — FONTE VIETNAMITA] " + tarefa.caminhoLegenda().getFileName() + " — "
+                    + e.getMessage());
             } catch (ExtratorException e) {
                 relatorio.registrarErroLegendaInvalida();
                 console.erro("[LEGENDA INVÁLIDA] " + tarefa.caminhoLegenda().getFileName() + " — " + e.getMessage());
@@ -285,14 +293,19 @@ public class RemuxarLoteUseCase {
 
     /**
      * PROPÓSITO DE NEGÓCIO: recusa arquivo vazio ou com conteúdo incompatível
-     * com a extensão ASS/SRT antes de invocar o mkvmerge.
+     * com a extensão ASS/SRT antes de invocar o mkvmerge — e, no ASS, a legenda
+     * que põe fonte vietnamita antiga na tela (o Gundam ZZ publicado em 09/10/2026
+     * mostrava "Nóo, ộ a atraỗóo!"; ordem de Paulo em 14/10: reprova e pede a 1.3).
      *
-     * <p>INVARIANTES DO DOMÍNIO: apenas ASS e SRT textuais são aceitos.
+     * <p>INVARIANTES DO DOMÍNIO: apenas ASS e SRT textuais são aceitos; a fonte é
+     * julgada pela regra única do kernel ({@link FonteVietnamitaLegada}), a mesma da
+     * 1.3 e da 4.1, só no que vai à tela (estilo usado por fala, {@code \fn} na fala).
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: formato desconhecido ou assinatura
-     * inválida lança {@link ExtratorException} e a tarefa é pulada.
+     * inválida lança {@link ExtratorException}; fonte vietnamita antiga lança
+     * {@link LegendaComFonteVietnamitaException}; nos dois, a tarefa é pulada.
      */
-    private void validarLegenda(Path legenda) {
+    private void validarLegenda(Path legenda) throws IOException {
         String nome = legenda.getFileName().toString().toLowerCase(Locale.ROOT);
         FormatoLegenda formato;
         if (nome.endsWith(".ass")) {
@@ -303,6 +316,17 @@ public class RemuxarLoteUseCase {
             throw new ExtratorException("Formato não suportado no remux: " + nome);
         }
         ValidadorSaidaExtracao.validar(legenda, formato);
+        if (formato == FormatoLegenda.ASS) {
+            // Leitura tolerante, como a do ValidadorSaidaExtracao: legenda externa em ANSI continua
+            // passando (os nomes de fonte são ASCII); Files.readString lançaria e viraria FALHA I/O.
+            String conteudo = new String(Files.readAllBytes(legenda), StandardCharsets.UTF_8);
+            List<String> achados = FonteVietnamitaLegada.achadosNoAss(conteudo);
+            if (!achados.isEmpty()) {
+                throw new LegendaComFonteVietnamitaException("fonte vietnamita antiga na tela ("
+                    + String.join("; ", achados) + "). Rode a 1.3 Troca de Tipo de Legenda (Arial) na pasta "
+                    + "das legendas e refaça o remux; o MKV deste episódio não foi gerado.");
+            }
+        }
     }
 
     /**
@@ -326,6 +350,7 @@ public class RemuxarLoteUseCase {
             + "; semLegenda=" + relatorio.getVideosSemLegenda()
             + "; ambiguos=" + relatorio.getPareamentosAmbiguos()
             + "; existentes=" + relatorio.getSaidasJaExistentes()
+            + "; fonteVietnamita=" + relatorio.getLegendasComFonteVietnamita()
             + "; falhas=" + relatorio.getTotalErros()
             + "; bytes=" + relatorio.getBytesMkvGeradosTotal();
         try {
