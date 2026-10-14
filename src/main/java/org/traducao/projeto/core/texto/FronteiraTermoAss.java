@@ -51,8 +51,15 @@ public final class FronteiraTermoAss {
      * <p>MEDIDO no acervo (60.891 falas, 24,6% com a quebra): das 12 formas sem acento do
      * dicionário de {@code NormalizadorAcentosComuns}, <b>0 sobreviveram soltas e 11 sobreviveram
      * coladas</b> — o cache é experimento natural, porque o normalizador roda antes de gravar.
+     *
+     * <p>A outra metade, achada em 14/10/2026: o termo também NÃO pode começar logo depois da
+     * contrabarra. A primeira alternativa só olhava letra e dígito, e a contrabarra não é nenhum
+     * dos dois — então em {@code "informação\Nao controle"} o casamento começava no {@code N} da
+     * quebra, lia {@code "Nao"} e o normalizador escrevia {@code "\Não controle"}: a tela mostra
+     * a quebra e depois {@code "ão controle"}. A 2.1 fez isso em falas revisadas à mão da
+     * Reconguista I (3 no filme, pela saída relida) — a revisão dizia "ao", a legenda saía "ão".
      */
-    public static final String INICIO = "(?:(?<=\\\\N)|(?<![\\p{L}\\p{N}]))";
+    public static final String INICIO = "(?:(?<=\\\\N)|(?<![\\p{L}\\p{N}\\\\]))";
 
     /** Fronteira de FIM do termo. Sem alternativa: à direita a quebra começa por contrabarra. */
     public static final String FIM = "(?![\\p{L}\\p{N}])";

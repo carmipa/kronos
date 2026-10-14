@@ -62,6 +62,18 @@ class FronteiraTermoAssTest {
     }
 
     @Test
+    @DisplayName("o termo nao comeca no N da propria quebra (\\Nao nao e 'Nao')")
+    void naoComecaNaLetraDaQuebra() {
+        assertFalse(FronteiraTermoAss.padrao("Nao")
+                .matcher("essa informação" + QUEBRA + "ao controle").find(),
+            "14/10, Reconguista I: o N da quebra mais o 'ao' seguinte viraram 'Nao', e o normalizador "
+                + "escreveu \\Não — a tela mostrava 'ão controle'");
+        assertTrue(FronteiraTermoAss.padrao("Nao")
+                .matcher("eu" + QUEBRA + "Nao sei").find(),
+            "FRONTEIRA: o termo de verdade logo depois da quebra continua encontrado");
+    }
+
+    @Test
     @DisplayName("termo de UMA palavra produz o padrao de sempre")
     void termoSimplesNaoMuda() {
         assertEquals("\\QArgama\\E", FronteiraTermoAss.corpo("Argama"),

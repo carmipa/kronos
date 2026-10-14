@@ -145,6 +145,22 @@ class NormalizadorAcentosComunsTest {
             norm.normalizar("A missao falhou.\\NEntao recuem."));
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: o lado oposto da quebra colada — a letra {@code N} da PRÓPRIA quebra
+     * não pode virar começo de palavra. Em 14/10/2026 a Reconguista I saiu com "ão controle" na
+     * tela: a revisão escreveu "informação\Nao controle", e o normalizador leu "Nao" a partir do N.
+     */
+    @Test
+    @DisplayName("\\N seguido de 'ao' continua 'ao' (nao vira \\Não)")
+    void quebraSeguidaDeAoNaoViraNao() {
+        assertEquals("Podem comunicar essa informação\\Nao controle da Capital Tower.",
+            norm.normalizar("Podem comunicar essa informação\\Nao controle da Capital Tower."));
+        assertEquals("Fiquei tão animada\\Nao ver o G-Self,",
+            norm.normalizar("Fiquei tão animada\\Nao ver o G-Self,"));
+        assertEquals("Voz,\\Nnão vai ganhar.", norm.normalizar("Voz,\\Nnao vai ganhar."),
+            "FRONTEIRA: o 'nao' de verdade depois da quebra continua acentuado");
+    }
+
     /** A família -ção acompanha, com singular e plural. */
     @Test
     @DisplayName("familia -ao/-cao, no singular e no plural")
