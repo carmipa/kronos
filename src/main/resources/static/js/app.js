@@ -21,7 +21,7 @@ import { travarAteEscolherLore } from './travaLore.js';
 import { inicializarGaveta } from './gaveta.js?v=1.1';
 import { inicializarDicas, registrarDicaPadrao, rotuloDe } from './dicas.js?v=1.1';
 import { initMapa } from '../mapa/mapa.js?v=5.0';
-import { initTelemetria } from '../telemetria/telemetria.js?v=3.2';
+import { initTelemetria } from '../telemetria/telemetria.js?v=3.3';
 import { initDocumentacao } from '../documentacao/documentacao.js?v=3.0';
 import { initSobre } from '../sobre/sobre.js?v=3.1';
 import { initRenomearArquivos } from '../renomearArquivos/renomearArquivos.js?v=3.1';

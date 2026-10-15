@@ -876,6 +876,11 @@
     }
 }
 
+/* Rótulo da coluna dentro da célula: só aparece no celular, onde o thead some (media abaixo). */
+#panel-telemetria .telemetria-table .td-rotulo {
+    display: none;
+}
+
 @media (max-width: 640px) {
     #panel-telemetria .telemetry-toolbar,
     #panel-telemetria .telemetry-card-header,
@@ -932,6 +937,16 @@
         padding: 0.3125rem 0;
         border-bottom: none;
         white-space: normal;
+    }
+    /* Sem o thead, o nome da coluna vem escrito na própria célula (telemetria.js, rotularCelulas). */
+    #panel-telemetria .telemetria-table .td-rotulo {
+        display: block;
+        margin-bottom: 0.125rem;
+        color: var(--text-muted);
+        font-family: var(--font-main);
+        font-size: 0.6875rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 }
 

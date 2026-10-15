@@ -1,4 +1,6 @@
 import { mostrarAlerta } from '../js/app.js';
+// Mesma URL (com a versão) que o app.js usa: o navegador reaproveita a instância do módulo.
+import { rotuloDe } from '../js/dicas.js?v=1.1';
 
 let jvmCpuHistory = [];
 let jvmHeapHistory = [];
@@ -565,6 +567,8 @@ function renderizarTabelaHistorico() {
     const inicio = (paginaAtualTabela - 1) * ITENS_POR_PAGINA;
     const pagina = filtrados.slice(inicio, inicio + ITENS_POR_PAGINA);
 
+    const rotulos = Array.from(tableBody.closest('table')?.querySelectorAll('thead th') ?? [], rotuloDe);
+
     tableBody.innerHTML = '';
     if (pagina.length === 0) {
         renderizarLinhaVazia(tableBody, historicoCompleto.length === 0
@@ -602,6 +606,7 @@ function renderizarTabelaHistorico() {
             tdTaxa.textContent = op.taxaSucesso === null || op.taxaSucesso === undefined ? '-' : `${op.taxaSucesso}%`;
 
             row.append(tdData, tdOperacao, tdOrigem, tdDetalhe, tdDuracao, tdTaxa);
+            rotularCelulas(row, rotulos);
             tableBody.appendChild(row);
         });
     }
@@ -748,6 +753,30 @@ function hexParaRgba(hex, alpha) {
     const g = (numero >> 8) & 255;
     const b = numero & 255;
     return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: no celular (até 640 px) o histórico vira um cartão por
+ * operação e o cabeçalho da tabela some; sem rótulo, quem lê vê "12 s" e "83%"
+ * sem saber de que coluna são. Cada célula ganha o nome da coluna em texto real.
+ *
+ * INVARIANTES DO DOMÍNIO: o rótulo sai do próprio `<th>` (fonte única, a mesma
+ * que o Google traduz) e é texto, não `attr()` em CSS, para o tradutor e o
+ * leitor de tela alcançarem. No computador ele fica `display: none` e a tabela
+ * não muda.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: sem cabeçalho, ou com menos títulos que
+ * células, a célula sem título correspondente fica sem rótulo; nada é lançado.
+ */
+function rotularCelulas(row, rotulos) {
+    Array.from(row.cells).forEach((td, i) => {
+        const rotulo = rotulos[i];
+        if (!rotulo) return;
+        const span = document.createElement('span');
+        span.className = 'td-rotulo';
+        span.textContent = rotulo;
+        td.prepend(span);
+    });
 }
 
 function renderizarLinhaVazia(tableBody, mensagem) {
