@@ -134,7 +134,7 @@
 
 #panel-inicio .pipeline-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(17.5rem, 1fr)); /* sobrescrita mais abaixo (4 colunas com quebras) */
     gap: 1rem;
 }
 
