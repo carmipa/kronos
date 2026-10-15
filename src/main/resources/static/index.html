@@ -36,8 +36,25 @@
 
 <body>
     <div class="app-container">
+        <!-- Barra do topo em tela estreita (até 992 px): o botão abre o menu lateral como gaveta
+             por cima do conteúdo (js/gaveta.js). No computador ela não aparece. -->
+        <div class="barra-movel">
+            <button type="button" class="barra-movel-menu" id="btn-menu-movel" aria-controls="menu-lateral"
+                aria-expanded="false"
+                data-tooltip="Abre o menu com todas as telas do KRONOS por cima do conteúdo.">
+                <span class="material-symbols-outlined" aria-hidden="true" translate="no">menu</span>
+                <span>Menu</span>
+            </button>
+            <span class="barra-movel-marca" translate="no">KRONOS CORE</span>
+        </div>
+
         <!-- Sidebar de Navegação -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="menu-lateral">
+            <button type="button" class="gaveta-fechar" id="btn-gaveta-fechar"
+                data-tooltip="Fecha o menu e volta para a tela que está aberta.">
+                <span class="material-symbols-outlined" aria-hidden="true" translate="no">close</span>
+                <span>Fechar</span>
+            </button>
             <div class="brand" translate="no">
                 <div class="brand-logo">
                     <img src="img/kronos_logo.svg" alt="Logo"
@@ -242,13 +259,14 @@
                 </div>
             </div>
         </aside>
+        <div class="gaveta-sombra" hidden></div>
 
         <!-- Conteúdo Principal -->
         <main class="main-content">
             <!-- Header Global -->
             <header class="main-header">
                 <div class="header-title">
-                    <h1 id="page-title">Painel Inicial</h1>
+                    <h1 id="page-title" tabindex="-1">Painel Inicial</h1>
                     <p id="page-subtitle">Orquestrador automatizado e pipeline industrial de processamento de animes</p>
                 </div>
                 <div class="quick-stats">

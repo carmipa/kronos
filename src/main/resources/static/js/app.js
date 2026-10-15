@@ -18,6 +18,7 @@ import { initTrocaTipoLegenda } from '../trocaTipoLegenda/trocaTipoLegenda.js?v=
 import { initRemuxer } from '../remuxer/remuxer.js?v=3.4';
 import { montarOpcoesContextos } from './selectContextos.js';
 import { travarAteEscolherLore } from './travaLore.js';
+import { inicializarGaveta } from './gaveta.js?v=1.0';
 import { initMapa } from '../mapa/mapa.js?v=5.0';
 import { initTelemetria } from '../telemetria/telemetria.js?v=3.1';
 import { initDocumentacao } from '../documentacao/documentacao.js?v=3.0';
@@ -146,6 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     inicializarI18n();
     inicializarNavegacao();
     inicializarGruposMenu();
+    inicializarGaveta();
     await inicializarModulos();
     atualizarStatusConexao();
     buscarContadoresGlobais();
