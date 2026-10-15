@@ -997,7 +997,8 @@ span.console-action-icon.material-symbols-outlined {
     font-weight: 600;
     letter-spacing: 0.02em;
     border: 1px solid transparent;
-    white-space: nowrap;
+    /* quebra só quando o selo sozinho não cabe na linha (vazava a 320 px) */
+    white-space: normal;
 }
 
 .op-selo-escreve {
@@ -1133,10 +1134,14 @@ span.console-action-icon.material-symbols-outlined {
     overflow: visible;
 }
 
+/* Quebra de linha: em tela estreita os botões descem para baixo do título em vez de saírem da
+   tela (medido: 16 painéis passavam de 360 px só por causa desta linha de botões). */
 .console-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem 0.75rem;
 }
 
 .console-header h3 {
@@ -1149,6 +1154,7 @@ span.console-action-icon.material-symbols-outlined {
 
 .console-actions {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
 }
@@ -1952,6 +1958,15 @@ span.console-action-icon.material-symbols-outlined {
     .main-content {
         width: 100%;
         padding: 0;
+    }
+    /* Margem lateral em %: 3rem fixos de cada lado comiam 96 px de uma tela de 360 */
+    .main-header {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 1.25rem 4%;
+    }
+    .panels-container {
+        padding: 0 4% 2rem;
     }
     .nav-item[data-tooltip]::before,
     .nav-item[data-tooltip]::after {

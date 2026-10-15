@@ -511,7 +511,28 @@
 
 @media (max-width: 720px) {
     #panel-inicio .pipeline-cards-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+    /* o título do fluxo é uma linha só no computador; no celular ele quebra em vez de vazar */
+    #panel-inicio .flow-header h3 {
+        white-space: normal;
+        min-width: 0;
+    }
+    /* banner: 65% de texto + 25% de desenho deixava o texto numa coluna de ~150 px; empilha */
+    #panel-inicio .welcome-hero-banner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.25rem;
+        padding: 1.5rem 6%;
+    }
+    #panel-inicio .hero-content {
+        max-width: 100%;
+    }
+    #panel-inicio .hero-visual {
+        width: 100%;
+    }
+    #panel-inicio .welcome-hero-banner h2 {
+        font-size: 2rem;
     }
 }
 

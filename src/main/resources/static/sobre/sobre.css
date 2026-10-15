@@ -13,7 +13,7 @@
 
 #panel-sobre .sobre-hero-grid {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 1.75rem;
     align-items: center;
 }
@@ -93,7 +93,8 @@
 
 #panel-sobre .sobre-personal-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(7.5rem, 1fr));
+    /* auto-fit: com 4 itens fixos a grade exigia 510 px e vazava a 1024 px */
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
     gap: 0.625rem;
     margin-top: 1.125rem;
     max-width: 48.75rem;
@@ -316,6 +317,8 @@
     font-size: 0.84rem;
     line-height: 1.55;
     margin: 0 0 0.875rem;
+    /* o nome do repositório não tem onde quebrar e vazava a 320 px */
+    overflow-wrap: anywhere;
 }
 
 #panel-sobre .sobre-repo-meta a {
@@ -396,8 +399,10 @@
         margin-right: auto;
     }
 
+    /* minmax(0, 1fr): "1fr" sozinho não encolhe abaixo do conteúdo e empurrava o cartão para
+       fora da tela do celular */
     #panel-sobre .sobre-two-col {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
