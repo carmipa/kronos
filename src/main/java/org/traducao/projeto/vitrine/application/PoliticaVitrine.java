@@ -42,6 +42,14 @@ public final class PoliticaVitrine {
         SSE_LOGS,
         /** Abre o substituto do fluxo de telemetria: o retrato de demonstração e batimento. */
         SSE_TELEMETRIA,
+        /**
+         * Endereço que o KRONOS não tem em lugar nenhum: leitura, caminho limpo, fora de
+         * {@code /api}, {@code /mcp} e {@code /q}, e sem extensão de estático público. Nunca segue
+         * para rota real. Quem navega recebe o 404 do KRONOS (o mesmo do KRONOS local); quem chama
+         * por script recebe a recusa de sempre. Decidido só pela forma do caminho, nunca pelo
+         * disco — a resposta não diz se um arquivo existe.
+         */
+        NAO_ENCONTRADO,
         /** Recusa com 403. */
         BLOQUEAR
     }
@@ -59,6 +67,7 @@ public final class PoliticaVitrine {
         static final Decisao BLOQUEAR = new Decisao(Acao.BLOQUEAR, null);
         static final Decisao SSE_LOGS = new Decisao(Acao.SSE_LOGS, null);
         static final Decisao SSE_TELEMETRIA = new Decisao(Acao.SSE_TELEMETRIA, null);
+        static final Decisao NAO_ENCONTRADO = new Decisao(Acao.NAO_ENCONTRADO, null);
 
         static Decisao demonstrar(String nome) {
             return new Decisao(Acao.DEMONSTRAR, nome);
@@ -141,7 +150,22 @@ public final class PoliticaVitrine {
         if (c.equals("/")) {
             return Decisao.PERMITIR;
         }
-        return extensaoEstaticaPermitida(c) ? Decisao.PERMITIR : Decisao.BLOQUEAR;
+        if (extensaoEstaticaPermitida(c)) {
+            return Decisao.PERMITIR;
+        }
+        // Fora de /api, /mcp e /q o KRONOS só tem estático, e o estático público só tem as extensões
+        // da lista (VitrineConteudoPublicoTest): o resto não existe, nem na instalação local. Disfarce
+        // de família de função (/API/STATUS, /Mcp) continua recusa, nunca "não encontrado".
+        return familiaDeFuncao(c.toLowerCase(Locale.ROOT)) ? Decisao.BLOQUEAR : Decisao.NAO_ENCONTRADO;
+    }
+
+    private static boolean familiaDeFuncao(String minusculo) {
+        for (String familia : new String[] {"/api", "/mcp", "/q"}) {
+            if (minusculo.equals(familia) || minusculo.startsWith(familia + "/")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Decisao decidirApi(String c) {

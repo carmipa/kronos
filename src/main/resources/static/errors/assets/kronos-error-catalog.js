@@ -1,8 +1,8 @@
-/* KRONOS CORE — kronos-error-catalog.js v1.1.0 — DADOS das páginas de erro
+/* KRONOS CORE — kronos-error-catalog.js v1.2.0 — DADOS das páginas de erro
    Gerado por ferramentas/paginas-de-erro/gerar.py. Mude os textos no gerador e regere;
    nunca aqui nem nos HTMLs (eles são renderizações deste catálogo). */
 window.KC_CATALOG = {
- "version": "1.1.0",
+ "version": "1.2.0",
  "ui": {
   "brand.sub": "Pipeline Industrial",
   "aria.lang": "Idioma da página",
@@ -62,7 +62,7 @@ window.KC_CATALOG = {
   "retry.exhausted": "Tentativas automáticas esgotadas. Use “Tentar agora” ou volte ao painel.",
   "foot.by": "Desenvolvido por",
   "foot.repo": "Quarkus Repo",
-  "foot.page": "Página de erro v1.1.0",
+  "foot.page": "Página de erro v1.2.0",
   "tip.foot.repo": "Abrir o repositório do projeto no GitHub",
   "tip.foot.autor": "Abre carminati.dev.br, a página do autor, em uma nova aba",
   "tip.foot.ref": "Versão das páginas de erro e código de referência desta tela",
@@ -170,6 +170,27 @@ window.KC_CATALOG = {
     "hint": "Escolha a pasta pelo botão Procurar do painel, dentro das raízes configuradas em navegador.raizes, e repita a operação.",
     "codeTip": "Código HTTP 403 — o servidor entendeu a requisição, mas recusou atendê-la",
     "titleTip": "Por que o acesso foi recusado",
+    "eyebrow": "HTTP 403 · Acesso"
+   }
+  },
+  "vitrine": {
+   "display": "403",
+   "mark": "403",
+   "http": "403 Forbidden",
+   "color": "#38bdf8",
+   "icon": "lock",
+   "family": "acc",
+   "actions": [
+    "home",
+    "back"
+   ],
+   "retry": false,
+   "texto": {
+    "title": "Só na instalação local",
+    "desc": "Este endereço não está aberto na vitrine pública do KRONOS CORE. A vitrine mostra as telas para você conhecer o sistema, mas nenhuma função roda aqui: tradução, revisão, gravação e leitura de pastas só acontecem na instalação local. Nada foi executado.",
+    "hint": "Volte às telas para continuar conhecendo o KRONOS CORE. Para usar as funções, instale o KRONOS CORE na sua máquina — o passo a passo está no repositório do projeto.",
+    "codeTip": "Código HTTP 403 — a vitrine recusa toda função; só as telas são públicas",
+    "titleTip": "Por que a vitrine recusou",
     "eyebrow": "HTTP 403 · Acesso"
    }
   },

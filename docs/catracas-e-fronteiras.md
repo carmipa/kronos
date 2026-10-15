@@ -83,7 +83,7 @@ do código.
 
 Contado em **14/10/2026** nas anotações `@Test` de cada classe: **48 guardas · 189 testes**
 (38 `Catraca*Test` com 128, 10 `Fronteira*` com 61). A suíte completa de 15/10/2026 rodou
-**3.047 testes, 0 falhas, 73 pulados** (os pulados são medições condicionadas: acervo ausente nesta
+**3.060 testes, 0 falhas, 73 pulados** (os pulados são medições condicionadas: acervo ausente nesta
 máquina ou LM Studio sem modelo carregado).
 
 ### Fronteiras — congelam *quem pode importar quem* (10 guardas, 61 testes)
@@ -183,8 +183,8 @@ classes provam isso, e o portão as roda pelo filtro `org.traducao.projeto.*Vitr
 |--------|-------------|
 | `VitrineRotasDoCodigoTest` (4) | Lê as rotas do **código compilado** (anotações Spring e JAX-RS), não da documentação: toda rota fora do gabarito revisado é recusada — inclusive a que nascer amanhã —, e toda entrada da lista de permitidos corresponde a uma rota real |
 | `VitrineConteudoPublicoTest` (4) | A pasta `static` só tem extensões da lista pública, e os dados de demonstração não carregam caminho, IP, máquina, dono ou chave; o detector é calibrado na fronteira (aprova `S01E01`, `1.5`, caminho já encurtado) |
-| `PoliticaVitrineTest` | A tabela de decisão (seguir, demonstrar, recusar), incluindo o mesmo caminho com outro método e caminhos disfarçados por barra dupla, ponto, maiúscula e codificação |
-| `GuardaVitrineHttpTest` | Com o servidor HTTP real e caminhos enviados por socket cru, o filtro está na frente do estático, do JAX-RS, das rotas Spring e do MCP |
+| `PoliticaVitrineTest` | A tabela de decisão (seguir, demonstrar, não encontrado, recusar), incluindo o mesmo caminho com outro método, caminhos disfarçados por barra dupla, ponto, maiúscula e codificação, e a fronteira entre "endereço que o KRONOS não tem" (404 para quem navega) e disfarce de `/api`, `/mcp` ou `/q` (recusa) |
+| `GuardaVitrineHttpTest` | Com o servidor HTTP real e caminhos enviados por socket cru, o filtro está na frente do estático, do JAX-RS, das rotas Spring e do MCP; quem navega recebe a página de erro do kit (a `vitrine` ou a 404) com o mesmo Request ID no cabeçalho e na página, nunca o arquivo plantado; quem chama por script recebe o JSON da recusa byte a byte |
 | `GuardaVitrineDesligadaTest` | O controle do outro lado: com a vitrine desligada as mesmas rotas respondem de verdade, então o 403 de lá vem da guarda e não de a rota não existir |
 | `ConferenciaArranqueVitrineTest` | A vitrine só sobe com `app.modo=WEB`, navegador automático e MCP desligados e filtro ligado; cada incoerência, sozinha, é recusada |
 | `ModoVitrineCamada2Test` | A segunda camada: mesmo que uma rota escapasse do filtro, a fila do pipeline e o executor de processo externo recusam antes de qualquer efeito — medido no mundo, com controle positivo |

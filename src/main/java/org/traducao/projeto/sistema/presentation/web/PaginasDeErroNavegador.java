@@ -57,6 +57,10 @@ public class PaginasDeErroNavegador {
     /** Corpo do 404 padrão do roteador, medido em 14/10/2026: é o que cliente de API continua vendo. */
     static final String CORPO_404_PADRAO = "<html><body><h1>Resource not found</h1></body></html>";
 
+    /**
+     * Marcador onde entra o Request ID. Cópia declarada em {@code vitrine.presentation.web.GuardaVitrine}:
+     * na vitrine o filtro dela responde antes deste handler, e a vitrine não depende de outra fatia.
+     */
     private static final String META_RID_VAZIA = "<meta name=\"kc-rid\" content=\"\">";
 
     private final Map<Integer, String> paginas = new ConcurrentHashMap<>();

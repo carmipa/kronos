@@ -1,6 +1,6 @@
 /* ============================================================================
    KRONOS CORE — Páginas de erro — kronos-error.css
-   Versão: 1.1.0 (adaptação ao KRONOS do kit v1.0.0) | Autor: Paulo André Carminati
+   Versão: 1.2.0 (adaptação ao KRONOS do kit v1.0.0; 1.2.0 = página da vitrine) | Autor: Paulo André Carminati
    Tema escuro, mesmo sistema visual do painel. Sem dependências externas.
    ----------------------------------------------------------------------------
    Como funciona a cor: cada página declara <html data-code="404"> e o bloco
@@ -82,6 +82,7 @@ html[data-code="422"]     { --accent: #e879f9; } /* fúcsia        */
 /* Acesso */
 html[data-code="401"]     { --accent: #f43f5e; } /* rosa-vermelho */
 html[data-code="403"]     { --accent: #ec4899; } /* pink          */
+html[data-code="vitrine"] { --accent: #38bdf8; } /* azul KRONOS (recusa da vitrine pública) */
 /* Limites & Tempo */
 html[data-code="408"]     { --accent: #f59e0b; } /* âmbar         */
 html[data-code="429"]     { --accent: #ea580c; } /* laranja queimado */

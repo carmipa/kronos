@@ -76,15 +76,30 @@ class PoliticaVitrineTest {
         // fonte local: woff2 passa; as outras extensões de fonte, com o mesmo sinal, não
         "GET,/fontes/material-symbols-outlined.woff2,PERMITIR",
         "POST,/fontes/material-symbols-outlined.woff2,BLOQUEAR",
-        "GET,/fontes/material-symbols-outlined.woff,BLOQUEAR",
-        "GET,/fontes/outfit.ttf,BLOQUEAR",
-        // estático fora da lista de extensões
-        "GET,/prova-vitrine/nao-deve-vazar.txt,BLOQUEAR",
-        "GET,/application-local.yml,BLOQUEAR",
-        "GET,/docs/arquitetura.md,BLOQUEAR",
+        "GET,/fontes/material-symbols-outlined.woff,NAO_ENCONTRADO",
+        "GET,/fontes/outfit.ttf,NAO_ENCONTRADO",
+        // estático fora da lista de extensões: nunca segue; para quem navega, é o 404 do KRONOS
+        "GET,/prova-vitrine/nao-deve-vazar.txt,NAO_ENCONTRADO",
+        "GET,/application-local.yml,NAO_ENCONTRADO",
+        "GET,/docs/arquitetura.md,NAO_ENCONTRADO",
+        "GET,/js/app,NAO_ENCONTRADO",
+        // segmento que começa por ponto é caminho ambíguo: continua recusado, nunca "não encontrado"
         "GET,/.env,BLOQUEAR",
         "GET,/js/.oculto.js,BLOQUEAR",
-        "GET,/js/app,BLOQUEAR",
+        // endereço digitado errado (15/10/2026: na VPS caía na página mínima da vitrine, com 403).
+        // Gabarito do requisito: todas as rotas do KRONOS moram sob /api (classes @Path medidas
+        // em 15/10), além de /mcp e /q; fora disso só há estático, então o local também dá 404.
+        "GET,/pagina-que-nao-existe,NAO_ENCONTRADO",
+        "HEAD,/pagina-que-nao-existe,NAO_ENCONTRADO",
+        "GET,/telemetria,NAO_ENCONTRADO",
+        "GET,/apis,NAO_ENCONTRADO",
+        // A1: o mesmo sinal ("endereço sem extensão") dentro das famílias de função é recusa, não 404
+        "GET,/api,BLOQUEAR",
+        "GET,/api/telemetria-inexistente,BLOQUEAR",
+        "GET,/q,BLOQUEAR",
+        "GET,/Mcp/sse,BLOQUEAR",
+        "GET,/Q/dev-ui,BLOQUEAR",
+        "POST,/pagina-que-nao-existe,BLOQUEAR",
     })
     @DisplayName("tabela de decisão da vitrine")
     void tabela(String metodo, String caminho, Acao esperado) {

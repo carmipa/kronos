@@ -14,12 +14,12 @@ O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Qu
 > |---|---|---|
 > | fatias funcionais | **21** | 28 pacotes de topo sob `org.traducao.projeto`, menos 5 peers, `core` e `config` |
 > | peers | **5** | `legenda` · `cachetraducao` · `lore` · `qualidadeTraducao` · `llm` |
-> | classes / linhas em `src/main` | **515** / **79.599** | `find … -name '*.java'` |
-> | classes / linhas em `src/test` | **486** / **90.959** | idem — o teste já pesa mais que o código |
+> | classes / linhas em `src/main` | **515** / **79.718** | `find … -name '*.java'` |
+> | classes / linhas em `src/test` | **486** / **91.033** | idem — o teste já pesa mais que o código |
 > | rotas `/api` | **49** | 39 em **21** `@RestController` + 10 em **6** recursos JAX-RS (`@Path`) |
 > | lore | **70** arquivos SQL, um por obra: **69** do lado da tradução, **69** do lado da revisão; **68** na lista da UI | `sem_lore` só existe na tradução e é oculta (`aparece_na_lista = 0`); `macross_dyrl` só existe na revisão — ver `lore/esquema.sql` |
 > | guardas executáveis | **48** | 38 `Catraca*Test` + 10 `Fronteira*`, somando 189 testes — mais as 7 classes de guarda da vitrine |
-> | suíte completa | **3.047** testes | `gradlew test --rerun-tasks`: 0 falhas, 73 pulados (medições condicionadas) |
+> | suíte completa | **3.060** testes | `gradlew test --rerun-tasks`: 0 falhas, 73 pulados (medições condicionadas) |
 >
 > Divergência entre um número aqui e o código é bug de documentação, não licença poética.
 > O número anterior desta página (72 lores) vinha de contagem de classes Java; a lore virou
@@ -117,7 +117,7 @@ O painel serve do celular de 320 px ao computador. Medido em 14/10/2026: antes, 
 
 ### Páginas de erro
 
-Dezoito páginas (400, 401, 403, 404, 405, 408, 409, 410, 413, 415, 422, 429, 500, 502, 503, 504, sem conexão e falha de interface) mais a dinâmica `/errors/error.html?code=…`, em `static/errors/`, no mesmo visual do painel: cor por erro, código grande, o que aconteceu, uma ação concreta e um painel de diagnóstico com Request ID que se copia.
+Dezoito páginas (400, 401, 403, 404, 405, 408, 409, 410, 413, 415, 422, 429, 500, 502, 503, 504, sem conexão e falha de interface), a página `vitrine` (403 "Só na instalação local", servida só pela vitrine pública) e a dinâmica `/errors/error.html?code=…`, em `static/errors/`, no mesmo visual do painel: cor por erro, código grande, o que aconteceu, uma ação concreta e um painel de diagnóstico com Request ID que se copia.
 
 - **Fonte única:** `ferramentas/paginas-de-erro/gerar.py` gera as páginas e o catálogo. Texto se muda no gerador e se regera — editar o HTML gerado é perder a edição na próxima geração.
 - **Quem serve:** o arquivo estático abre direto em `/errors/<código>.html`. Além disso, quem **navega** até um endereço que não existe recebe a página 404 com o status 404, e quem abre pela barra do navegador uma ação que só aceita `POST` recebe a 405 — antes, um `<h1>Resource not found</h1>` cru e uma tela em branco. Só navegação (`GET`/`HEAD` com `Accept: text/html`): o `fetch` do painel e qualquer cliente de API recebem a resposta de antes, byte a byte (`sistema.presentation.web.PaginasDeErroNavegador`).
@@ -125,9 +125,10 @@ Dezoito páginas (400, 401, 403, 404, 405, 408, 409, 410, 413, 415, 422, 429, 50
 - **Retry e saúde:** nas páginas 408, 429, 5xx e sem conexão, a contagem consulta `/api/status` e, quando o KRONOS responde, volta à rota de origem — só do próprio site: `?from=//outro-site` é recusado.
 - **Idioma e tooltip:** as mesmas três bandeiras do painel (sem dicionário) e o tooltip canônico (`/dica/`), com o "?" ao lado de títulos e rótulos.
 - **Não ligado de propósito:** erro de JavaScript e queda de Wi-Fi no painel **não** levam à página de falha ou de sem conexão — isso tiraria a pessoa do console de um trabalho em andamento por qualquer erro de extensão do navegador.
+- **Na vitrine:** o filtro da vitrine responde antes de qualquer rota, então é ele quem serve as páginas a quem navega: a `vitrine` (403) para função, caminho ambíguo e rotas de `/api`, `/mcp` e `/q`; a 404 para endereço que o KRONOS não tem. Chamada de script continua com o 403 e o JSON de sempre (`vitrine.presentation.web.GuardaVitrine`). Até 15/10/2026 a navegação para um endereço sem extensão caía numa página mínima da vitrine: só um `.html` inexistente chegava à 404, e era justamente o caso que o roteiro de navegador testava.
 - **Na VPS:** `ferramentas/paginas-de-erro/nginx-kronos-erros.conf` serve 502/503/504 quando o contêiner da vitrine estiver fora do ar (aplicar é passo de deploy).
 
-**De onde veio.** Kit de páginas de erro v1.0.0 de 14/10/2026, adaptado na v1.1.0. Visual, cores, ícones, anatomia e textos foram mantidos; mudou o que o KRONOS não tem ou o que estava errado:
+**De onde veio.** Kit de páginas de erro v1.0.0 de 14/10/2026, adaptado na v1.1.0; a v1.2.0 (15/10/2026) acrescentou a página `vitrine`. Visual, cores, ícones, anatomia e textos foram mantidos; mudou o que o KRONOS não tem ou o que estava errado:
 
 | No kit | No KRONOS | Por quê |
 |---|---|---|
@@ -145,7 +146,7 @@ Dezoito páginas (400, 401, 403, 404, 405, 408, 409, 410, 413, 415, 422, 429, 50
 | 415: "use a 1.3" | "a Extração (1.2) já entrega ASS, SRT ou PGS" | a 1.3 troca fonte, não formato |
 | falha de interface: "abra a Telemetria" | "abra o console do navegador (F12)" | o erro de JavaScript está no console do navegador |
 
-**Guardas:** `CatracaPaginasDeErroTest` (uma página por código, tooltip ligado, mesma versão do módulo de idioma, nada de `/q/health` ou `/login`, retorno só da mesma origem) e `PaginasDeErroNavegadorHttpTest` (servidor HTTP real: página para navegação, resposta de antes para a API). No navegador, `ferramentas/navegador/verificar-paginas-de-erro.mjs`: as 19 páginas no desktop e no celular sem erro e sem estouro, varredura da regra de tooltip e axe WCAG 2.2 AA limpos, 404 com Request ID, retorno que não vaza, telemetria que abre, `?detail=` que não executa, idioma, teclado e todo tooltip dentro da tela.
+**Guardas:** `CatracaPaginasDeErroTest` (uma página por código, tooltip ligado, mesma versão do módulo de idioma, nada de `/q/health` ou `/login`, retorno só da mesma origem) e `PaginasDeErroNavegadorHttpTest` (servidor HTTP real: página para navegação, resposta de antes para a API). No navegador, `ferramentas/navegador/verificar-paginas-de-erro.mjs`: as 20 páginas no desktop e no celular sem erro e sem estouro, varredura da regra de tooltip e axe WCAG 2.2 AA limpos, 404 com Request ID para endereço com e sem extensão, na vitrine a página `vitrine` ao navegar até uma função, retorno que não vaza, telemetria que abre, `?detail=` que não executa, idioma, teclado e todo tooltip dentro da tela.
 
 A exceção é a [vitrine pública](ref-docker.md#vitrine-pública-vps): outra imagem (`Dockerfile.vitrine`) que mostra as telas na rede e recusa toda função.
 

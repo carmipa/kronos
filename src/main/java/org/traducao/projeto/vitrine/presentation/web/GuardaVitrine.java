@@ -14,9 +14,14 @@ import org.traducao.projeto.vitrine.application.PoliticaVitrine;
 import org.traducao.projeto.vitrine.application.PoliticaVitrine.Decisao;
 import org.traducao.projeto.vitrine.infrastructure.DadosDemonstracao;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -43,9 +48,11 @@ import java.util.concurrent.atomic.AtomicLong;
  *       {@value #VIDA_MAXIMA_SSE_MS} ms.</li>
  * </ul>
  *
- * <p>COMPORTAMENTO EM CASO DE FALHA: recusa com 403 e JSON {@code {erro, mensagem, vitrine}};
- * dado de demonstração ausente responde 404; teto de SSE atingido responde 503. Nenhum desses
- * caminhos chama a rota real.
+ * <p>COMPORTAMENTO EM CASO DE FALHA: recusa com 403 e JSON {@code {erro, mensagem, vitrine}} para
+ * quem chama por script; quem navega vê a página de erro {@code vitrine} (403) ou, para endereço
+ * que o KRONOS não tem, a página 404 — as duas do kit de {@code static/errors/}, com Request ID no
+ * cabeçalho, na página e no log. Dado de demonstração ausente responde 404; teto de SSE atingido
+ * responde 503. Nenhum desses caminhos chama a rota real.
  */
 @ApplicationScoped
 public class GuardaVitrine {
@@ -77,6 +84,17 @@ public class GuardaVitrine {
         + "a{color:#38bdf8}</style></head><body><h1>Vitrine do KRONOS</h1><p>" + MENSAGEM_RECUSA
         + "</p><p><a href=\"/\">Voltar às telas</a></p></body></html>";
 
+    /**
+     * Páginas de erro do kit ({@code static/errors/}, geradas por {@code ferramentas/paginas-de-erro/gerar.py})
+     * que a vitrine serve a quem navega. A injeção do Request ID repete, de propósito, a do
+     * {@code PaginasDeErroNavegador} da fatia {@code sistema}: a vitrine não depende de outra fatia,
+     * e o filtro dela responde antes que aquele handler seja alcançado.
+     */
+    static final String PAGINA_VITRINE = "vitrine";
+    static final String PAGINA_404 = "404";
+    /** Cópia declarada do marcador de {@code sistema.presentation.web.PaginasDeErroNavegador} (ver acima). */
+    private static final String META_RID_VAZIA = "<meta name=\"kc-rid\" content=\"\">";
+
     private static final String IDENTIDADE = "vitrine-" + UUID.randomUUID();
 
     @ConfigProperty(name = ModoVitrine.CHAVE_CONFIGURACAO, defaultValue = "false")
@@ -85,6 +103,7 @@ public class GuardaVitrine {
     private final AtomicInteger sseAbertas = new AtomicInteger();
     private final AtomicLong recusadas = new AtomicLong();
     private final AtomicLong demonstradas = new AtomicLong();
+    private final Map<String, String> paginasDeErro = new ConcurrentHashMap<>();
 
     /**
      * PROPÓSITO DE NEGÓCIO: liga a vitrine no roteador HTTP quando a configuração manda.
@@ -135,26 +154,98 @@ public class GuardaVitrine {
             case DEMONSTRAR -> demonstrar(rc, decisao.demonstracao());
             case SSE_LOGS -> abrirSse(rc, false);
             case SSE_TELEMETRIA -> abrirSse(rc, true);
+            case NAO_ENCONTRADO -> naoEncontrado(rc);
             default -> recusar(rc);
         }
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: recusa uma função na vitrine. Quem NAVEGA (botão que abre aba, URL
+     * digitada, formulário) vê a página de erro {@code vitrine} do KRONOS, no mesmo visual das
+     * outras páginas de erro; quem chama por script recebe o JSON que as telas já sabem mostrar.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: status 403 nos dois casos; o JSON é o de sempre, byte a byte.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: página ausente no classpath vira a página mínima da
+     * vitrine, com o defeito no log.
+     */
     private void recusar(RoutingContext rc) {
+        contarRecusa(rc);
+        if (!navegacao(rc)) {
+            rc.response()
+                .setStatusCode(403)
+                .putHeader("Content-Type", "application/json; charset=utf-8")
+                .putHeader("Cache-Control", "no-store")
+                .end(CORPO_RECUSA);
+            return;
+        }
+        responderPaginaDeErro(rc, 403, PAGINA_VITRINE);
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: endereço que o KRONOS não tem. Quem navega vê o mesmo 404 do KRONOS
+     * local — antes via a página mínima da vitrine com 403, e as páginas de erro "não apareciam"
+     * na VPS para endereço digitado errado (medido em 15/10/2026).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: nunca chama rota real; só navegação muda (script segue com o 403 e
+     * o JSON de sempre, então varredura automática e o fail2ban do proxy veem o mesmo de antes).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: igual a {@link #recusar}.
+     */
+    private void naoEncontrado(RoutingContext rc) {
+        if (!navegacao(rc)) {
+            recusar(rc);
+            return;
+        }
+        contarRecusa(rc);
+        responderPaginaDeErro(rc, 404, PAGINA_404);
+    }
+
+    private void contarRecusa(RoutingContext rc) {
         long total = recusadas.incrementAndGet();
         log.debug("[VITRINE] recusada: {} {}", rc.request().method(), rc.request().path());
         if (total % RESUMO_A_CADA == 0) {
             log.info("[VITRINE] {} requisições recusadas até agora; {} respondidas com demonstração.",
                 total, demonstradas.get());
         }
-        // Navegação direta do navegador (botão que abre aba, URL digitada) recebe página legível;
-        // chamada de script (fetch) recebe o JSON que as telas já sabem mostrar.
+    }
+
+    private static boolean navegacao(RoutingContext rc) {
         String aceita = rc.request().getHeader("Accept");
-        boolean navegacao = aceita != null && aceita.contains("text/html");
-        rc.response()
-            .setStatusCode(403)
-            .putHeader("Content-Type", navegacao ? "text/html; charset=utf-8" : "application/json; charset=utf-8")
-            .putHeader("Cache-Control", "no-store")
-            .end(navegacao ? PAGINA_RECUSA : CORPO_RECUSA);
+        return aceita != null && aceita.contains("text/html");
+    }
+
+    private void responderPaginaDeErro(RoutingContext rc, int status, String pagina) {
+        String rid = "KC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+        String caminho = rc.request().path() == null ? "" : rc.request().path().replaceAll("\\p{Cntrl}", "?");
+        if (caminho.length() > 300) {
+            caminho = caminho.substring(0, 300) + "…";
+        }
+        log.info("[PAGINA-ERRO] {} {} {} -> página de erro da vitrine (rid {})", status, rc.request().method(), caminho, rid);
+        HttpServerResponse resposta = rc.response()
+            .setStatusCode(status)
+            .putHeader("Content-Type", "text/html; charset=utf-8")
+            .putHeader("X-Request-Id", rid)
+            .putHeader("Cache-Control", "no-store");
+        if ("HEAD".equals(rc.request().method().name())) {
+            resposta.end();
+            return;
+        }
+        String html = paginasDeErro.computeIfAbsent(pagina, this::carregarPaginaDeErro);
+        resposta.end(html.replace(META_RID_VAZIA, "<meta name=\"kc-rid\" content=\"" + rid + "\">"));
+    }
+
+    private String carregarPaginaDeErro(String pagina) {
+        String caminho = "META-INF/resources/errors/" + pagina + ".html";
+        try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(caminho)) {
+            if (in != null) {
+                return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            }
+            log.error("[PAGINA-ERRO] {} ausente no classpath: rode ferramentas/paginas-de-erro/gerar.py", caminho);
+        } catch (IOException e) {
+            log.error("[PAGINA-ERRO] falha ao ler {}: {}", caminho, e.toString());
+        }
+        return PAGINA_RECUSA;
     }
 
     private void demonstrar(RoutingContext rc, String nome) {

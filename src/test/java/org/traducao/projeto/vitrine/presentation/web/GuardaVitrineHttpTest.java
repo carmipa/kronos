@@ -4,6 +4,7 @@ import io.quarkus.test.common.http.TestHTTPResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
+import io.restassured.response.Response;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,9 @@ class GuardaVitrineHttpTest {
                 "app.modo", "WEB");
         }
     }
+
+    /** O {@code Accept} que o Chromium manda ao navegar. */
+    private static final String NAVEGADOR = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
     @TestHTTPResource("/")
     URL raiz;
@@ -120,15 +124,54 @@ class GuardaVitrineHttpTest {
     }
 
     @Test
-    @DisplayName("navegação direta (botão que abre aba) recebe página legível, não JSON cru")
+    @DisplayName("navegação direta até uma função: página de erro 'vitrine' do kit, com Request ID; script segue com o JSON")
     void navegacaoRecebePagina() {
-        given().header("Accept", "text/html,application/xhtml+xml").get("/api/telemetria/exportar")
-            .then().statusCode(403)
-            .contentType(containsString("text/html"))
-            .body(containsString("Vitrine do KRONOS"))
-            .body(containsString("href=\"/\""));
+        Response r = given().header("Accept", NAVEGADOR).get("/api/telemetria/exportar");
+        assertEquals(403, r.statusCode());
+        assertTrue(r.contentType().contains("text/html"), r.contentType());
+        String rid = r.header("X-Request-Id");
+        String html = r.asString();
+        assertTrue(rid != null && rid.matches("KC-[0-9A-F]{8}"), "Request ID: " + rid);
+        assertTrue(html.contains("<html lang=\"pt-BR\" data-code=\"vitrine\">"), "não é a página 'vitrine' do kit");
+        assertTrue(html.contains("Só na instalação local"), "título da página da vitrine ausente");
+        assertTrue(html.contains("<meta name=\"kc-rid\" content=\"" + rid + "\">"), "o Request ID do cabeçalho não está na página");
         given().header("Accept", "application/json").get("/api/telemetria/exportar")
             .then().statusCode(403).body("vitrine", equalTo(true));
+    }
+
+    @Test
+    @DisplayName("endereço que o KRONOS não tem: quem navega vê o 404 do kit; script segue com o 403 e o JSON de sempre")
+    void enderecoInexistente() {
+        Response r = given().header("Accept", NAVEGADOR).get("/pagina-que-nao-existe");
+        assertEquals(404, r.statusCode());
+        String rid = r.header("X-Request-Id");
+        String html = r.asString();
+        assertTrue(html.contains("<html lang=\"pt-BR\" data-code=\"404\">"), "não é a página 404 do kit");
+        assertTrue(rid != null && html.contains("<meta name=\"kc-rid\" content=\"" + rid + "\">"), "Request ID: " + rid);
+
+        given().header("Accept", NAVEGADOR).head("/pagina-que-nao-existe")
+            .then().statusCode(404).header("X-Request-Id", org.hamcrest.Matchers.notNullValue());
+
+        String json = given().header("Accept", "*/*").get("/pagina-que-nao-existe")
+            .then().statusCode(403).extract().asString();
+        assertEquals("{\"erro\":\"" + GuardaVitrine.MENSAGEM_RECUSA + "\",\"mensagem\":\"" + GuardaVitrine.MENSAGEM_RECUSA
+            + "\",\"vitrine\":true}", json, "o JSON da recusa mudou para quem chama por script");
+    }
+
+    @Test
+    @DisplayName("arquivo plantado fora da lista: a navegação recebe o 404, nunca o conteúdo do arquivo")
+    void estaticoForaDaListaNaNavegacao() {
+        String html = given().header("Accept", NAVEGADOR).get("/prova-vitrine/nao-deve-vazar.txt")
+            .then().statusCode(404).extract().asString();
+        assertFalse(html.contains("Caso-controle da vitrine"), "o conteúdo do arquivo plantado vazou");
+        assertTrue(html.contains("data-code=\"404\""), "não é a página 404 do kit");
+    }
+
+    @Test
+    @DisplayName("controle: o mesmo 404 sai para um .html inexistente, que segue pelo estático (como antes)")
+    void controleHtmlInexistente() {
+        given().header("Accept", NAVEGADOR).get("/pagina-que-nao-existe.html")
+            .then().statusCode(404).body(containsString("data-code=\"404\""));
     }
 
     @Test

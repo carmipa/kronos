@@ -35,7 +35,7 @@ const BASE = (ARGS.find((a) => a.startsWith('http')) || 'http://127.0.0.1:18099'
 const JS_NOSSO = join(AQUI, '..', '..', 'src', 'main', 'resources', 'static', 'errors', 'assets', 'kronos-error.js');
 const GOOGLE = /(^|\.)(google\.com|googleapis\.com|gstatic\.com|translate\.goog)$/;
 const ALHEIO = 'example.com';
-const PAGINAS = ['400', '401', '403', '404', '405', '408', '409', '410', '413', '415', '422', '429',
+const PAGINAS = ['400', '401', '403', 'vitrine', '404', '405', '408', '409', '410', '413', '415', '422', '429',
   '500', '502', '503', '504', 'offline', 'crash', 'error'];
 const LARGURAS = [[1366, 900], [390, 844]];
 const AXE = readFileSync(join(AQUI, 'node_modules', 'axe-core', 'axe.min.js'), 'utf8');
@@ -44,6 +44,7 @@ const VARREDURA = readFileSync(join(AQUI, 'dica-varredura.js'), 'utf8');
 const ok = [];
 const falhas = [];
 const naoVerificado = [];
+const naoSeAplica = [];
 const confere = (c, d) => (c ? ok : falhas).push(d);
 
 let browser;
@@ -142,17 +143,40 @@ try {
     await ctx.close();
   }
 
-  // 2. O servidor entrega a página 404 com o Request ID (navegação a endereço inexistente)
-  {
+  // 2. O servidor entrega a página 404 com o Request ID (navegação a endereço inexistente). Com e
+  //    sem extensão: em 15/10/2026 só o ".html" chegava ao 404 na vitrine — o endereço digitado sem
+  //    extensão caía na página mínima da vitrine, e este item, que só testava o ".html", passava.
+  for (const caminho of ['/pagina-que-nao-existe.html', '/pagina-que-nao-existe']) {
     const { ctx, page } = await contexto();
-    const resp = await page.goto(`${BASE}/pagina-que-nao-existe.html`, { waitUntil: 'load' });
+    const resp = await page.goto(`${BASE}${caminho}`, { waitUntil: 'load' });
     const rid = resp.headers()['x-request-id'];
     const naTela = await page.evaluate(() => ({
       code: document.documentElement.getAttribute('data-code'),
       rid: document.querySelector('[data-diag="rid"]')?.textContent,
     }));
-    confere(resp.status() === 404 && naTela.code === '404', `2. endereço inexistente: status ${resp.status()} e página ${naTela.code}`);
-    confere(Boolean(rid) && naTela.rid === rid, `2. o Request ID do cabeçalho aparece no diagnóstico (${rid} / ${naTela.rid})`);
+    confere(resp.status() === 404 && naTela.code === '404', `2. ${caminho}: status ${resp.status()} e página ${naTela.code}`);
+    confere(Boolean(rid) && naTela.rid === rid, `2. ${caminho}: o Request ID do cabeçalho aparece no diagnóstico (${rid} / ${naTela.rid})`);
+    await ctx.close();
+  }
+
+  // 2b. Só na vitrine: navegar até uma função mostra a página "vitrine" do kit (403), com Request ID.
+  //     Fora da vitrine o mesmo endereço é uma rota real, e o roteiro não a chama.
+  {
+    const { ctx, page } = await contexto();
+    const sonda = await page.request.get(`${BASE}/api/status`);
+    if (sonda.headers()['x-kronos-vitrine'] !== '1') {
+      naoSeAplica.push('2b. função recusada na vitrine: este servidor não é a vitrine (sem o cabeçalho X-Kronos-Vitrine)');
+    } else {
+      const resp = await page.goto(`${BASE}/api/telemetria/exportar`, { waitUntil: 'load' });
+      const rid = resp.headers()['x-request-id'];
+      const naTela = await page.evaluate(() => ({
+        code: document.documentElement.getAttribute('data-code'),
+        rid: document.querySelector('[data-diag="rid"]')?.textContent,
+        titulo: document.querySelector('h2, .kc-title')?.textContent?.trim(),
+      }));
+      confere(resp.status() === 403 && naTela.code === 'vitrine', `2b. função na vitrine: status ${resp.status()} e página ${naTela.code} ("${naTela.titulo}")`);
+      confere(Boolean(rid) && naTela.rid === rid, `2b. o Request ID do cabeçalho aparece no diagnóstico (${rid} / ${naTela.rid})`);
+    }
     await ctx.close();
   }
 
@@ -308,6 +332,7 @@ try {
 
 ok.forEach((d) => console.log('ok    ' + d));
 naoVerificado.forEach((d) => console.log('NAO VERIFICOU ' + d));
+naoSeAplica.forEach((d) => console.log('nao se aplica ' + d));
 falhas.forEach((d) => console.log('FALHA ' + d));
 console.log(`\n${ok.length} ok, ${falhas.length} falhas, ${naoVerificado.length} não verificados — ${BASE}`);
 process.exit(falhas.length ? 1 : (naoVerificado.length || ok.length === 0 ? 2 : 0));

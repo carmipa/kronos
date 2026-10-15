@@ -29,7 +29,7 @@ import os
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SAIDA = os.path.join(RAIZ, "src", "main", "resources", "static", "errors")
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 VERSAO_I18N = "2.2"      # tem de ser a mesma do import em static/js/app.js
 VERSAO_CSS_I18N = "1.3"  # tem de ser a mesma do <link> em static/index.html
 AUTHOR = "Paulo André Carminati"
@@ -177,6 +177,14 @@ CATALOG = [
         "O servidor entendeu a requisição, mas recusou atendê-la — por exemplo, uma pasta fora das raízes que o navegador de pastas pode listar. Nenhuma etapa do pipeline foi executada.",
         "Escolha a pasta pelo botão Procurar do painel, dentro das raízes configuradas em navegador.raizes, e repita a operação.",
         "Código HTTP 403 — o servidor entendeu a requisição, mas recusou atendê-la", "Por que o acesso foi recusado")),
+
+    # Só a vitrine pública serve esta página: é a recusa do filtro da vitrine para quem NAVEGA até
+    # uma função (rota de /api, /mcp, /q) ou um caminho ambíguo. Endereço que não existe recebe o 404.
+    E("vitrine", "403", "403", "403 Forbidden", "#38bdf8", "lock", "acc", ["home", "back"], False,
+      T("Só na instalação local",
+        "Este endereço não está aberto na vitrine pública do KRONOS CORE. A vitrine mostra as telas para você conhecer o sistema, mas nenhuma função roda aqui: tradução, revisão, gravação e leitura de pastas só acontecem na instalação local. Nada foi executado.",
+        "Volte às telas para continuar conhecendo o KRONOS CORE. Para usar as funções, instale o KRONOS CORE na sua máquina — o passo a passo está no repositório do projeto.",
+        "Código HTTP 403 — a vitrine recusa toda função; só as telas são públicas", "Por que a vitrine recusou")),
 
     E("404", "404", "404", "404 Not Found", "#2dd4bf", "search-x", "nav", ["home", "back", "telemetry"], False,
       T("Página não encontrada",

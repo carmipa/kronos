@@ -144,7 +144,23 @@ class CatracaRegraDuplicadaEntreFatiasTest {
      * comentario: {@code CatracaTelemetriaKaraokeCompletaTest.nomeDoAcervoLocalEIgualNosDoisLados}
      * congela a igualdade dos dois nomes e reprova o build se divergirem.
      */
-    private static final int DUPLICADAS_CONHECIDAS = 16;
+    /*
+     * 16 -> 17 em 15/10/2026. A regra que entrou e o marcador do Request ID nas paginas de erro,
+     * <meta name="kc-rid" content="">, que passou a existir em
+     * {@code vitrine.presentation.web.GuardaVitrine.META_RID_VAZIA} alem de
+     * {@code sistema.presentation.web.PaginasDeErroNavegador.META_RID_VAZIA}.
+     *
+     * SUBIU, e a copia esta DECLARADA nos dois lados. Nao foram unificadas porque a vitrine NAO
+     * depende de outra fatia, e o filtro dela responde antes que o handler do sistema seja
+     * alcancado: e por isso que, na VPS, a navegacao para endereco errado mostrava a pagina minima
+     * da vitrine e nunca a pagina de erro do kit. Importar o handler criaria a aresta
+     * vitrine->sistema para economizar uma string.
+     *
+     * O risco de copia — o gerador mudar o marcador e um lado parar de injetar o Request ID — nao
+     * ficou no comentario: GuardaVitrineHttpTest e PaginasDeErroNavegadorHttpTest leem a pagina
+     * REAL gerada e reprovam se o Request ID do cabecalho nao estiver dentro dela.
+     */
+    private static final int DUPLICADAS_CONHECIDAS = 17;
 
     @Test
     @DisplayName("nenhuma REGRA nova e duplicada entre fatias sem declaracao")

@@ -248,17 +248,22 @@ docker compose -f docker-compose.vitrine.yml up -d --build   # prova local em ht
   o build se aparecer caminho, IP, máquina, dono ou chave.
 - **Os dois SSE** são substitutos que mantêm a conexão com batimento (a tela
   reconecta a cada 5 s se o fluxo cair) e nunca leem o console nem o cache real.
-- **Todo o resto: 403.** Chamada de script recebe JSON `{erro, mensagem, vitrine}`;
-  navegação direta recebe uma página legível com link de volta. A faixa amarela no
-  topo da tela avisa que é a vitrine.
+- **Todo o resto: 403.** Chamada de script recebe JSON `{erro, mensagem, vitrine}`.
+  Quem navega (`Accept: text/html`) recebe as [páginas de erro](arquitetura.md#páginas-de-erro)
+  do KRONOS, com Request ID no cabeçalho, na página e no log: a página `vitrine` (403,
+  "Só na instalação local") ao abrir uma função, um caminho ambíguo ou uma rota de
+  `/api`, `/mcp` ou `/q`; e a 404, como no KRONOS local, ao digitar um endereço que o
+  KRONOS não tem (fora dessas três famílias e sem extensão de estático público). Até
+  15/10/2026 essa navegação caía numa página mínima da vitrine com 403. A faixa amarela
+  no topo da tela avisa que é a vitrine.
 
 ### Por que o filtro não é JAX-RS
 
 Filtro JAX-RS não alcança arquivo estático (servido antes) nem o MCP (rota do
 Vert.x) — cicatriz do binmapper em 02/09/2026. O `Filters` do Quarkus entra no
 roteador antes de qualquer rota, e o teste prova com um arquivo plantado só no
-classpath de teste (`prova-vitrine/nao-deve-vazar.txt`): 403 com a vitrine ligada,
-200 com ela desligada.
+classpath de teste (`prova-vitrine/nao-deve-vazar.txt`): 403 com a vitrine ligada
+(a página 404 para quem navega, nunca o arquivo), 200 com ela desligada.
 
 ### Deploy na VPS
 
