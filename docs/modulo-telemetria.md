@@ -81,8 +81,9 @@ Retorna `TelemetriaResumo`:
   "tempoMedioPorLinhaMs": 850,
   "totalCacheHits": 2103,
   "historicoOperacoes": [
-    { "nomeOperacao": "...", "detalheOperacao": "...", "duracaoFormatada": "...", "taxaSucesso": 100,
-      "origem": "...", "duracaoMs": 1234, "registradoEm": "2026-10-14T12:00:00Z" }
+    { "nomeOperacao": "...", "detalheOperacao": "...", "duracaoFormatada": "...", "taxaSucesso": 97,
+      "origem": "...", "duracaoMs": 1234, "registradoEm": "2026-10-14T12:00:00Z",
+      "itensDetectados": 68, "itensCorrigidos": 66 }
   ],
   "traducoesLlm": [ ],
   "operacoes": [ ],
@@ -102,6 +103,12 @@ Retorna `TelemetriaResumo`:
 ```
 
 Inclui **métricas de JVM em tempo real**: CPU do processo (em %), threads ativas e heap usado/máximo **em bytes**. `registradoEm` é o instante UTC (ISO-8601); o navegador converte para a hora local.
+
+Na tela, a coluna **Corrigidos** do histórico mostra `itensCorrigidos de itensDetectados` ("66 de 68"); `taxaSucesso`
+(divisão inteira, arredondada para baixo) fica só por compatibilidade — ela exibia "0%" para 91 de 24.441. O
+**funil** soma a lista `traducoesLlm`: falas traduzíveis (`totalLinhas`, com repetição) e os textos distintos que
+vieram do cache (`falasDoCache`) ou do LLM (`falasTraduzidas`); a **eficiência do cache** é cache ÷ (cache + LLM),
+na mesma unidade. Nenhuma barra é estimada.
 
 ### `GET /api/telemetria/exportar`
 

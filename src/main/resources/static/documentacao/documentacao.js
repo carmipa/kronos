@@ -71,6 +71,27 @@ export function initDocumentacao() {
 
     // Links markdown do tipo "(02-instalacao.md)" viram navegação interna do
     // painel em vez de tentar abrir um arquivo .md cru no navegador.
+    /**
+     * PROPÓSITO DE NEGÓCIO: a tela já tem o título principal (h1 do cabeçalho); o "# Título" de
+     * cada .md virava um SEGUNDO h1, e o leitor de tela perdia a hierarquia da página.
+     *
+     * INVARIANTES DO DOMÍNIO: cada título desce um nível (h1 vira h2 ... h6 fica h6) e leva a
+     * classe do nível original (md-h1 ... md-h6), que é o que o CSS estiliza: a aparência não muda.
+     * O .md continua com "#" — ele também é a documentação do GitHub.
+     *
+     * COMPORTAMENTO EM CASO DE FALHA: raiz sem títulos não muda; nada é lançado.
+     */
+    function rebaixarTitulos(raiz) {
+        raiz.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((titulo) => {
+            const nivel = Number(titulo.tagName[1]);
+            const novo = document.createElement('h' + Math.min(6, nivel + 1));
+            for (const atributo of titulo.attributes) novo.setAttribute(atributo.name, atributo.value);
+            novo.classList.add('md-h' + nivel);
+            novo.innerHTML = titulo.innerHTML;
+            titulo.replaceWith(novo);
+        });
+    }
+
     function sanitizarLinks(html) {
         return html.replace(
             /href="(?:\.\/|\.\.\/)*(?:[a-zA-Z0-9_\-]+\/)?([a-zA-Z0-9_\-]+)\.md(#[a-zA-Z0-9_\-]*)?"/g,
@@ -139,6 +160,7 @@ export function initDocumentacao() {
                 html = sanitizarLinks(html);
                 html = sanitizarImagens(html);
                 elMarkdown.innerHTML = html;
+                rebaixarTitulos(elMarkdown);
 
                 elMarkdown.querySelectorAll('a.doc-md-link').forEach(a => {
                     const pg = a.dataset.pagina;

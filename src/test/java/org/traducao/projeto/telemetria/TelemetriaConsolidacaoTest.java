@@ -89,6 +89,31 @@ class TelemetriaConsolidacaoTest {
             "Anime", "Temporada Única", ts, "lore", "CONCLUIDO", null, null);
     }
 
+    /**
+     * A tela mostrava a coluna "Confianca" com a taxa inteira (91 de 24.441 virava "0%"); agora
+     * ela lê os números crus. Fronteira: tradução de episódio não detecta nada e vem com nulo.
+     */
+    @Test
+    @DisplayName("Histórico leva detectados e corrigidos crus da operação")
+    void historicoLevaDetectadosECorrigidos() {
+        TelemetriaService t = new TelemetriaService();
+        t.registrarOperacao(new OperacaoTelemetria("Revisao de Lore (.ass LLM)", "pasta", 1000L, 3, 24441, 91,
+            "2026-10-14T10:00:00Z"));
+        t.registrarTraducao(legado("ep.ass", "aya", 10, "2026-10-14T09:00:00Z"));
+
+        List<OperacaoHistorico> historico = t.gerarResumo(Path.of("cache")).historicoOperacoes();
+
+        OperacaoHistorico lore = historico.stream()
+            .filter(h -> h.nomeOperacao().startsWith("Revisao de Lore")).findFirst().orElseThrow();
+        assertEquals(24441, lore.itensDetectados());
+        assertEquals(91, lore.itensCorrigidos());
+        assertEquals(0, lore.taxaSucesso(), "a taxa inteira continua igual, só por compatibilidade");
+        OperacaoHistorico traducao = historico.stream()
+            .filter(h -> "Tradução LLM".equals(h.nomeOperacao())).findFirst().orElseThrow();
+        assertEquals(null, traducao.itensDetectados());
+        assertEquals(null, traducao.itensCorrigidos());
+    }
+
     @Test
     @DisplayName("Somente legado existente")
     void somenteLegado() {

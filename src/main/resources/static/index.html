@@ -14,8 +14,8 @@
     <!-- Dica (tooltip) canônica da regra 6-A, sem edição; antes do CSS do projeto para as regras dele vencerem empates -->
     <link rel="stylesheet" href="dica/dica.css?v=1.0">
     <link rel="stylesheet" href="fontes/fontes.css?v=1.0">
-    <link rel="stylesheet" href="css/base.css?v=5.6">
-    <link rel="stylesheet" href="inicio/inicio.css?v=4.1">
+    <link rel="stylesheet" href="css/base.css?v=5.7">
+    <link rel="stylesheet" href="inicio/inicio.css?v=4.2">
     <link rel="stylesheet" href="analise/analise.css?v=5.0">
     <link rel="stylesheet" href="extracao/extracao.css?v=4.0">
     <link rel="stylesheet" href="traducao/traducao.css?v=4.0">
@@ -29,9 +29,9 @@
     <link rel="stylesheet" href="renomearArquivos/renomearArquivos.css?v=4.0">
     <link rel="stylesheet" href="traducaoKaraoke/traducaoKaraoke.css?v=1.1">
     <link rel="icon" type="image/png" href="img/kronos_logo.png">
-    <link rel="stylesheet" href="telemetria/telemetria.css?v=4.2">
+    <link rel="stylesheet" href="telemetria/telemetria.css?v=4.3">
     <link rel="stylesheet" href="mapa/mapa.css?v=6.0">
-    <link rel="stylesheet" href="documentacao/documentacao.css?v=4.0">
+    <link rel="stylesheet" href="documentacao/documentacao.css?v=4.1">
     <link rel="stylesheet" href="sobre/sobre.css?v=4.1">
     <link rel="stylesheet" href="i18n/i18n.css?v=1.3">
 </head>
@@ -660,7 +660,7 @@
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">radar</span>
                             <h3 data-tooltip="Resume o que a análise lê com o ffprobe e como separa cada legenda: texto (traduzível, segue para a 1.2) ou imagem (exige OCR). Não confere sincronia.">O que a análise faz</h3>
-                            <span class="op-caixa-etiqueta">somente leitura</span>
+                            <span class="op-caixa-etiqueta">não altera os vídeos</span>
                         </div>
                         <p class="op-caixa-desc">Roda o <strong>ffprobe</strong> em cada vídeo da pasta e devolve contêiner, codecs e <strong>cada faixa de legenda embutida</strong>, classificada por traduzibilidade. <strong>Nada é gravado em disco</strong> — o relatório vive na tela, e o TXT só sai se você clicar em Exportar.</p>
                         <ol class="op-lista">
@@ -670,7 +670,7 @@
                                     <span class="op-titulo">Legenda de TEXTO (ASS, SSA, SRT, WebVTT, MOV_TEXT)</span>
                                     <span class="op-desc">Extraível e traduzível. É o caminho normal: segue para a 1.2.</span>
                                     <span class="op-selos">
-                                        <span class="op-selo op-selo-seguro">não escreve nada</span>
+                                        <span class="op-selo op-selo-seguro">não altera os vídeos</span>
                                     </span>
                                 </div>
                             </li>
@@ -680,7 +680,7 @@
                                     <span class="op-titulo">Legenda BITMAP (PGS, VobSub, DVB)</span>
                                     <span class="op-desc">É imagem, não texto. Exige OCR, que este projeto não faz — saber disso <em>antes</em> evita gastar uma noite tentando.</span>
                                     <span class="op-selos">
-                                        <span class="op-selo op-selo-seguro">não escreve nada</span>
+                                        <span class="op-selo op-selo-seguro">não altera os vídeos</span>
                                     </span>
                                 </div>
                             </li>
@@ -1262,7 +1262,7 @@
                                     <span class="op-desc">Mede quantas vezes cada termo oficial seria restaurado e em
                                         quais arquivos. Sai tudo no console abaixo.</span>
                                     <span class="op-selos">
-                                        <span class="op-selo op-selo-seguro">não escreve nada</span>
+                                        <span class="op-selo op-selo-seguro">não altera o cache</span>
                                     </span>
                                 </div>
                                 <button type="button" class="btn btn-primary btn-cyan"
@@ -1802,11 +1802,12 @@
                     <div class="glass-card">
                         <h2 data-tooltip="Gera o mapa do código do KRONOS: árvore de pastas e lista dos arquivos-fonte Java e Python com o cabeçalho de cada um, para consulta e documentação.">Mapeamento de Estrutura & Taxonomia</h2>
                         <p class="card-desc">Varre recursivamente os arquivos do repositório Java, gerando o relatório
-                            markdown de arquitetura e taxonomia automaticamente.</p>
+                            markdown de arquitetura e taxonomia automaticamente. <strong>Regrava o
+                            <code>mapa_projeto.md</code> da raiz</strong> a cada geração.</p>
 
                         <div class="mapa-controls">
                             <button type="button" class="btn btn-primary btn-purple" id="btn-gerar-mapa"
-                                data-tooltip="Analisa e gera de forma estática o mapa estrutural das classes Java do repositório.">
+                                data-tooltip="Gera o mapa estrutural das classes do repositório e regrava o mapa_projeto.md da raiz; pede confirmação antes.">
                                 <span class="material-symbols-outlined btn-icon">account_tree</span>
                                 <span>Gerar Mapa do Projeto</span>
                             </button>
@@ -1857,7 +1858,7 @@
                                 <button type="button" class="btn btn-primary" id="btn-exportar-telemetria"
                                     data-tooltip="Faz download do arquivo de telemetria compartilhado para auditoria">
                                     <span class="material-symbols-outlined btn-icon">download</span>
-                                    <span>Exportar Estatisticas</span>
+                                    <span>Exportar Estatísticas</span>
                                 </button>
                                 <button type="button" class="btn btn-primary btn-green" id="btn-publicar-dataset"
                                     data-tooltip="Gera um retrato só com métricas (sem texto de legenda nem caminhos), faz commit e push para o repositório público do dataset no GitHub.">
@@ -1900,15 +1901,15 @@
                             <article class="telemetry-hero-card">
                                 <div class="hero-card-header">
                                     <div>
-                                        <span class="metric-eyebrow">Eficiencia do cache</span>
+                                        <span class="metric-eyebrow">Eficiência do cache</span>
                                         <strong id="t-cache-rate">0.0%</strong>
                                     </div>
-                                    <span class="telemetry-status" id="t-cache-status">estavel</span>
+                                    <span class="telemetry-status" id="t-cache-status">estável</span>
                                 </div>
                                 <div class="telemetry-meter" aria-hidden="true">
                                     <span id="t-cache-meter" style="width: 0%;"></span>
                                 </div>
-                                <p>Percentual de falas reaproveitadas do cache local durante as traducoes.</p>
+                                <p>Parte dos textos distintos que veio do cache local em vez do LLM, nas traduções registradas.</p>
                             </article>
 
                             <article class="telemetry-provider-card">
@@ -1917,16 +1918,16 @@
                                     <strong>LM Studio (Local)</strong>
                                 </div>
                                 <div class="provider-row">
-                                    <span>Latencia</span>
+                                    <span>Tempo da verificação</span>
                                     <strong id="t-latencia">-- ms</strong>
                                 </div>
                                 <div class="provider-row">
                                     <span>Modelo ativo</span>
-                                    <strong id="t-modelo-ativo">Inferido localmente</strong>
+                                    <strong id="t-modelo-ativo">Verificando…</strong>
                                 </div>
                                 <div class="provider-row">
                                     <span>Status</span>
-                                    <strong class="accent-green">Conectado</strong>
+                                    <strong id="t-llm-status">Verificando…</strong>
                                 </div>
                             </article>
                         </div>
@@ -1941,13 +1942,13 @@
                             <article class="telemetry-metric-card accent-green">
                                 <span class="metric-icon"><span
                                         class="material-symbols-outlined metric-icon-sym">translate</span></span>
-                                <span class="metric-label">Falas traduzidas</span>
+                                <span class="metric-label">Falas traduzíveis</span>
                                 <strong id="t-linhas">0</strong>
                             </article>
                             <article class="telemetry-metric-card accent-yellow">
                                 <span class="metric-icon"><span
                                         class="material-symbols-outlined metric-icon-sym">schedule</span></span>
-                                <span class="metric-label">Tempo medio / linha</span>
+                                <span class="metric-label">Tempo médio / fala</span>
                                 <strong id="t-tempo-linha">0 ms</strong>
                             </article>
                             <article class="telemetry-metric-card accent-purple">
@@ -1965,7 +1966,7 @@
                             <article class="telemetry-metric-card accent-blue">
                                 <span class="metric-icon"><span
                                         class="material-symbols-outlined metric-icon-sym">psychology</span></span>
-                                <span class="metric-label">Chamadas LLM</span>
+                                <span class="metric-label">Operações com LLM</span>
                                 <strong id="t-chamadas-llm">0</strong>
                             </article>
                             <article class="telemetry-metric-card accent-magenta">
@@ -2016,8 +2017,8 @@
                         <div class="telemetry-insights-grid">
                             <section class="telemetry-insight-card">
                                 <span class="insight-kicker accent-purple">Triagem e Custo</span>
-                                <h3 data-tooltip="Falas dos episódios traduzidos divididas entre cache e LLM local. A barra Brutas não é medida: é o total de falas mais 15%.">Funil de Processamento Cognitivo</h3>
-                                <p>Volume de falas filtradas ate o acionamento real do LLM local.</p>
+                                <h3 data-tooltip="Falas traduzíveis dos episódios (com repetição) e quantos textos distintos vieram do cache ou foram traduzidos pelo LLM local.">Funil de Processamento Cognitivo</h3>
+                                <p>O que o cache poupou antes de chamar o LLM local.</p>
                                 <div class="telemetry-chart-box">
                                     <div id="chart-funil-processamento" class="telemetry-dom-chart"></div>
                                 </div>
@@ -2028,13 +2029,13 @@
                             </section>
                             <section class="telemetry-insight-card">
                                 <span class="insight-kicker accent-yellow">Modelos Utilizados</span>
-                                <h3 data-tooltip="Quantos episódios traduzidos usaram cada modelo do LLM local, pelo registro mais recente de cada episódio. O centro mostra o total.">Distribuicao de Modelos LLM</h3>
-                                <p>Frequencia agregada das chamadas locais registradas no historico.</p>
+                                <h3 data-tooltip="Quantos episódios traduzidos usaram cada modelo do LLM local, pelo registro mais recente de cada episódio. O centro mostra o total.">Distribuição de Modelos LLM</h3>
+                                <p>Episódios traduzidos por modelo, do mais usado para o menos usado.</p>
                                 <div class="telemetry-chart-box">
                                     <div id="chart-modelos-llm" class="telemetry-dom-chart"></div>
                                 </div>
                                 <div class="insight-stat">
-                                    <span>Operacoes</span>
+                                    <span>Operações no histórico</span>
                                     <strong id="t-operacoes">0</strong>
                                 </div>
                             </section>
@@ -2057,14 +2058,14 @@
                             <div class="telemetry-card-header">
                                 <div>
                                     <span class="section-kicker">Eventos &middot; Pipeline</span>
-                                    <h3 data-tooltip="Operações do pipeline, traduções por episódio e análises de mídia, da mais recente para a mais antiga, 12 por página.">Historico Operacional</h3>
-                                    <p class="telemetry-table-count" id="t-table-count">0 operacoes registradas</p>
+                                    <h3 data-tooltip="Operações do pipeline, traduções por episódio e análises de mídia, da mais recente para a mais antiga, 12 por página.">Histórico Operacional</h3>
+                                    <p class="telemetry-table-count" id="t-table-count">0 operações registradas</p>
                                 </div>
                                 <div class="telemetry-search">
                                     <span class="material-symbols-outlined search-icon-sym"
                                         style="font-size: 16px; margin-right: 4px; vertical-align: middle; color: var(--text-muted);">search</span>
-                                    <input data-tooltip="Digite parte do nome da operação ou do detalhe (pasta, episódio). A tabela filtra enquanto você digita, sem diferenciar maiúsculas." type="search" id="t-table-search"
-                                        placeholder="Buscar por operacao ou conteudo..." autocomplete="off">
+                                    <input data-tooltip="Digite parte do nome da operação ou do detalhe (pasta, episódio). A tabela filtra enquanto você digita, sem diferenciar maiúsculas nem acentos." type="search" id="t-table-search"
+                                        placeholder="Buscar por operação ou conteúdo..." autocomplete="off">
                                 </div>
                             </div>
 
@@ -2080,12 +2081,12 @@
                                 <table class="telemetria-table">
                                     <thead>
                                         <tr>
-                                            <th data-tooltip="Quando a operação foi registrada, em horário UTC, não no fuso local. A tabela já vem da mais recente para a mais antiga; clicar não ordena.">Data/Hora</th>
-                                            <th data-tooltip="Tipo de operação registrada, como Tradução LLM ou Análise de Mídia. O ponto colorido indica a origem; para filtrar, use os botões acima.">Operacao</th>
+                                            <th data-tooltip="Quando a operação foi registrada, na hora do seu computador. A tabela já vem da mais recente para a mais antiga; clicar não ordena.">Data/Hora</th>
+                                            <th data-tooltip="Tipo de operação registrada, como Tradução LLM ou Análise de Mídia. O ponto colorido indica a origem; para filtrar, use os botões acima.">Operação</th>
                                             <th data-tooltip="Quem fez o trabalho, deduzido do nome da operação: LLM, LORE, GOOGLE, CACHE ou SISTEMA. Clicar no título não filtra nem ordena.">Origem</th>
                                             <th data-tooltip="Pasta, arquivo ou episódio da operação, com arquivos, detectados e corrigidos quando houver. Texto longo aparece cortado; passe o mouse para ler.">Detalhe / Chave</th>
-                                            <th data-tooltip="Tempo total da operação em segundos ou minutos. Verde: menos de 5 s; amarelo: 1 minuto ou mais. Traço quando não foi medido.">Duracao</th>
-                                            <th data-tooltip="Percentual dos itens detectados que a operação corrigiu, arredondado para baixo. Traço quando nada foi detectado; não mede a qualidade.">Confianca</th>
+                                            <th data-tooltip="Tempo total da operação em segundos ou minutos. Verde: menos de 5 s; amarelo: 1 minuto ou mais. Traço quando não foi medido.">Duração</th>
+                                            <th data-tooltip="Itens que a operação corrigiu, de quantos ela detectou (ex.: 66 de 68). Traço quando ela não detecta nada; não mede a qualidade.">Corrigidos</th>
                                         </tr>
                                     </thead>
                                     <tbody id="telemetria-table-body">
@@ -2098,12 +2099,12 @@
                             </div>
 
                             <div class="telemetry-pagination">
-                                <span class="pagination-info" id="t-pagination-info">Pagina 1 de 1</span>
+                                <span class="pagination-info" id="t-pagination-info">Página 1 de 1</span>
                                 <div class="pagination-buttons">
                                     <button data-tooltip="Volta para a página anterior, com operações mais recentes (12 por página). Fica desativado na primeira página." type="button" class="btn btn-secondary" id="t-page-prev"
                                         disabled>Anterior</button>
                                     <button data-tooltip="Avança para a próxima página, com operações mais antigas (12 por página). Fica desativado na última página." type="button" class="btn btn-secondary" id="t-page-next"
-                                        disabled>Proxima</button>
+                                        disabled>Próxima</button>
                                 </div>
                             </div>
                         </section>
@@ -2111,10 +2112,10 @@
                         <section class="glass-card telemetry-audit-card">
                             <div>
                                 <span class="section-kicker accent-cyan">KRONOS Audit Stream</span>
-                                <h3 data-tooltip="Resumo da última atualização: hora em UTC, total de operações, falas registradas e percentual de cache. Muda a cada nova leitura.">Log Auditavel do Pipeline de Traducao</h3>
-                                <p>Registro sintetico das metricas recebidas do endpoint local de telemetria.</p>
+                                <h3 data-tooltip="Resumo da última atualização: hora local, total de operações, falas traduzíveis e percentual de cache. Muda a cada nova leitura.">Log Auditável do Pipeline de Tradução</h3>
+                                <p>Registro sintético das métricas recebidas do endpoint local de telemetria.</p>
                             </div>
-                            <span class="telemetry-status stream">Stream ativo</span>
+                            <span class="telemetry-status" id="t-stream-status">Conectando…</span>
                             <div class="audit-line" id="t-audit-line">[System] Inicializando stream de observabilidade
                                 KRONOS...</div>
                         </section>
@@ -2277,7 +2278,7 @@
                                     <div style="font-size:48px; margin-bottom:12px; color: var(--accent-magenta);"><span
                                             class="material-symbols-outlined" style="font-size: 48px;">menu_book</span>
                                     </div>
-                                    <h1 data-tooltip="Página de entrada da documentação. Os cartões abaixo são atalhos para cinco páginas; o índice da documentação lista todas.">Documentação Técnica</h1>
+                                    <h2 class="doc-welcome-titulo" data-tooltip="Página de entrada da documentação. Os cartões abaixo são atalhos para cinco páginas; o índice da documentação lista todas.">Documentação Técnica</h2>
                                     <p>Guia completo do <strong>KRONOS CORE</strong> — arquitetura, todos os módulos do
                                         pipeline, referência de API REST e diagnósticos.</p>
                                     <div class="doc-welcome-grid">
@@ -2394,7 +2395,7 @@
     <div id="modal-navegador" class="modal-overlay hidden" role="dialog" aria-modal="true"
         aria-labelledby="modal-navegador-titulo">
         <div class="modal-box modal-navegador-box">
-            <h3 data-tooltip="Pastas que o servidor do KRONOS enxerga, só dentro das raízes permitidas. Clique numa pasta para entrar; se o campo pede arquivo, clique no arquivo." id="modal-navegador-titulo">Escolher pasta</h3>
+            <h3 data-tooltip="Pastas que o servidor do KRONOS enxerga, só dentro das raízes permitidas. Clique numa pasta para entrar; se o campo pede arquivo, clique no arquivo." id="modal-navegador-titulo"><span id="modal-navegador-titulo-texto">Escolher pasta</span></h3>
             <div class="navegador-barra">
                 <button type="button" id="btn-navegador-subir" class="btn btn-secondary btn-navegador-subir"
                     data-tooltip="Subir um nível (nunca sai da raiz permitida)">

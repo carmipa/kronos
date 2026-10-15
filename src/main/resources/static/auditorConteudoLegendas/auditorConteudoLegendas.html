@@ -57,9 +57,9 @@
         <div class="op-caixa-cabecalho">
             <span class="material-symbols-outlined op-caixa-icone">content_paste_search</span>
             <h3 data-tooltip="Explica o que cada modo acha e o que não acha, e qual tela conserta cada defeito (2.3, 4.2 ou 4.3). Esta tela só diagnostica.">O que a análise procura</h3>
-            <span class="op-caixa-etiqueta">somente leitura</span>
+            <span class="op-caixa-etiqueta">não altera a legenda</span>
         </div>
-        <p class="op-caixa-desc">Auditoria profunda do arquivo de legenda: alucinação do modelo, efeito visual vazado para o texto e formatação quebrada. <strong>Nunca altera arquivo nenhum</strong> — é 100% leitura.</p>
+        <p class="op-caixa-desc">Auditoria profunda do arquivo de legenda: alucinação do modelo, efeito visual vazado para o texto e formatação quebrada. <strong>Nunca altera a legenda</strong> — só lê. Grava um relatório JSON em <code>relatorios/&lt;pasta&gt;/</code> e atualiza a telemetria.</p>
         <ol class="op-lista">
             <li class="op-linha">
                 <span class="op-marca"><span class="material-symbols-outlined">compare_arrows</span></span>
@@ -67,7 +67,8 @@
                     <span class="op-titulo">Ambas (comparar) — o modo que mais acha</span>
                     <span class="op-desc">Põe o inglês ao lado do PT-BR e acusa o que mudou entre os dois: fala perdida ou inventada, quebra de linha alucinada, karaokê ou efeito visual danificado, cabeçalho alterado. <strong>Não</strong> acusa fala que ficou em inglês — essa é pendência da própria tradução.</span>
                     <span class="op-selos">
-                        <span class="op-selo op-selo-seguro">não escreve nada</span>
+                        <span class="op-selo op-selo-seguro">não altera a legenda</span>
+                        <span class="op-selo op-selo-escreve">grava relatório JSON</span>
                     </span>
                 </div>
             </li>
@@ -77,7 +78,8 @@
                     <span class="op-titulo">Só Original (EN) ou Só Traduzida (PT-BR)</span>
                     <span class="op-desc">Para quando você tem um arquivo só. Acha defeito de formatação e efeito vazado, mas <strong>não</strong> o que depende de comparar com o par.</span>
                     <span class="op-selos">
-                        <span class="op-selo op-selo-seguro">não escreve nada</span>
+                        <span class="op-selo op-selo-seguro">não altera a legenda</span>
+                        <span class="op-selo op-selo-escreve">grava relatório JSON</span>
                     </span>
                 </div>
             </li>

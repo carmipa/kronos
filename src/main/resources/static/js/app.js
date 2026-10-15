@@ -6,13 +6,13 @@
 
 import { initAnalise } from '../analise/analise.js?v=4.0';
 import { initExtracao } from '../extracao/extracao.js?v=3.0';
-import { initAuditorConteudo } from '../auditorConteudoLegendas/auditorConteudoLegendas.js?v=4.1';
+import { initAuditorConteudo } from '../auditorConteudoLegendas/auditorConteudoLegendas.js?v=4.2';
 import { initTraducao } from '../traducao/traducao.js?v=3.2';
-import { initTraducaoSemLore } from '../traducaoSemLore/traducaoSemLore.js?v=1.0';
+import { initTraducaoSemLore } from '../traducaoSemLore/traducaoSemLore.js?v=1.1';
 import { initCorrecao } from '../correcao/correcao.js?v=3.1';
 import { initRevisao } from '../revisao/revisao.js?v=3.5';
 import { initCura } from '../cura/cura.js?v=3.0';
-import { initRevisaoLore } from '../revisaoLore/revisaoLore.js?v=3.3';
+import { initRevisaoLore } from '../revisaoLore/revisaoLore.js?v=3.4';
 import { initRevisaoConcordancia } from '../revisaoConcordancia/revisaoConcordancia.js?v=1.1';
 import { initTrocaTipoLegenda } from '../trocaTipoLegenda/trocaTipoLegenda.js?v=3.2';
 import { initRemuxer } from '../remuxer/remuxer.js?v=3.4';
@@ -20,10 +20,10 @@ import { montarOpcoesContextos } from './selectContextos.js';
 import { travarAteEscolherLore } from './travaLore.js';
 import { inicializarGaveta } from './gaveta.js?v=1.1';
 import { inicializarDicas, registrarDicaPadrao, rotuloDe } from './dicas.js?v=1.1';
-import { initMapa } from '../mapa/mapa.js?v=5.0';
-import { initTelemetria } from '../telemetria/telemetria.js?v=3.3';
-import { initDocumentacao } from '../documentacao/documentacao.js?v=3.0';
-import { initSobre } from '../sobre/sobre.js?v=3.1';
+import { initMapa } from '../mapa/mapa.js?v=5.1';
+import { initTelemetria } from '../telemetria/telemetria.js?v=3.4';
+import { initDocumentacao } from '../documentacao/documentacao.js?v=3.1';
+import { initSobre } from '../sobre/sobre.js?v=3.2';
 import { initRenomearArquivos } from '../renomearArquivos/renomearArquivos.js?v=3.1';
 // 4.3 Karaokê Simples foi ABSORVIDO pela tela única 4.1 Karaokê em 21/09/2026: o achatamento virou
 // o Passo 2 da mesma tela (chama /api/novo-karaoke/* direto). O backend do achatador continua vivo;
@@ -113,7 +113,7 @@ const CONFIG_SECOES = {
     },
     telemetria: {
         titulo: "Telemetria KRONOS",
-        subtitulo: "Observabilidade da traducao, cache local e historico operacional"
+        subtitulo: "Observabilidade da tradução, cache local e histórico operacional"
     },
     documentacao: {
         titulo: "Documentação",
@@ -1623,7 +1623,9 @@ function abrirNavegadorPastas(dirInicial, tipo) {
             lista.innerHTML = '';
 
             if (pastas.length === 0 && arquivos.length === 0) {
-                lista.innerHTML = '<div class="navegador-vazio">Esta pasta não tem subpastas.</div>';
+                lista.innerHTML = pedeArquivo
+                    ? '<div class="navegador-vazio">Esta pasta não tem subpastas nem arquivos de legenda.</div>'
+                    : '<div class="navegador-vazio">Esta pasta não tem subpastas.</div>';
                 return;
             }
 
@@ -1656,6 +1658,11 @@ function abrirNavegadorPastas(dirInicial, tipo) {
         // clicando num arquivo. Deixar o botão visível ofereceria uma saída que
         // devolveria uma pasta para um campo que espera um arquivo.
         btnUsar.classList.toggle('hidden', pedeArquivo);
+        // O título dizia "Escolher pasta" também no modo arquivo (a 1.4 pede um .ass).
+        const textoTitulo = pedeArquivo ? 'Escolher arquivo' : 'Escolher pasta';
+        const tituloModal = document.getElementById('modal-navegador-titulo-texto');
+        if (tituloModal) tituloModal.textContent = textoTitulo;
+        document.querySelector('#modal-navegador-titulo .dica__gatilho')?.setAttribute('aria-label', `Ajuda sobre ${textoTitulo}`);
         modal.classList.remove('hidden');
         carregar(caminhoAtual);
     });

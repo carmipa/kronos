@@ -179,7 +179,7 @@
 #panel-documentacao .doc-error { padding: 2rem; text-align: center; color: var(--accent-red); }
 
 /* Conteúdo Markdown renderizado */
-#panel-documentacao .doc-markdown h1 {
+#panel-documentacao .doc-markdown .md-h1 {
     font-family: var(--font-main);
     font-size: 1.625rem;
     font-weight: 800;
@@ -190,7 +190,7 @@
     padding-bottom: 0.75rem;
 }
 
-#panel-documentacao .doc-markdown h2 {
+#panel-documentacao .doc-markdown .md-h2 {
     font-size: 1.1875rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -201,7 +201,7 @@
     gap: 0.5rem;
 }
 
-#panel-documentacao .doc-markdown h2::before {
+#panel-documentacao .doc-markdown .md-h2::before {
     content: '';
     display: inline-block;
     width: 0.1875rem;
@@ -211,7 +211,7 @@
     flex-shrink: 0;
 }
 
-#panel-documentacao .doc-markdown h3 {
+#panel-documentacao .doc-markdown .md-h3 {
     font-size: 0.9375rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -219,7 +219,7 @@
     margin-bottom: 0.5rem;
 }
 
-#panel-documentacao .doc-markdown h4 {
+#panel-documentacao .doc-markdown .md-h4 {
     font-size: 0.8125rem;
     font-weight: 600;
     color: var(--accent-blue);
@@ -340,7 +340,7 @@
 /* Welcome card (página inicial da documentação) */
 #panel-documentacao .doc-welcome { padding: 2.5rem 2rem; text-align: center; }
 
-#panel-documentacao .doc-welcome h1 {
+#panel-documentacao .doc-welcome .doc-welcome-titulo {
     font-size: 1.875rem;
     font-weight: 800;
     color: var(--text-primary);

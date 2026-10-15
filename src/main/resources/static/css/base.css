@@ -1974,6 +1974,38 @@ span.console-action-icon.material-symbols-outlined {
     }
 }
 
+/* Botão-link do repositório (Início e Sobre). Antes só existia preso ao #panel-inicio, e o
+   Sobre mostrava o link cru do navegador. */
+.repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: fit-content;
+    transition: var(--transition-fast);
+}
+
+.repo-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-active);
+    transform: translateY(-1px);
+}
+
+.github-icon {
+    color: var(--text-secondary);
+}
+
+.repo-link:hover .github-icon {
+    color: var(--text-primary);
+}
+
 /* ==========================================================================
    ALVOS DE TOQUE — só com dedo (pointer: coarse); o mouse do computador não muda.
    WCAG 2.5.8 exige 24 px; a regra 6-A recomenda 44 px. Medido a 390 px antes daqui: 15

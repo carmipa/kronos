@@ -12,7 +12,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 22956,
-   "registradoEm": "2026-10-14T17:16:16.025017100Z"
+   "registradoEm": "2026-10-14T17:16:16.025017100Z",
+   "itensDetectados": 32,
+   "itensCorrigidos": 32
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -21,7 +23,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 503907,
-   "registradoEm": "2026-10-14T17:14:52.114908500Z"
+   "registradoEm": "2026-10-14T17:14:52.114908500Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -30,7 +34,9 @@
    "taxaSucesso": 97,
    "origem": "LLM",
    "duracaoMs": 39612,
-   "registradoEm": "2026-10-14T16:58:53.330497800Z"
+   "registradoEm": "2026-10-14T16:58:53.330497800Z",
+   "itensDetectados": 68,
+   "itensCorrigidos": 66
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -39,7 +45,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 343319,
-   "registradoEm": "2026-10-14T16:53:16.514039300Z"
+   "registradoEm": "2026-10-14T16:53:16.514039300Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -48,7 +56,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 339999,
-   "registradoEm": "2026-10-14T16:47:30.845614100Z"
+   "registradoEm": "2026-10-14T16:47:30.845614100Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -57,7 +67,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 471599,
-   "registradoEm": "2026-10-14T16:41:48.667822300Z"
+   "registradoEm": "2026-10-14T16:41:48.667822300Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -66,7 +78,9 @@
    "taxaSucesso": 98,
    "origem": "LLM",
    "duracaoMs": 40092,
-   "registradoEm": "2026-10-14T12:15:52.038469200Z"
+   "registradoEm": "2026-10-14T12:15:52.038469200Z",
+   "itensDetectados": 89,
+   "itensCorrigidos": 88
   },
   {
    "nomeOperacao": "Troca de Fontes ASS",
@@ -75,7 +89,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 50,
-   "registradoEm": "2026-10-14T12:14:54.786903800Z"
+   "registradoEm": "2026-10-14T12:14:54.786903800Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 1
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -84,7 +100,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 91708,
-   "registradoEm": "2026-10-14T12:05:49.611670600Z"
+   "registradoEm": "2026-10-14T12:05:49.611670600Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -93,7 +111,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 24345,
-   "registradoEm": "2026-10-14T12:04:17.844898900Z"
+   "registradoEm": "2026-10-14T12:04:17.844898900Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Extracao de Legendas (ASS)",
@@ -102,7 +122,9 @@
    "taxaSucesso": 66,
    "origem": "SISTEMA",
    "duracaoMs": 156632,
-   "registradoEm": "2026-10-14T07:49:36.682799300Z"
+   "registradoEm": "2026-10-14T07:49:36.682799300Z",
+   "itensDetectados": 138,
+   "itensCorrigidos": 92
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -111,7 +133,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 94208,
-   "registradoEm": "2026-10-12T21:50:42.149989700Z"
+   "registradoEm": "2026-10-12T21:50:42.149989700Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Extracao de Legendas (ASS)",
@@ -120,7 +144,9 @@
    "taxaSucesso": 50,
    "origem": "SISTEMA",
    "duracaoMs": 800,
-   "registradoEm": "2026-10-12T21:48:39.911386100Z"
+   "registradoEm": "2026-10-12T21:48:39.911386100Z",
+   "itensDetectados": 2,
+   "itensCorrigidos": 1
   },
   {
    "nomeOperacao": "Extracao de Legendas (ASS)",
@@ -129,7 +155,9 @@
    "taxaSucesso": 40,
    "origem": "SISTEMA",
    "duracaoMs": 63878,
-   "registradoEm": "2026-10-12T18:20:07.983658400Z"
+   "registradoEm": "2026-10-12T18:20:07.983658400Z",
+   "itensDetectados": 110,
+   "itensCorrigidos": 44
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -138,7 +166,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 1753,
-   "registradoEm": "2026-10-10T13:14:40.887976100Z"
+   "registradoEm": "2026-10-10T13:14:40.887976100Z",
+   "itensDetectados": 31,
+   "itensCorrigidos": 31
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -147,7 +177,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 20925,
-   "registradoEm": "2026-10-10T13:14:29.945350100Z"
+   "registradoEm": "2026-10-10T13:14:29.945350100Z",
+   "itensDetectados": 31,
+   "itensCorrigidos": 31
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -156,7 +188,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 92541,
-   "registradoEm": "2026-10-10T13:14:01.356670400Z"
+   "registradoEm": "2026-10-10T13:14:01.356670400Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -165,7 +199,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 130740,
-   "registradoEm": "2026-10-10T13:12:19.329001400Z"
+   "registradoEm": "2026-10-10T13:12:19.329001400Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -174,7 +210,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 9613,
-   "registradoEm": "2026-10-10T12:59:46.519115100Z"
+   "registradoEm": "2026-10-10T12:59:46.519115100Z",
+   "itensDetectados": 28,
+   "itensCorrigidos": 28
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -183,7 +221,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 8305,
-   "registradoEm": "2026-10-10T12:59:35.142076400Z"
+   "registradoEm": "2026-10-10T12:59:35.142076400Z",
+   "itensDetectados": 31,
+   "itensCorrigidos": 31
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -192,7 +232,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 14091,
-   "registradoEm": "2026-10-10T12:59:19.564437100Z"
+   "registradoEm": "2026-10-10T12:59:19.564437100Z",
+   "itensDetectados": 43,
+   "itensCorrigidos": 43
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -201,7 +243,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 8649,
-   "registradoEm": "2026-10-10T12:59:04.046462800Z"
+   "registradoEm": "2026-10-10T12:59:04.046462800Z",
+   "itensDetectados": 31,
+   "itensCorrigidos": 31
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -210,7 +254,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 8261,
-   "registradoEm": "2026-10-10T12:58:53.580921700Z"
+   "registradoEm": "2026-10-10T12:58:53.580921700Z",
+   "itensDetectados": 31,
+   "itensCorrigidos": 31
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -219,7 +265,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 28038,
-   "registradoEm": "2026-10-10T12:58:43.264476Z"
+   "registradoEm": "2026-10-10T12:58:43.264476Z",
+   "itensDetectados": 31,
+   "itensCorrigidos": 31
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -228,7 +276,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 182069,
-   "registradoEm": "2026-10-10T12:58:07.032460800Z"
+   "registradoEm": "2026-10-10T12:58:07.032460800Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -237,7 +287,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 188849,
-   "registradoEm": "2026-10-10T12:54:53.533758900Z"
+   "registradoEm": "2026-10-10T12:54:53.533758900Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -246,7 +298,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 247854,
-   "registradoEm": "2026-10-10T12:51:42.253018700Z"
+   "registradoEm": "2026-10-10T12:51:42.253018700Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -255,7 +309,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 271145,
-   "registradoEm": "2026-10-10T12:39:14.519212900Z"
+   "registradoEm": "2026-10-10T12:39:14.519212900Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -264,7 +320,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 693543,
-   "registradoEm": "2026-10-09T20:03:14.564702Z"
+   "registradoEm": "2026-10-09T20:03:14.564702Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -273,7 +331,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 17384,
-   "registradoEm": "2026-10-09T18:42:48.635498700Z"
+   "registradoEm": "2026-10-09T18:42:48.635498700Z",
+   "itensDetectados": 6,
+   "itensCorrigidos": 6
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -282,7 +342,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 171157,
-   "registradoEm": "2026-10-09T18:29:17.950371200Z"
+   "registradoEm": "2026-10-09T18:29:17.950371200Z",
+   "itensDetectados": 50,
+   "itensCorrigidos": 50
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -291,7 +353,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 221108,
-   "registradoEm": "2026-10-09T18:22:52.960087Z"
+   "registradoEm": "2026-10-09T18:22:52.960087Z",
+   "itensDetectados": 47,
+   "itensCorrigidos": 47
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -300,7 +364,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 34813,
-   "registradoEm": "2026-10-09T18:18:01.181100300Z"
+   "registradoEm": "2026-10-09T18:18:01.181100300Z",
+   "itensDetectados": 22,
+   "itensCorrigidos": 22
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -309,7 +375,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 17306,
-   "registradoEm": "2026-10-09T18:15:35.300661300Z"
+   "registradoEm": "2026-10-09T18:15:35.300661300Z",
+   "itensDetectados": 11,
+   "itensCorrigidos": 11
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -318,7 +386,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 10965,
-   "registradoEm": "2026-10-09T18:12:06.976476400Z"
+   "registradoEm": "2026-10-09T18:12:06.976476400Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 1
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -327,7 +397,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 10501,
-   "registradoEm": "2026-10-09T18:10:53.501000700Z"
+   "registradoEm": "2026-10-09T18:10:53.501000700Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 1
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -336,7 +408,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 7604,
-   "registradoEm": "2026-10-09T18:08:43.756460900Z"
+   "registradoEm": "2026-10-09T18:08:43.756460900Z",
+   "itensDetectados": 6,
+   "itensCorrigidos": 6
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -345,7 +419,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 16707,
-   "registradoEm": "2026-10-09T18:07:43.388489200Z"
+   "registradoEm": "2026-10-09T18:07:43.388489200Z",
+   "itensDetectados": 15,
+   "itensCorrigidos": 15
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -354,7 +430,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 37389,
-   "registradoEm": "2026-10-09T18:04:33.042339100Z"
+   "registradoEm": "2026-10-09T18:04:33.042339100Z",
+   "itensDetectados": 21,
+   "itensCorrigidos": 21
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -363,7 +441,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 23994,
-   "registradoEm": "2026-10-09T17:57:03.940533200Z"
+   "registradoEm": "2026-10-09T17:57:03.940533200Z",
+   "itensDetectados": 12,
+   "itensCorrigidos": 12
   },
   {
    "nomeOperacao": "Remux (mkvmerge)",
@@ -372,7 +452,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 25156,
-   "registradoEm": "2026-10-09T17:56:12.561704300Z"
+   "registradoEm": "2026-10-09T17:56:12.561704300Z",
+   "itensDetectados": 11,
+   "itensCorrigidos": 11
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -381,7 +463,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 81106,
-   "registradoEm": "2026-10-09T16:50:12.103441300Z"
+   "registradoEm": "2026-10-09T16:50:12.103441300Z",
+   "itensDetectados": 683,
+   "itensCorrigidos": 683
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -390,7 +474,9 @@
    "taxaSucesso": 99,
    "origem": "LLM",
    "duracaoMs": 155216,
-   "registradoEm": "2026-10-09T15:52:30.129731Z"
+   "registradoEm": "2026-10-09T15:52:30.129731Z",
+   "itensDetectados": 851,
+   "itensCorrigidos": 850
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -399,7 +485,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 22766,
-   "registradoEm": "2026-10-09T15:49:42.139231400Z"
+   "registradoEm": "2026-10-09T15:49:42.139231400Z",
+   "itensDetectados": 53,
+   "itensCorrigidos": 53
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -408,7 +496,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 33062,
-   "registradoEm": "2026-10-09T15:49:05.827643900Z"
+   "registradoEm": "2026-10-09T15:49:05.827643900Z",
+   "itensDetectados": 58,
+   "itensCorrigidos": 58
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -417,7 +507,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 162871,
-   "registradoEm": "2026-10-09T15:48:29.275901400Z"
+   "registradoEm": "2026-10-09T15:48:29.275901400Z",
+   "itensDetectados": 823,
+   "itensCorrigidos": 823
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -426,7 +518,9 @@
    "taxaSucesso": 89,
    "origem": "LLM",
    "duracaoMs": 234495,
-   "registradoEm": "2026-10-09T15:45:37.628273300Z"
+   "registradoEm": "2026-10-09T15:45:37.628273300Z",
+   "itensDetectados": 683,
+   "itensCorrigidos": 613
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -435,7 +529,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 331661,
-   "registradoEm": "2026-10-09T15:41:33.148481100Z"
+   "registradoEm": "2026-10-09T15:41:33.148481100Z",
+   "itensDetectados": 2234,
+   "itensCorrigidos": 2234
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -444,7 +540,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 331687,
-   "registradoEm": "2026-10-09T15:35:52.165701700Z"
+   "registradoEm": "2026-10-09T15:35:52.165701700Z",
+   "itensDetectados": 2124,
+   "itensCorrigidos": 2124
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -453,7 +551,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 228993,
-   "registradoEm": "2026-10-09T15:30:07.191474900Z"
+   "registradoEm": "2026-10-09T15:30:07.191474900Z",
+   "itensDetectados": 741,
+   "itensCorrigidos": 741
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -462,7 +562,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 85,
-   "registradoEm": "2026-10-09T15:26:15.293978500Z"
+   "registradoEm": "2026-10-09T15:26:15.293978500Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -471,7 +573,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 22381,
-   "registradoEm": "2026-10-09T15:26:02.057115700Z"
+   "registradoEm": "2026-10-09T15:26:02.057115700Z",
+   "itensDetectados": 231,
+   "itensCorrigidos": 231
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -480,7 +584,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 64915,
-   "registradoEm": "2026-10-09T15:25:36.237860Z"
+   "registradoEm": "2026-10-09T15:25:36.237860Z",
+   "itensDetectados": 6266,
+   "itensCorrigidos": 6266
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -489,7 +595,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 39342,
-   "registradoEm": "2026-10-09T15:23:42.912953800Z"
+   "registradoEm": "2026-10-09T15:23:42.912953800Z",
+   "itensDetectados": 103,
+   "itensCorrigidos": 103
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -498,7 +606,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 39369,
-   "registradoEm": "2026-10-09T00:11:02.457066500Z"
+   "registradoEm": "2026-10-09T00:11:02.457066500Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -507,7 +617,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 57458,
-   "registradoEm": "2026-10-09T00:10:23.072711500Z"
+   "registradoEm": "2026-10-09T00:10:23.072711500Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -516,7 +628,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 61046,
-   "registradoEm": "2026-10-09T00:09:25.596857500Z"
+   "registradoEm": "2026-10-09T00:09:25.596857500Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -525,7 +639,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 35093,
-   "registradoEm": "2026-10-09T00:08:22.959282400Z"
+   "registradoEm": "2026-10-09T00:08:22.959282400Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -534,7 +650,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 50514,
-   "registradoEm": "2026-10-09T00:07:47.855127600Z"
+   "registradoEm": "2026-10-09T00:07:47.855127600Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -543,7 +661,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 61476,
-   "registradoEm": "2026-10-09T00:06:57.330364900Z"
+   "registradoEm": "2026-10-09T00:06:57.330364900Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -552,7 +672,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 68713,
-   "registradoEm": "2026-10-09T00:05:55.844548900Z"
+   "registradoEm": "2026-10-09T00:05:55.844548900Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Tradução LLM",
@@ -561,7 +683,9 @@
    "taxaSucesso": null,
    "origem": "LLM",
    "duracaoMs": 75929,
-   "registradoEm": "2026-10-09T00:04:47.112353500Z"
+   "registradoEm": "2026-10-09T00:04:47.112353500Z",
+   "itensDetectados": null,
+   "itensCorrigidos": null
   },
   {
    "nomeOperacao": "Renomear Arquivos",
@@ -570,7 +694,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 15,
-   "registradoEm": "2026-10-08T20:17:48.170053500Z"
+   "registradoEm": "2026-10-08T20:17:48.170053500Z",
+   "itensDetectados": 12,
+   "itensCorrigidos": 12
   },
   {
    "nomeOperacao": "Reverter Renomeação",
@@ -579,7 +705,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 9,
-   "registradoEm": "2026-10-08T20:17:48.142404800Z"
+   "registradoEm": "2026-10-08T20:17:48.142404800Z",
+   "itensDetectados": 13,
+   "itensCorrigidos": 13
   },
   {
    "nomeOperacao": "Renomear Arquivos",
@@ -588,7 +716,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 18,
-   "registradoEm": "2026-10-08T20:17:48.126014300Z"
+   "registradoEm": "2026-10-08T20:17:48.126014300Z",
+   "itensDetectados": 13,
+   "itensCorrigidos": 13
   },
   {
    "nomeOperacao": "Reverter Renomeação",
@@ -597,7 +727,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 21,
-   "registradoEm": "2026-10-08T20:17:47.456837600Z"
+   "registradoEm": "2026-10-08T20:17:47.456837600Z",
+   "itensDetectados": 13,
+   "itensCorrigidos": 13
   },
   {
    "nomeOperacao": "Renomear Arquivos",
@@ -606,7 +738,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 50,
-   "registradoEm": "2026-10-08T20:17:46.425798400Z"
+   "registradoEm": "2026-10-08T20:17:46.425798400Z",
+   "itensDetectados": 47,
+   "itensCorrigidos": 47
   },
   {
    "nomeOperacao": "Reverter Renomeação",
@@ -615,7 +749,9 @@
    "taxaSucesso": 100,
    "origem": "SISTEMA",
    "duracaoMs": 56,
-   "registradoEm": "2026-10-08T20:17:45.236618100Z"
+   "registradoEm": "2026-10-08T20:17:45.236618100Z",
+   "itensDetectados": 47,
+   "itensCorrigidos": 47
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -624,7 +760,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 344,
-   "registradoEm": "2026-09-24T21:15:40.074417600Z"
+   "registradoEm": "2026-09-24T21:15:40.074417600Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -633,7 +771,9 @@
    "taxaSucesso": 24,
    "origem": "SISTEMA",
    "duracaoMs": 344,
-   "registradoEm": "2026-09-24T21:15:40.025623900Z"
+   "registradoEm": "2026-09-24T21:15:40.025623900Z",
+   "itensDetectados": 206,
+   "itensCorrigidos": 51
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -642,7 +782,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 31082,
-   "registradoEm": "2026-09-24T21:15:35.046607100Z"
+   "registradoEm": "2026-09-24T21:15:35.046607100Z",
+   "itensDetectados": 104,
+   "itensCorrigidos": 104
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -651,7 +793,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 320,
-   "registradoEm": "2026-09-24T21:15:01.478324800Z"
+   "registradoEm": "2026-09-24T21:15:01.478324800Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -660,7 +804,9 @@
    "taxaSucesso": 27,
    "origem": "SISTEMA",
    "duracaoMs": 320,
-   "registradoEm": "2026-09-24T21:15:01.427268600Z"
+   "registradoEm": "2026-09-24T21:15:01.427268600Z",
+   "itensDetectados": 98,
+   "itensCorrigidos": 27
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -669,7 +815,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 15992,
-   "registradoEm": "2026-09-24T21:14:57.893742300Z"
+   "registradoEm": "2026-09-24T21:14:57.893742300Z",
+   "itensDetectados": 54,
+   "itensCorrigidos": 54
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -678,7 +826,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 355,
-   "registradoEm": "2026-09-24T21:14:40.002084200Z"
+   "registradoEm": "2026-09-24T21:14:40.002084200Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -687,7 +837,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 355,
-   "registradoEm": "2026-09-24T21:14:39.332284300Z"
+   "registradoEm": "2026-09-24T21:14:39.332284300Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -696,7 +848,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 17630,
-   "registradoEm": "2026-09-24T21:14:37.147058600Z"
+   "registradoEm": "2026-09-24T21:14:37.147058600Z",
+   "itensDetectados": 50,
+   "itensCorrigidos": 50
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -705,7 +859,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 36,
-   "registradoEm": "2026-09-24T18:36:57.169573100Z"
+   "registradoEm": "2026-09-24T18:36:57.169573100Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -714,7 +870,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 36,
-   "registradoEm": "2026-09-24T18:36:57.115325200Z"
+   "registradoEm": "2026-09-24T18:36:57.115325200Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -723,7 +881,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 2267,
-   "registradoEm": "2026-09-24T18:36:53.392388300Z"
+   "registradoEm": "2026-09-24T18:36:53.392388300Z",
+   "itensDetectados": 50,
+   "itensCorrigidos": 50
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -732,7 +892,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 1577,
-   "registradoEm": "2026-09-24T18:36:49.925938900Z"
+   "registradoEm": "2026-09-24T18:36:49.925938900Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -741,7 +903,9 @@
    "taxaSucesso": 50,
    "origem": "SISTEMA",
    "duracaoMs": 1577,
-   "registradoEm": "2026-09-24T18:36:49.873978100Z"
+   "registradoEm": "2026-09-24T18:36:49.873978100Z",
+   "itensDetectados": 105,
+   "itensCorrigidos": 53
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -750,7 +914,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 23493,
-   "registradoEm": "2026-09-24T18:36:46.076294600Z"
+   "registradoEm": "2026-09-24T18:36:46.076294600Z",
+   "itensDetectados": 55,
+   "itensCorrigidos": 55
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -759,7 +925,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 1166,
-   "registradoEm": "2026-09-24T18:36:19.642510200Z"
+   "registradoEm": "2026-09-24T18:36:19.642510200Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -768,7 +936,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 1166,
-   "registradoEm": "2026-09-24T18:36:18.586458500Z"
+   "registradoEm": "2026-09-24T18:36:18.586458500Z",
+   "itensDetectados": 1260,
+   "itensCorrigidos": 11
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -777,7 +947,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 7430,
-   "registradoEm": "2026-09-24T18:36:15.581073600Z"
+   "registradoEm": "2026-09-24T18:36:15.581073600Z",
+   "itensDetectados": 550,
+   "itensCorrigidos": 550
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -786,7 +958,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 18214,
-   "registradoEm": "2026-09-24T18:36:06.161830700Z"
+   "registradoEm": "2026-09-24T18:36:06.161830700Z",
+   "itensDetectados": 7,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -795,7 +969,9 @@
    "taxaSucesso": 19,
    "origem": "SISTEMA",
    "duracaoMs": 18214,
-   "registradoEm": "2026-09-24T18:36:05.101907500Z"
+   "registradoEm": "2026-09-24T18:36:05.101907500Z",
+   "itensDetectados": 363,
+   "itensCorrigidos": 70
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -804,7 +980,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 22374,
-   "registradoEm": "2026-09-24T18:35:43.482334900Z"
+   "registradoEm": "2026-09-24T18:35:43.482334900Z",
+   "itensDetectados": 73,
+   "itensCorrigidos": 73
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -813,7 +991,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 2135,
-   "registradoEm": "2026-09-24T18:35:20.166979800Z"
+   "registradoEm": "2026-09-24T18:35:20.166979800Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -822,7 +1002,9 @@
    "taxaSucesso": 27,
    "origem": "SISTEMA",
    "duracaoMs": 2135,
-   "registradoEm": "2026-09-24T18:35:20.101976200Z"
+   "registradoEm": "2026-09-24T18:35:20.101976200Z",
+   "itensDetectados": 98,
+   "itensCorrigidos": 27
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -831,7 +1013,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 16275,
-   "registradoEm": "2026-09-24T18:35:15.110519300Z"
+   "registradoEm": "2026-09-24T18:35:15.110519300Z",
+   "itensDetectados": 54,
+   "itensCorrigidos": 54
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -840,7 +1024,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 810,
-   "registradoEm": "2026-09-24T18:34:56.840034200Z"
+   "registradoEm": "2026-09-24T18:34:56.840034200Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -849,7 +1035,9 @@
    "taxaSucesso": 24,
    "origem": "SISTEMA",
    "duracaoMs": 810,
-   "registradoEm": "2026-09-24T18:34:56.795555700Z"
+   "registradoEm": "2026-09-24T18:34:56.795555700Z",
+   "itensDetectados": 206,
+   "itensCorrigidos": 51
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -858,7 +1046,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 31945,
-   "registradoEm": "2026-09-24T18:34:52.270068300Z"
+   "registradoEm": "2026-09-24T18:34:52.270068300Z",
+   "itensDetectados": 104,
+   "itensCorrigidos": 104
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -867,7 +1057,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 2069,
-   "registradoEm": "2026-09-24T18:34:19.654900100Z"
+   "registradoEm": "2026-09-24T18:34:19.654900100Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -876,7 +1068,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 2069,
-   "registradoEm": "2026-09-24T18:34:19.581353Z"
+   "registradoEm": "2026-09-24T18:34:19.581353Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -885,7 +1079,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 17454,
-   "registradoEm": "2026-09-24T18:34:15.729763900Z"
+   "registradoEm": "2026-09-24T18:34:15.729763900Z",
+   "itensDetectados": 50,
+   "itensCorrigidos": 50
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -894,7 +1090,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 2253,
-   "registradoEm": "2026-09-24T18:22:06.410839900Z"
+   "registradoEm": "2026-09-24T18:22:06.410839900Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -903,7 +1101,9 @@
    "taxaSucesso": 27,
    "origem": "SISTEMA",
    "duracaoMs": 2253,
-   "registradoEm": "2026-09-24T18:22:06.357023700Z"
+   "registradoEm": "2026-09-24T18:22:06.357023700Z",
+   "itensDetectados": 98,
+   "itensCorrigidos": 27
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -912,7 +1112,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 14513,
-   "registradoEm": "2026-09-24T18:21:59.423011300Z"
+   "registradoEm": "2026-09-24T18:21:59.423011300Z",
+   "itensDetectados": 48,
+   "itensCorrigidos": 48
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -921,7 +1123,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 1504,
-   "registradoEm": "2026-09-24T18:21:43.674533Z"
+   "registradoEm": "2026-09-24T18:21:43.674533Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -930,7 +1134,9 @@
    "taxaSucesso": 24,
    "origem": "SISTEMA",
    "duracaoMs": 1504,
-   "registradoEm": "2026-09-24T18:21:43.615901200Z"
+   "registradoEm": "2026-09-24T18:21:43.615901200Z",
+   "itensDetectados": 206,
+   "itensCorrigidos": 51
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -939,7 +1145,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 32728,
-   "registradoEm": "2026-09-24T18:21:39.016592500Z"
+   "registradoEm": "2026-09-24T18:21:39.016592500Z",
+   "itensDetectados": 104,
+   "itensCorrigidos": 104
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -948,7 +1156,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 2231,
-   "registradoEm": "2026-09-24T18:21:03.499857Z"
+   "registradoEm": "2026-09-24T18:21:03.499857Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -957,7 +1167,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 2231,
-   "registradoEm": "2026-09-24T18:21:03.387934100Z"
+   "registradoEm": "2026-09-24T18:21:03.387934100Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -966,7 +1178,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 24767,
-   "registradoEm": "2026-09-24T18:20:56.780041900Z"
+   "registradoEm": "2026-09-24T18:20:56.780041900Z",
+   "itensDetectados": 50,
+   "itensCorrigidos": 50
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -975,7 +1189,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 1631,
-   "registradoEm": "2026-09-24T18:05:46.580339600Z"
+   "registradoEm": "2026-09-24T18:05:46.580339600Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -984,7 +1200,9 @@
    "taxaSucesso": 25,
    "origem": "SISTEMA",
    "duracaoMs": 1631,
-   "registradoEm": "2026-09-24T18:05:46.538718600Z"
+   "registradoEm": "2026-09-24T18:05:46.538718600Z",
+   "itensDetectados": 96,
+   "itensCorrigidos": 24
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -993,7 +1211,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 20828,
-   "registradoEm": "2026-09-24T18:05:43.227737800Z"
+   "registradoEm": "2026-09-24T18:05:43.227737800Z",
+   "itensDetectados": 48,
+   "itensCorrigidos": 48
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1002,7 +1222,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 806,
-   "registradoEm": "2026-09-24T18:05:20.451373300Z"
+   "registradoEm": "2026-09-24T18:05:20.451373300Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1011,7 +1233,9 @@
    "taxaSucesso": 24,
    "origem": "SISTEMA",
    "duracaoMs": 806,
-   "registradoEm": "2026-09-24T18:05:20.409840500Z"
+   "registradoEm": "2026-09-24T18:05:20.409840500Z",
+   "itensDetectados": 206,
+   "itensCorrigidos": 51
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1020,7 +1244,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 44764,
-   "registradoEm": "2026-09-24T18:05:15.446272300Z"
+   "registradoEm": "2026-09-24T18:05:15.446272300Z",
+   "itensDetectados": 104,
+   "itensCorrigidos": 104
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1029,7 +1255,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 1944,
-   "registradoEm": "2026-09-24T18:04:29.871627Z"
+   "registradoEm": "2026-09-24T18:04:29.871627Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1038,7 +1266,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 1944,
-   "registradoEm": "2026-09-24T18:04:29.807823200Z"
+   "registradoEm": "2026-09-24T18:04:29.807823200Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1047,7 +1277,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 23865,
-   "registradoEm": "2026-09-24T18:04:25.882414900Z"
+   "registradoEm": "2026-09-24T18:04:25.882414900Z",
+   "itensDetectados": 50,
+   "itensCorrigidos": 50
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1056,7 +1288,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 1750,
-   "registradoEm": "2026-09-24T17:31:45.405755100Z"
+   "registradoEm": "2026-09-24T17:31:45.405755100Z",
+   "itensDetectados": 216,
+   "itensCorrigidos": 216
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1065,7 +1299,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 11460,
-   "registradoEm": "2026-09-24T17:31:39.197085900Z"
+   "registradoEm": "2026-09-24T17:31:39.197085900Z",
+   "itensDetectados": 36,
+   "itensCorrigidos": 36
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1074,7 +1310,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 23821,
-   "registradoEm": "2026-09-24T17:31:25.742672300Z"
+   "registradoEm": "2026-09-24T17:31:25.742672300Z",
+   "itensDetectados": 55,
+   "itensCorrigidos": 55
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1083,7 +1321,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 5974,
-   "registradoEm": "2026-09-24T17:30:58.588528300Z"
+   "registradoEm": "2026-09-24T17:30:58.588528300Z",
+   "itensDetectados": 550,
+   "itensCorrigidos": 550
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1092,7 +1332,9 @@
    "taxaSucesso": 98,
    "origem": "LLM",
    "duracaoMs": 35710,
-   "registradoEm": "2026-09-24T17:30:49.295569200Z"
+   "registradoEm": "2026-09-24T17:30:49.295569200Z",
+   "itensDetectados": 72,
+   "itensCorrigidos": 71
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1101,7 +1343,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 2603,
-   "registradoEm": "2026-09-24T17:07:49.919734900Z"
+   "registradoEm": "2026-09-24T17:07:49.919734900Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1110,7 +1354,9 @@
    "taxaSucesso": 19,
    "origem": "SISTEMA",
    "duracaoMs": 2603,
-   "registradoEm": "2026-09-24T17:07:48.874533900Z"
+   "registradoEm": "2026-09-24T17:07:48.874533900Z",
+   "itensDetectados": 363,
+   "itensCorrigidos": 70
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1119,7 +1365,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 20,
-   "registradoEm": "2026-09-24T17:06:57.763185Z"
+   "registradoEm": "2026-09-24T17:06:57.763185Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1128,7 +1376,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 20,
-   "registradoEm": "2026-09-24T17:06:57.711313200Z"
+   "registradoEm": "2026-09-24T17:06:57.711313200Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1137,7 +1387,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 5158,
-   "registradoEm": "2026-09-24T17:06:56.911248900Z"
+   "registradoEm": "2026-09-24T17:06:56.911248900Z",
+   "itensDetectados": 36,
+   "itensCorrigidos": 36
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1146,7 +1398,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 1270,
-   "registradoEm": "2026-09-24T17:06:50.258346800Z"
+   "registradoEm": "2026-09-24T17:06:50.258346800Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1155,7 +1409,9 @@
    "taxaSucesso": 50,
    "origem": "SISTEMA",
    "duracaoMs": 1270,
-   "registradoEm": "2026-09-24T17:06:50.212124500Z"
+   "registradoEm": "2026-09-24T17:06:50.212124500Z",
+   "itensDetectados": 105,
+   "itensCorrigidos": 53
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1164,7 +1420,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 9299,
-   "registradoEm": "2026-09-24T17:06:45.701733800Z"
+   "registradoEm": "2026-09-24T17:06:45.701733800Z",
+   "itensDetectados": 55,
+   "itensCorrigidos": 55
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1173,7 +1431,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 58,
-   "registradoEm": "2026-09-24T17:06:33.718608500Z"
+   "registradoEm": "2026-09-24T17:06:33.718608500Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1182,7 +1442,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 58,
-   "registradoEm": "2026-09-24T17:06:33.672459800Z"
+   "registradoEm": "2026-09-24T17:06:33.672459800Z",
+   "itensDetectados": 1260,
+   "itensCorrigidos": 11
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1191,7 +1453,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 2800,
-   "registradoEm": "2026-09-24T17:06:30.485616400Z"
+   "registradoEm": "2026-09-24T17:06:30.485616400Z",
+   "itensDetectados": 550,
+   "itensCorrigidos": 550
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1200,7 +1464,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 19065,
-   "registradoEm": "2026-09-24T17:06:24.221945200Z"
+   "registradoEm": "2026-09-24T17:06:24.221945200Z",
+   "itensDetectados": 7,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1209,7 +1475,9 @@
    "taxaSucesso": 19,
    "origem": "SISTEMA",
    "duracaoMs": 19065,
-   "registradoEm": "2026-09-24T17:06:23.161496100Z"
+   "registradoEm": "2026-09-24T17:06:23.161496100Z",
+   "itensDetectados": 363,
+   "itensCorrigidos": 70
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1218,7 +1486,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 14904,
-   "registradoEm": "2026-09-24T17:05:59.765748200Z"
+   "registradoEm": "2026-09-24T17:05:59.765748200Z",
+   "itensDetectados": 72,
+   "itensCorrigidos": 72
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1227,7 +1497,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 21,
-   "registradoEm": "2026-09-24T16:47:49.771817Z"
+   "registradoEm": "2026-09-24T16:47:49.771817Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1236,7 +1508,9 @@
    "taxaSucesso": 29,
    "origem": "SISTEMA",
    "duracaoMs": 21,
-   "registradoEm": "2026-09-24T16:47:49.712898500Z"
+   "registradoEm": "2026-09-24T16:47:49.712898500Z",
+   "itensDetectados": 86,
+   "itensCorrigidos": 25
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1245,7 +1519,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 5076,
-   "registradoEm": "2026-09-24T16:47:48.813166900Z"
+   "registradoEm": "2026-09-24T16:47:48.813166900Z",
+   "itensDetectados": 36,
+   "itensCorrigidos": 36
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1254,7 +1530,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 1242,
-   "registradoEm": "2026-09-24T16:47:42.178927100Z"
+   "registradoEm": "2026-09-24T16:47:42.178927100Z",
+   "itensDetectados": 1,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1263,7 +1541,9 @@
    "taxaSucesso": 50,
    "origem": "SISTEMA",
    "duracaoMs": 1242,
-   "registradoEm": "2026-09-24T16:47:42.132375200Z"
+   "registradoEm": "2026-09-24T16:47:42.132375200Z",
+   "itensDetectados": 105,
+   "itensCorrigidos": 53
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1272,7 +1552,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 9031,
-   "registradoEm": "2026-09-24T16:47:37.324699Z"
+   "registradoEm": "2026-09-24T16:47:37.324699Z",
+   "itensDetectados": 55,
+   "itensCorrigidos": 55
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1281,7 +1563,9 @@
    "taxaSucesso": null,
    "origem": "SISTEMA",
    "duracaoMs": 50,
-   "registradoEm": "2026-09-24T16:47:25.543137800Z"
+   "registradoEm": "2026-09-24T16:47:25.543137800Z",
+   "itensDetectados": 0,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1290,7 +1574,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 50,
-   "registradoEm": "2026-09-24T16:47:25.488872500Z"
+   "registradoEm": "2026-09-24T16:47:25.488872500Z",
+   "itensDetectados": 1260,
+   "itensCorrigidos": 11
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1299,7 +1585,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 2753,
-   "registradoEm": "2026-09-24T16:47:22.134165100Z"
+   "registradoEm": "2026-09-24T16:47:22.134165100Z",
+   "itensDetectados": 550,
+   "itensCorrigidos": 550
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1308,7 +1596,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 17878,
-   "registradoEm": "2026-09-24T16:47:06.224047400Z"
+   "registradoEm": "2026-09-24T16:47:06.224047400Z",
+   "itensDetectados": 7,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1317,7 +1607,9 @@
    "taxaSucesso": 19,
    "origem": "SISTEMA",
    "duracaoMs": 17878,
-   "registradoEm": "2026-09-24T16:47:05.174303800Z"
+   "registradoEm": "2026-09-24T16:47:05.174303800Z",
+   "itensDetectados": 363,
+   "itensCorrigidos": 70
   },
   {
    "nomeOperacao": "Tradução de Karaokê (LLM)",
@@ -1326,7 +1618,9 @@
    "taxaSucesso": 100,
    "origem": "LLM",
    "duracaoMs": 17117,
-   "registradoEm": "2026-09-24T16:46:13.854513300Z"
+   "registradoEm": "2026-09-24T16:46:13.854513300Z",
+   "itensDetectados": 72,
+   "itensCorrigidos": 72
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1335,7 +1629,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 2685,
-   "registradoEm": "2026-09-24T15:51:55.531279800Z"
+   "registradoEm": "2026-09-24T15:51:55.531279800Z",
+   "itensDetectados": 2,
+   "itensCorrigidos": 0
   },
   {
    "nomeOperacao": "NOVO_KARAOKE",
@@ -1344,7 +1640,9 @@
    "taxaSucesso": 19,
    "origem": "SISTEMA",
    "duracaoMs": 2685,
-   "registradoEm": "2026-09-24T15:51:54.471299Z"
+   "registradoEm": "2026-09-24T15:51:54.471299Z",
+   "itensDetectados": 363,
+   "itensCorrigidos": 70
   },
   {
    "nomeOperacao": "Karaokê Simples",
@@ -1353,7 +1651,9 @@
    "taxaSucesso": 0,
    "origem": "SISTEMA",
    "duracaoMs": 20,
-   "registradoEm": "2026-09-24T15:47:12.249596400Z"
+   "registradoEm": "2026-09-24T15:47:12.249596400Z",
+   "itensDetectados": 2,
+   "itensCorrigidos": 0
   }
  ],
  "traducoesLlm": [

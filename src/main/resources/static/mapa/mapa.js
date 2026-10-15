@@ -36,6 +36,13 @@ export function initMapa() {
 
     if (btnGerar) {
         btnGerar.addEventListener('click', async () => {
+            // Gravava por cima do mapa_projeto.md da raiz sem dizer nada: o aviso fica visível no
+            // texto da tela e é confirmado aqui, antes da escrita.
+            const confirmou = window.confirm(
+                'Gerar Mapa REGRAVA o arquivo mapa_projeto.md na raiz do KRONOS: o mapa anterior é '
+                + 'substituído (o arquivo é versionado no git, então dá para recuperar pelo histórico).\n\n'
+                + 'Continuar?');
+            if (!confirmou) return;
             btnGerar.disabled = true;
             if (viewer) viewer.textContent = 'Mapeando a estrutura completa do projeto. Por favor, aguarde...';
 

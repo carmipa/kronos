@@ -95,7 +95,9 @@ class CatracaAvisoSonoroNasTelasLongasTest {
         // "remuxer/remuxer.js" SAIU em 2026-09-02 — a catraca so desce. Paulo pediu o som na
         // 5.1, e ela era a tela onde a ausencia doia mais: o lote e de horas, com um MKV de
         // gigabytes por episodio, e terminava em silencio absoluto.
-        "traducaoSemLore/traducaoSemLore.js",
+        // "traducaoSemLore/traducaoSemLore.js" SAIU em 2026-10-15: a 2.2 nao escutava o fim do
+        // lote que o servidor ja anunciava no canal "traducao-sem-lore" (so a 2.1 escutava). Paulo
+        // autorizou corrigir os achados da revisao das telas; ganhou toast, linha e a segunda via do som.
         "trocaTipoLegenda/trocaTipoLegenda.js"));
 
     @Test

@@ -3,7 +3,7 @@ import { logNoConsole, mostrarAlerta, mensagemDoErro } from '../js/app.js';
 // v4.0: entraram as visões de tabela comparativa e gráfico. Subir a versão é obrigatório —
 // sem isso o navegador serve o HTML antigo em cache e os contêineres novos não existem, o
 // que aparece como "a feature não funciona" sem erro nenhum no console.
-const PAINEL_HTML = 'auditorConteudoLegendas/auditorConteudoLegendas.html?v=4.2';
+const PAINEL_HTML = 'auditorConteudoLegendas/auditorConteudoLegendas.html?v=4.3';
 
 const ORDEM_SEVERIDADE = { CRITICAL: 0, ERROR: 1, WARNING: 2 };
 

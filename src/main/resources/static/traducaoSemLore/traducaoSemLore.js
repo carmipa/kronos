@@ -1,4 +1,5 @@
 import { logNoConsole, mostrarAlerta } from '../js/app.js';
+import { tocarAvisoSonoro } from '../js/avisoSonoro.js';
 
 const CONSOLE = 'console-traducao-sem-lore';
 /** Id reservado do contexto genérico — espelha ProvedorContexto.ID_SEM_LORE no backend. */
@@ -18,6 +19,21 @@ const CONTEXTO_SEM_LORE = 'sem_lore';
  * mostrado em alerta; nada é reenviado automaticamente.
  */
 export function initTraducaoSemLore() {
+    // Fim do lote: o servidor avisa no canal "traducao-sem-lore" e o app.js repassa como
+    // kronos:traducao-finalizada, mas só a 2.1 escutava — a 2.2 terminava sem toast, sem linha
+    // no console e sem a segunda via do som. Registrado no init, que roda UMA vez no boot.
+    window.addEventListener('kronos:traducao-finalizada', (evento) => {
+        if (evento.detail?.canal !== 'traducao-sem-lore') return;
+        // Corpo: "<desfecho>|<veredito do som>" — ver TraducaoController#SEPARADOR_EVENTO.
+        const [desfecho = 'ENCERRADO', somDaMaquina = ''] = String(evento.detail.dados || '').split('|');
+        const tipo = desfecho.startsWith('CONCLU') && !desfecho.includes('FALHA') ? 'sucesso' : 'aviso';
+        logNoConsole(CONSOLE, `Lote encerrado: ${desfecho}`, tipo);
+        mostrarAlerta(`Tradução sem Lore — lote ${desfecho}`, tipo);
+        if (somDaMaquina !== 'TOCOU') {
+            tocarAvisoSonoro();
+        }
+    });
+
     const form = document.getElementById('form-traducao-sem-lore');
     if (!form) return;
 

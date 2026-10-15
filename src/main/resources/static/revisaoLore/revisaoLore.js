@@ -5,7 +5,7 @@ import { armarAvisoSonoro, tocarAvisoSonoro, mensagemDoAviso } from '../js/aviso
 // O cartao do alvo tem dono unico desde 19/08/2026 — ver o Javadoc de ligarCartaoLoreAtiva.
 import { ligarCartaoAlvoAtivo } from '../js/cartaoAlvoAtivo.js?v=1.1';
 
-const PAINEL_HTML = 'revisaoLore/revisaoLore.html?v=3.3';
+const PAINEL_HTML = 'revisaoLore/revisaoLore.html?v=3.4';
 
 async function carregarPainelHtml() {
     const painel = document.getElementById('panel-revisao-lore');

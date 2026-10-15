@@ -8,18 +8,18 @@
 
 O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Quarkus** (usando as extensões de compatibilidade Spring — `quarkus-spring-di`, `quarkus-spring-web`, `quarkus-spring-boot-properties`), organizada em **fatias verticais** (*vertical slices*) sob `org.traducao.projeto.*` — hoje são **21 fatias funcionais**, cada uma resolvendo uma etapa específica do pipeline de tradução de legendas de anime (a 21ª, `vitrine`, é a [vitrine pública](ref-docker.md#vitrine-pública-vps)).
 
-> **Os números desta página são contados, não estimados.** Medidos em **14/10/2026**:
+> **Os números desta página são contados, não estimados.** Medidos em **15/10/2026**:
 >
 > | o quê | quanto | como foi contado |
 > |---|---|---|
 > | fatias funcionais | **21** | 28 pacotes de topo sob `org.traducao.projeto`, menos 5 peers, `core` e `config` |
 > | peers | **5** | `legenda` · `cachetraducao` · `lore` · `qualidadeTraducao` · `llm` |
-> | classes / linhas em `src/main` | **514** / **79.459** | `find … -name '*.java'` |
-> | classes / linhas em `src/test` | **485** / **90.765** | idem — o teste já pesa mais que o código |
+> | classes / linhas em `src/main` | **515** / **79.599** | `find … -name '*.java'` |
+> | classes / linhas em `src/test` | **486** / **90.959** | idem — o teste já pesa mais que o código |
 > | rotas `/api` | **49** | 39 em **21** `@RestController` + 10 em **6** recursos JAX-RS (`@Path`) |
 > | lore | **70** arquivos SQL, um por obra: **69** do lado da tradução, **69** do lado da revisão; **68** na lista da UI | `sem_lore` só existe na tradução e é oculta (`aparece_na_lista = 0`); `macross_dyrl` só existe na revisão — ver `lore/esquema.sql` |
 > | guardas executáveis | **48** | 38 `Catraca*Test` + 10 `Fronteira*`, somando 189 testes — mais as 7 classes de guarda da vitrine |
-> | suíte completa | **3.039** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
+> | suíte completa | **3.047** testes | `gradlew test --rerun-tasks`: 0 falhas, 73 pulados (medições condicionadas) |
 >
 > Divergência entre um número aqui e o código é bug de documentação, não licença poética.
 > O número anterior desta página (72 lores) vinha de contagem de classes Java; a lore virou

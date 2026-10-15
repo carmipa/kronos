@@ -82,8 +82,9 @@ do código.
 ## O inventário completo
 
 Contado em **14/10/2026** nas anotações `@Test` de cada classe: **48 guardas · 189 testes**
-(38 `Catraca*Test` com 128, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
-**3.039 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
+(38 `Catraca*Test` com 128, 10 `Fronteira*` com 61). A suíte completa de 15/10/2026 rodou
+**3.047 testes, 0 falhas, 73 pulados** (os pulados são medições condicionadas: acervo ausente nesta
+máquina ou LM Studio sem modelo carregado).
 
 ### Fronteiras — congelam *quem pode importar quem* (10 guardas, 61 testes)
 

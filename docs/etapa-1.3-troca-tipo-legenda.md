@@ -81,8 +81,8 @@ sequenceDiagram
     UC-->>UI: progresso via SSE (canal troca-tipo-legenda)
 ```
 
-- **Escanear** roda **síncrono dentro da fila** (`executarEAguardar`): garante que nenhum job pesado roda em paralelo e devolve o relatório na própria resposta HTTP. Se a fila estiver ocupada com um job longo, a requisição espera.
-- **Aplicar** roda **assíncrono na fila** (`submeter`): copia para `backups/troca_tipo_legenda_<timestamp>/` só os arquivos que vão mudar, grava, loga cada substituição no console via SSE e registra cada troca no cache de auditoria. Ao fim grava os relatórios `troca_fontes_<timestamp>.json` e `.md` em `relatorios/<nome da pasta>/`.
+- **Escanear** roda **síncrono dentro da fila** (`executarEAguardar`): garante que nenhum job pesado roda em paralelo e devolve o relatório na própria resposta HTTP. Se a fila estiver ocupada com um job longo, a requisição espera. Arquivo que não abre como `.ass`/`.ssa` volta com `erroLeitura` (o motivo) e conta em `totalComErroLeitura`; a tela mostra **"Erro de leitura"** sempre visível (até 15/10/2026 ele saía como "OK", com uma fonte inventada `ERRO_LEITURA`, escondido atrás de "Mostrar OK"). As legendas em subpastas não são lidas, mas são contadas em `legendasEmSubpastas` (`-1` = não deu para conferir) e a tela avisa.
+- **Aplicar** roda **assíncrono na fila** (`submeter`): copia para `backups/troca_tipo_legenda_<timestamp>/` só os arquivos que vão mudar, grava, loga cada substituição no console via SSE e registra cada troca no cache de auditoria. Ao fim grava os relatórios `troca_fontes_<timestamp>.json` e `.md` em `relatorios/<nome da pasta>/`. Arquivo que não grava conta em `totalFalhas` (no JSON e na linha "Arquivos com falha" do MD), e o fim sai como **aviso**, nunca "[SUCESSO]"; o mesmo vale para o achatamento.
 - A execução respeita **parada cooperativa** (interrupção via encerramento/`/api/pipeline/parar`) — arquivos já gravados são preservados.
 
 ---

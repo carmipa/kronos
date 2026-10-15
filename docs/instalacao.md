@@ -34,7 +34,7 @@ cd traducao_animes_llm_local_quarkus
 
 - **FFmpeg/FFprobe**: baixe em [ffmpeg.org](https://ffmpeg.org/download.html) e garanta que `ffmpeg`/`ffprobe` estão no `PATH`, ou configure o caminho completo em `application.yml` (`extrator.ffmpeg-path` / `extrator.ffprobe-path`).
 - **MKVToolNix**: baixe em [mkvtoolnix.download](https://mkvtoolnix.download/) — no Windows, o app já procura automaticamente em `C:\Program Files\MKVToolNix\`.
-- **LM Studio**: baixe em [lmstudio.ai](https://lmstudio.ai/), carregue um modelo de sua preferência (recomendado: modelos instruct de 7B+ com boa capacidade multilíngue — ex. Mistral Nemo, Qwen2.5-Instruct, Gemma) e **inicie o servidor local** (padrão: `http://127.0.0.1:1234`).
+- **LM Studio**: baixe em [lmstudio.ai](https://lmstudio.ai/), carregue o modelo **aya-expanse-8b** (o titular do projeto, escolhido por medição contra o mistral-nemo; outro modelo instruct multilíngue de 7B+ também roda) e **inicie o servidor local** (padrão: `http://127.0.0.1:1234`).
 
 ### 3. Configurar (opcional)
 

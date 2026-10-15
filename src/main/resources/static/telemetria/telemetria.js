@@ -146,7 +146,7 @@ async function mostrarFatia(fatia) {
     for (const o of visiveis) {
         const tr = document.createElement('tr');
         for (const v of [o.tipo, o.detalhe, `${o.tempoTotalMs ?? 0} ms`,
-                         o.arquivosProcessados, o.itensDetectados, o.itensCorrigidos, o.registradoEm]) {
+                         o.arquivosProcessados, o.itensDetectados, o.itensCorrigidos, dataHoraLocal(o.registradoEm)]) {
             const td = document.createElement('td');
             td.textContent = v === null || v === undefined ? '' : String(v);
             tr.appendChild(td);
@@ -240,7 +240,7 @@ export function initTelemetria() {
     const campoBusca = document.getElementById('t-table-search');
     if (campoBusca) {
         campoBusca.addEventListener('input', () => {
-            termoBuscaTabela = campoBusca.value.trim().toLowerCase();
+            termoBuscaTabela = semAcento(campoBusca.value.trim());
             paginaAtualTabela = 1;
             renderizarTabelaHistorico();
         });
@@ -292,16 +292,36 @@ export function initTelemetria() {
             carregarDadosTelemetria();
         }
     }, 10000);
+
+    // O cartão do provedor era texto fixo ("Conectado", "Inferido localmente") e a latência
+    // mostrada era a da própria tela. Agora pergunta ao LM Studio, como o card do Início.
+    atualizarStatusLlm();
+    setInterval(() => {
+        const panel = document.getElementById('panel-telemetria');
+        if (panel && panel.classList.contains('active')) atualizarStatusLlm();
+    }, 15000);
 }
 
 let sseAtivo = false;
 
+/** O selo do stream mostra o estado real da conexão SSE (antes dizia "Stream ativo" sempre). */
+function definirSeloStream(ativo) {
+    const selo = document.getElementById('t-stream-status');
+    if (!selo) return;
+    selo.textContent = ativo ? 'Stream ativo' : 'Reconectando — atualiza a cada 10 s';
+    selo.classList.toggle('stream', ativo);
+}
+
 function iniciarStreamTelemetria() {
-    if (typeof EventSource === 'undefined') return;
+    if (typeof EventSource === 'undefined') {
+        definirSeloStream(false);
+        return;
+    }
     try {
         const stream = new EventSource('/api/telemetria/stream');
         stream.addEventListener('telemetria', (evento) => {
             sseAtivo = true;
+            definirSeloStream(true);
             const panel = document.getElementById('panel-telemetria');
             if (!panel || !panel.classList.contains('active')) return;
             try {
@@ -313,11 +333,66 @@ function iniciarStreamTelemetria() {
         stream.onerror = () => {
             // O navegador reconecta sozinho; enquanto isso o polling assume.
             sseAtivo = false;
+            definirSeloStream(false);
         };
     } catch (err) {
         console.error('Não foi possível abrir o stream SSE de telemetria:', err);
         sseAtivo = false;
+        definirSeloStream(false);
     }
+}
+
+/**
+ * PROPÓSITO DE NEGÓCIO: o cartão "Provedor" diz se o LM Studio está no ar, qual modelo está
+ * carregado e quanto a verificação levou — o mesmo /api/llm/status do card do Início.
+ *
+ * INVARIANTES DO DOMÍNIO: nada é afirmado sem a resposta: "Conectado" só com servidor no ar
+ * E modelo carregado; o tempo mostrado é o desta verificação, não o da tela.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: erro de rede vira "Status indisponível" e o selo
+ * "Desconectado"; nada é lançado.
+ */
+async function atualizarStatusLlm() {
+    const modeloEl = document.getElementById('t-modelo-ativo');
+    const statusEl = document.getElementById('t-llm-status');
+    const tempoEl = document.getElementById('t-latencia');
+    const definir = (modelo, status, cor, titulo) => {
+        if (modeloEl) { modeloEl.textContent = modelo; modeloEl.title = titulo || modelo; }
+        if (statusEl) {
+            statusEl.textContent = status;
+            statusEl.classList.remove('accent-green', 'accent-yellow', 'accent-red');
+            statusEl.classList.add(cor);
+        }
+    };
+    const inicio = performance.now();
+    try {
+        const res = await fetch('/api/llm/status');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const s = await res.json();
+        if (tempoEl) tempoEl.textContent = `${Math.round(performance.now() - inicio)} ms`;
+        if (s.online && s.modeloCarregado && s.modelo) {
+            definir(s.modelo, 'Conectado', 'accent-green');
+        } else if (s.online) {
+            definir('Nenhum modelo carregado', 'Sem modelo', 'accent-yellow', s.mensagem);
+        } else {
+            definir('LM Studio desconectado', 'Desconectado', 'accent-red', s.mensagem);
+        }
+    } catch (err) {
+        if (tempoEl) tempoEl.textContent = '-- ms';
+        definir('Status indisponível', 'Desconectado', 'accent-red', String(err && err.message ? err.message : err));
+    }
+}
+
+/** Instante gravado em UTC (ISO-8601) mostrado na hora do computador de quem usa (decisão de 05/07). */
+function dataHoraLocal(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? String(iso) : d.toLocaleString('pt-BR');
+}
+
+/** Minúsculas e sem acento: a busca acha "Tradução" digitando "traducao" e vice-versa. */
+function semAcento(texto) {
+    return String(texto ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }
 
 async function carregarDadosTelemetria() {
@@ -333,7 +408,7 @@ async function carregarDadosTelemetria() {
     } catch (err) {
         console.error('Erro ao atualizar telemetria:', err);
         if (tableBody && tableBody.children.length === 0) {
-            renderizarLinhaVazia(tableBody, 'Nao foi possivel carregar a telemetria agora.');
+            renderizarLinhaVazia(tableBody, 'Não foi possível carregar a telemetria agora.');
         }
     }
 }
@@ -347,7 +422,6 @@ function aplicarDadosTelemetria(data, latenciaMs) {
     const cacheRateVal = document.getElementById('t-cache-rate');
     const cacheStatusVal = document.getElementById('t-cache-status');
     const cacheMeterVal = document.getElementById('t-cache-meter');
-    const latenciaVal = document.getElementById('t-latencia');
     const cacheSavedVal = document.getElementById('t-cache-saved');
     const operacoesVal = document.getElementById('t-operacoes');
     const auditLineVal = document.getElementById('t-audit-line');
@@ -357,9 +431,13 @@ function aplicarDadosTelemetria(data, latenciaMs) {
 
     const totalLinhas = Number(data.totalLinhas ?? 0);
         const cacheHits = Number(data.totalCacheHits ?? 0);
-        const cacheRate = totalLinhas > 0 ? Math.min(100, (cacheHits / totalLinhas) * 100) : 0;
+        // Mesma unidade dos dois lados: textos distintos vindos do cache sobre textos distintos
+        // (cache + LLM). Antes dividia por falas traduzíveis COM repetição e subestimava o cache.
+        const funil = somarFunil(data.traducoesLlm);
+        const textosDistintos = funil.cache + funil.llm;
+        const cacheRate = textosDistintos > 0 ? Math.min(100, (funil.cache / textosDistintos) * 100) : 0;
         const historico = Array.isArray(data.historicoOperacoes) ? data.historicoOperacoes : [];
-        const statusCache = cacheRate >= 50 ? 'otimo' : cacheRate > 0 ? 'aquecendo' : 'estavel';
+        const statusCache = cacheRate >= 50 ? 'ótimo' : cacheRate > 0 ? 'aquecendo' : 'estável';
 
         // Atualiza os cards estatísticos
         if (episodiosVal) episodiosVal.textContent = formatarNumero(data.totalEpisodios ?? 0);
@@ -370,11 +448,9 @@ function aplicarDadosTelemetria(data, latenciaMs) {
         if (cacheRateVal) cacheRateVal.textContent = `${cacheRate.toFixed(1)}%`;
         if (cacheStatusVal) cacheStatusVal.textContent = statusCache;
         if (cacheMeterVal) cacheMeterVal.style.width = `${cacheRate}%`;
-        // No caminho SSE não há latência de request para medir.
-        if (latenciaVal && latenciaMs !== null && latenciaMs !== undefined) {
-            latenciaVal.textContent = `${latenciaMs} ms`;
-        }
-        if (cacheSavedVal) cacheSavedVal.textContent = `${formatarNumero(cacheHits)} chamadas`;
+        // A "Latência" do cartão do provedor é a do LM Studio (atualizarStatusLlm), não a desta tela.
+        // Mesma fonte da barra "Do cache" ao lado: no retrato cortado da vitrine o agregado diverge da lista.
+        if (cacheSavedVal) cacheSavedVal.textContent = `${formatarNumero(funil.cache)} chamadas`;
         if (operacoesVal) operacoesVal.textContent = formatarNumero(historico.length);
         if (errosVal) errosVal.textContent = formatarNumero(data.totalErros ?? 0);
         if (arquivosSanitizadosVal) arquivosSanitizadosVal.textContent = formatarNumero(data.arquivosSanitizados ?? 0);
@@ -383,8 +459,8 @@ function aplicarDadosTelemetria(data, latenciaMs) {
             chamadasLlmVal.textContent = formatarNumero(totalChamadasLlm);
         }
         if (auditLineVal) {
-            const hora = new Date().toLocaleTimeString('pt-BR', { timeZone: 'UTC' });
-            auditLineVal.textContent = `[${hora} UTC] ${formatarNumero(historico.length)} operacoes, ${formatarNumero(totalLinhas)} falas e ${cacheRate.toFixed(1)}% de cache registrados.`;
+            const hora = new Date().toLocaleTimeString('pt-BR');
+            auditLineVal.textContent = `[${hora}] ${formatarNumero(historico.length)} operações, ${formatarNumero(totalLinhas)} falas traduzíveis e ${cacheRate.toFixed(1)}% de cache registrados.`;
         }
 
         // Atualiza estatísticas detalhadas do hardware JVM
@@ -414,12 +490,22 @@ function aplicarDadosTelemetria(data, latenciaMs) {
         renderizarTabelaHistorico();
 }
 
+// Nomes gravados sem acento pelo backend: o histórico guarda o nome cru (filtro e chave não
+// mudam), a tela mostra com acento. "Analise de Midia" é a operação do LOTE; a linha por
+// arquivo já vem como "Análise de Mídia".
+const ROTULOS_SEM_ACENTO = [
+    [/^Analise de Midia$/, 'Análise de Mídia (lote)'],
+    [/\bExtracao\b/, 'Extração'],
+    [/\bRevisao\b/, 'Revisão'],
+    [/\bTraducao\b/, 'Tradução'],
+];
+
 function rotuloExibicaoOperacao(nome) {
     if (!nome) return 'Desconhecida';
     if (nome === NOME_OPERACAO_LORE || nome.includes('Revisao de Lore')) {
         return 'Revisão de Lore';
     }
-    return nome;
+    return ROTULOS_SEM_ACENTO.reduce((rotulo, [padrao, novo]) => rotulo.replace(padrao, novo), nome);
 }
 
 function renderizarRevisaoLore(resumo) {
@@ -481,7 +567,8 @@ function filtrarHistorico() {
             return false;
         }
         if (!termoBuscaTabela) return true;
-        const alvo = `${op.nomeOperacao ?? ''} ${op.detalheOperacao ?? ''}`.toLowerCase();
+        // O nome exibido (com acento) entra junto do cru: quem digita o que lê no chip acha.
+        const alvo = semAcento(`${rotuloExibicaoOperacao(op.nomeOperacao)} ${op.nomeOperacao ?? ''} ${op.detalheOperacao ?? ''}`);
         return alvo.includes(termoBuscaTabela);
     });
 }
@@ -573,20 +660,18 @@ function renderizarTabelaHistorico() {
     if (pagina.length === 0) {
         renderizarLinhaVazia(tableBody, historicoCompleto.length === 0
             ? 'Aguardando dados de processamento...'
-            : 'Nenhuma operacao corresponde a busca/filtro atual.');
+            : 'Nenhuma operação corresponde à busca ou ao filtro atual.');
     } else {
         pagina.forEach(op => {
             const row = document.createElement('tr');
             const origem = op.origem ?? 'SISTEMA';
             const cor = CORES_ORIGEM[origem] ?? CORES_ORIGEM.SISTEMA;
 
-            // registradoEm chega em UTC (ISO-8601); o Date converte para o
-            // fuso local do navegador na exibição.
+            // registradoEm chega em UTC (ISO-8601) e é mostrado na hora local do navegador:
+            // guardar em UTC, exibir local (decisão de 05/07; antes saía forçado em UTC).
             const tdData = document.createElement('td');
             tdData.className = 'op-datetime';
-            tdData.textContent = op.registradoEm
-                ? new Date(op.registradoEm).toLocaleString('pt-BR', { timeZone: 'UTC' }) + ' UTC'
-                : '-';
+            tdData.textContent = dataHoraLocal(op.registradoEm);
 
             const tdOperacao = document.createElement('td');
             tdOperacao.innerHTML = `<span class="op-name"><span class="chip-dot" style="background:${cor}"></span>${rotuloExibicaoOperacao(op.nomeOperacao)}</span>`;
@@ -602,8 +687,12 @@ function renderizarTabelaHistorico() {
             const tdDuracao = document.createElement('td');
             tdDuracao.innerHTML = `<span class="op-duration ${classeDuracao(op.duracaoMs)}">${op.duracaoFormatada || '-'}</span>`;
 
+            // "x de y", não percentual: a divisão inteira do backend mostrava "0%" para 91 de 24.441.
             const tdTaxa = document.createElement('td');
-            tdTaxa.textContent = op.taxaSucesso === null || op.taxaSucesso === undefined ? '-' : `${op.taxaSucesso}%`;
+            const detectados = Number(op.itensDetectados ?? 0);
+            tdTaxa.textContent = detectados > 0
+                ? `${formatarNumero(op.itensCorrigidos ?? 0)} de ${formatarNumero(detectados)}`
+                : (op.taxaSucesso === null || op.taxaSucesso === undefined ? '-' : `${op.taxaSucesso}%`);
 
             row.append(tdData, tdOperacao, tdOrigem, tdDetalhe, tdDuracao, tdTaxa);
             rotularCelulas(row, rotulos);
@@ -617,25 +706,39 @@ function renderizarTabelaHistorico() {
         const fimIntervalo = Math.min(inicio + ITENS_POR_PAGINA, totalFiltrado);
         const intervaloTexto = totalFiltrado === 0 ? '0-0' : `${inicio + 1}-${fimIntervalo}`;
         contadorTexto.textContent = totalFiltrado === total
-            ? `${formatarNumero(total)} operacoes registradas · exibindo ${intervaloTexto}`
-            : `${formatarNumero(totalFiltrado)} de ${formatarNumero(total)} operacoes · exibindo ${intervaloTexto}`;
+            ? `${formatarNumero(total)} operações registradas · exibindo ${intervaloTexto}`
+            : `${formatarNumero(totalFiltrado)} de ${formatarNumero(total)} operações · exibindo ${intervaloTexto}`;
     }
-    if (paginacaoInfo) paginacaoInfo.textContent = `Pagina ${paginaAtualTabela} de ${totalPaginas}`;
+    if (paginacaoInfo) paginacaoInfo.textContent = `Página ${paginaAtualTabela} de ${totalPaginas}`;
     if (btnAnterior) btnAnterior.disabled = paginaAtualTabela <= 1;
     if (btnProxima) btnProxima.disabled = paginaAtualTabela >= totalPaginas;
 }
 
-function renderizarGraficosTelemetria(data, totalLinhas, cacheHits, cpuVal, heapPercent) {
-    const brutas = Math.round(totalLinhas * 1.15) || 0;
-    const unicas = totalLinhas || 0;
-    const cache = cacheHits || 0;
-    const llm = Math.max(0, totalLinhas - cacheHits);
+/**
+ * PROPÓSITO DE NEGÓCIO: os números do funil — falas traduzíveis e quantos textos vieram do cache
+ * ou foram traduzidos pelo LLM —, todos da MESMA lista de traduções por episódio.
+ *
+ * INVARIANTES DO DOMÍNIO: nada estimado (a antiga barra "Brutas" era o total + 15%); as três
+ * barras saem da mesma população, então continuam coerentes quando a lista vem cortada (o retrato
+ * da vitrine). "Traduzíveis" conta falas com repetição; cache e LLM contam textos distintos.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: lista ausente ou campo nulo soma zero; nada é lançado.
+ */
+function somarFunil(traducoes) {
+    const lista = Array.isArray(traducoes) ? traducoes : [];
+    return lista.reduce((acc, t) => ({
+        traduziveis: acc.traduziveis + numeroSeguro(t.totalLinhas, 0),
+        cache: acc.cache + numeroSeguro(t.falasDoCache, 0),
+        llm: acc.llm + numeroSeguro(t.falasTraduzidas, 0),
+    }), { traduziveis: 0, cache: 0, llm: 0 });
+}
 
+function renderizarGraficosTelemetria(data, totalLinhas, cacheHits, cpuVal, heapPercent) {
+    const funil = somarFunil(data.traducoesLlm);
     renderizarFunil([
-        { label: 'Brutas', valor: brutas, cor: '#64748b' },
-        { label: 'Únicas', valor: unicas, cor: '#818cf8' },
-        { label: 'Cache', valor: cache, cor: '#2dd4bf' },
-        { label: 'LLM', valor: llm, cor: '#6366f1' }
+        { label: 'Traduzíveis', valor: funil.traduziveis, cor: '#818cf8' },
+        { label: 'Do cache', valor: funil.cache, cor: '#2dd4bf' },
+        { label: 'Pelo LLM', valor: funil.llm, cor: '#6366f1' }
     ]);
 
     const contagemModelos = {};
@@ -695,6 +798,9 @@ function renderizarDonut(contagemModelos) {
         return;
     }
 
+    // Do mais usado para o menos usado: antes o rótulo era o PRIMEIRO da ordem de inserção,
+    // não o modelo mais frequente, e as outras cores não tinham legenda.
+    entradas.sort((a, b) => b[1] - a[1]);
     const cores = ['#2dd4bf', '#818cf8', '#f59e0b', '#f43f5e', '#3b82f6'];
     const total = entradas.reduce((acc, [, valor]) => acc + valor, 0);
     let inicio = 0;
@@ -704,14 +810,24 @@ function renderizarDonut(contagemModelos) {
         inicio = fim;
         return trecho;
     }).join(', ');
-    const principal = entradas[0]?.[0] ?? 'LLM';
+    const legenda = entradas.slice(0, 5).map(([modelo, valor], idx) => `
+            <li style="display:flex;gap:.375rem;align-items:center;min-width:0;">
+                <span aria-hidden="true" style="flex:none;width:.5rem;height:.5rem;border-radius:50%;background:${cores[idx % cores.length]};"></span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escaparHtml(modelo)}">${escaparHtml(modelo)}</span>
+                <strong style="margin-left:auto;">${formatarNumero(valor)}</strong>
+            </li>`).join('');
+    const resto = entradas.length > 5 ? `<li style="color:var(--text-muted);">+${entradas.length - 5} modelo(s)</li>` : '';
 
     alvo.innerHTML = `
         <div class="telemetry-donut" style="width:92px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(${fatias});box-shadow:0 0 22px rgba(45,212,191,.12);">
-            <span style="position:relative;z-index:1;color:var(--text-primary);font-size:.9rem;font-weight:800;">${total}</span>
+            <span style="position:relative;z-index:1;color:var(--text-primary);font-size:.9rem;font-weight:800;">${formatarNumero(total)}</span>
         </div>
-        <div class="telemetry-donut-label" title="${principal}">${principal}</div>
+        <ul class="telemetry-donut-legenda" aria-label="Episódios por modelo">${legenda}${resto}</ul>
     `;
+}
+
+function escaparHtml(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function renderizarLinhasJvm(cpuHistory, heapHistory) {
