@@ -1981,6 +1981,47 @@ span.console-action-icon.material-symbols-outlined {
     }
 }
 
+/* ==========================================================================
+   ALVOS DE TOQUE — só com dedo (pointer: coarse); o mouse do computador não muda.
+   WCAG 2.5.8 exige 24 px; a regra 6-A recomenda 44 px. Medido a 390 px antes daqui: 15
+   controles abaixo de 24 px (caixa de seleção de 13 px, campo numérico de 19 px, busca de
+   15 px, links soltos de 15-17 px) e 142 entre 24 e 44 px. Regra no mecanismo, não por tela:
+   botão ou campo novo já nasce do tamanho certo.
+   ========================================================================== */
+@media (pointer: coarse) {
+    /* `!important` só neste piso: regra de componente com min-height menor e seletor mais forte
+       (ex.: #panel-telemetria .btn-compact = 2rem) venceria e reabriria o alvo pequeno. Não há
+       motivo legítimo para um alvo de dedo ficar abaixo disto. */
+    button,
+    select,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]),
+    #panel-sobre .net-chip {
+        min-height: 2.75rem !important;
+    }
+    /* botão só de ícone (bandeiras): a largura também conta */
+    .seletor-idioma-botao {
+        min-width: 2.75rem;
+    }
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    label:has(> input[type="checkbox"]),
+    label:has(> input[type="radio"]) {
+        min-height: 2.75rem;
+    }
+    /* links que estão sozinhos (não dentro de uma frase) */
+    .creator-link,
+    .repo-link,
+    #panel-sobre .sobre-handle a,
+    #panel-sobre .sobre-personal-item a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.5rem;
+    }
+}
+
 @media (max-width: 640px) {
     .anime-meta-banner {
         flex-direction: column;

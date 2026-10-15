@@ -54,11 +54,17 @@ export function inicializarGaveta() {
         conteudo.inert = true;
         const ativo = gaveta.querySelector('.nav-item.active');
         const alvo = ativo && ativo.offsetParent !== null ? ativo : (fecharDentro || gaveta.querySelector('.nav-item'));
-        // Medido no Chromium: na mesma tarefa em que a gaveta deixa de estar escondida, o focus()
-        // falha calado; depois de dois quadros ele pega (3 de 3).
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            if (estaAberta()) alvo?.focus();
-        }));
+        // Medido no Chromium: logo depois de a gaveta deixar de estar escondida o focus() falha
+        // calado, e o número de quadros até ele pegar variou (2 bastaram 3 de 3 num ensaio e
+        // faltaram noutro). Então tenta, confere se pegou e repete no quadro seguinte.
+        const focarQuandoPuder = (restam) => {
+            if (!estaAberta() || !alvo) return;
+            alvo.focus();
+            if (document.activeElement !== alvo && restam > 0) {
+                requestAnimationFrame(() => focarQuandoPuder(restam - 1));
+            }
+        };
+        requestAnimationFrame(() => focarQuandoPuder(10));
     };
 
     /** @param {'botao'|'titulo'|'nenhum'} destinoDoFoco para onde o foco vai depois de fechar */
