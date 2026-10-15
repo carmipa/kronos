@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.traducao.projeto.core.execucao.FilaExecucaoPipeline;
+import org.traducao.projeto.core.presentation.ui.AnsiCores;
 import org.traducao.projeto.core.util.DuracaoUtil;
 import org.traducao.projeto.core.presentation.web.LogStreamService;
 import org.traducao.projeto.trocaTipoLegenda.application.AchatarEstilosUseCase;
@@ -99,6 +100,15 @@ public class TrocaTipoLegendaController {
             long inicioMs = System.currentTimeMillis();
             try {
                 ResultadoTrocaFonte resultado = useCase.aplicar(diretorio, forcarArial);
+                if (resultado.totalFalhas() > 0) {
+                    // Arquivo que não gravou não pode sair com o banner verde de "concluída com
+                    // sucesso" logo abaixo do [ERRO] dele: quem opera lê só o fim.
+                    System.out.println(AnsiCores.YELLOW + "\n========================================================================" + AnsiCores.RESET);
+                    System.out.println(AnsiCores.YELLOW + "  [AVISO] TROCA DE FONTES TERMINOU COM " + resultado.totalFalhas()
+                        + " ARQUIVO(S) SEM GRAVAR" + AnsiCores.RESET);
+                    System.out.println(AnsiCores.YELLOW + "========================================================================" + AnsiCores.RESET);
+                    return;
+                }
                 System.out.println("\n[32m========================================================================[0m");
                 System.out.println("[32m  [SUCESSO] TROCA DE FONTES CONCLUÍDA COM SUCESSO![0m");
                 System.out.println("[32m========================================================================[0m");

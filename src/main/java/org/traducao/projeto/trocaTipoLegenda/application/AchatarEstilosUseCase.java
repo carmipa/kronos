@@ -13,12 +13,10 @@ import org.traducao.projeto.trocaTipoLegenda.domain.ports.ConsoleTrocaPort;
 import org.traducao.projeto.trocaTipoLegenda.domain.ports.LegendaIoPort;
 import org.traducao.projeto.trocaTipoLegenda.domain.ports.TelemetriaTrocaPort;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * PROPÓSITO DE NEGÓCIO: aplica em lote o "achatamento" de estilos decorativos numa
@@ -80,7 +78,8 @@ public class AchatarEstilosUseCase {
      * (arquivos alterados, falas achatadas) refletem apenas gravações concluídas.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: diretório inexistente lança exceção antes de
-     * qualquer escrita; falha por arquivo não impede os demais.
+     * qualquer escrita; falha por arquivo não impede os demais, entra em {@code totalFalhas}
+     * e faz o fim da operação sair como aviso, nunca como sucesso.
      */
     public ResultadoTrocaFonte aplicar(Path diretorio) {
         long inicioMs = System.currentTimeMillis();
@@ -89,11 +88,12 @@ public class AchatarEstilosUseCase {
         console.titulo("\n=== Iniciando Achatamento de Estilos Decorativos ===");
         console.info("Pasta alvo: " + diretorio.toAbsolutePath());
 
-        List<Path> arquivos = listarLegendas(diretorio);
+        List<Path> arquivos = LegendasDaPasta.listar(diretorio);
         if (arquivos.isEmpty()) {
-            console.aviso("[AVISO] Nenhum arquivo .ass/.ssa encontrado.");
+            console.aviso("[AVISO] Nenhum arquivo .ass/.ssa nesta pasta."
+                + TrocaTipoLegendaUseCase.avisoSubpastas(LegendasDaPasta.contarEmSubpastas(diretorio)));
             console.info(DuracaoUtil.linhaRelatorioFinal(OPERACAO, inicioMs));
-            return new ResultadoTrocaFonte(0, 0, 0, LocalDateTime.now().toString(), "N/A", null);
+            return new ResultadoTrocaFonte(0, 0, 0, LocalDateTime.now().toString(), "N/A", null, 0);
         }
 
         Path pastaBackup = backup.abrirSessao("achatar_estilos");
@@ -102,6 +102,7 @@ public class AchatarEstilosUseCase {
         int totalAlterados = 0;
         int totalFalas = 0;
         int totalSilabas = 0;
+        int totalFalhas = 0;
         for (Path arq : arquivos) {
             if (Thread.currentThread().isInterrupted()) {
                 console.aviso("[AVISO] Execução interrompida — arquivos já gravados foram preservados.");
@@ -129,19 +130,31 @@ public class AchatarEstilosUseCase {
                 console.sucesso("  [ACHATADO] " + arq.getFileName() + ": " + r.falasAchatadas()
                     + " fala(s); estilos " + r.estilosDecorativos() + " -> " + r.estiloBase() + silabas + ".");
             } catch (Exception e) {
+                totalFalhas++;
                 console.erro("  [ERRO] Falha ao achatar " + arq.getFileName() + ": " + e.getMessage());
                 log.error("Erro ao achatar estilos de {}", arq, e);
             }
         }
 
-        console.sucesso("\n========================================================================");
-        console.sucesso("  [SUCESSO] ACHATAMENTO DE ESTILOS DECORATIVOS FINALIZADO!");
+        // Com falha o fim é AVISO, não SUCESSO: o banner verde escondia os arquivos não gravados.
+        if (totalFalhas > 0) {
+            console.aviso("\n========================================================================");
+            console.aviso("  [AVISO] ACHATAMENTO TERMINOU COM " + totalFalhas + " ARQUIVO(S) SEM GRAVAR");
+        } else {
+            console.sucesso("\n========================================================================");
+            console.sucesso("  [SUCESSO] ACHATAMENTO DE ESTILOS DECORATIVOS FINALIZADO!");
+        }
         console.info("  • Arquivos analisados : " + arquivos.size());
         console.info("  • Arquivos alterados  : " + totalAlterados);
         console.info("  • Falas achatadas     : " + totalFalas);
         console.info("  • Sílabas descartadas : " + totalSilabas + " (camada de timing de karaokê)");
+        console.info("  • Arquivos com falha  : " + totalFalhas);
         console.info("  • Pasta de Backup     : " + pastaBackup);
-        console.sucesso("========================================================================");
+        if (totalFalhas > 0) {
+            console.aviso("========================================================================");
+        } else {
+            console.sucesso("========================================================================");
+        }
 
         long duracaoMs = System.currentTimeMillis() - inicioMs;
         telemetria.registrar(
@@ -154,7 +167,8 @@ public class AchatarEstilosUseCase {
         console.info(DuracaoUtil.linhaRelatorioFinal(OPERACAO, inicioMs));
 
         return new ResultadoTrocaFonte(
-            arquivos.size(), totalAlterados, totalFalas, LocalDateTime.now().toString(), pastaBackup.toString(), null);
+            arquivos.size(), totalAlterados, totalFalas, LocalDateTime.now().toString(), pastaBackup.toString(), null,
+            totalFalhas);
     }
 
     private void validarDiretorio(Path dir) {
@@ -163,21 +177,6 @@ public class AchatarEstilosUseCase {
         }
         if (!Files.isDirectory(dir)) {
             throw new TrocaTipoLegendaException("O caminho fornecido não é uma pasta existente: " + dir);
-        }
-    }
-
-    private List<Path> listarLegendas(Path dir) {
-        try (Stream<Path> stream = Files.list(dir)) {
-            return stream
-                .filter(Files::isRegularFile)
-                .filter(p -> {
-                    String nome = p.toString().toLowerCase();
-                    return nome.endsWith(".ass") || nome.endsWith(".ssa");
-                })
-                .sorted()
-                .toList();
-        } catch (IOException e) {
-            throw new TrocaTipoLegendaException("Falha ao listar arquivos de legenda na pasta: " + dir, e);
         }
     }
 

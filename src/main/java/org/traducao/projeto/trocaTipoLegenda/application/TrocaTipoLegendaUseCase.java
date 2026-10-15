@@ -32,7 +32,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 public class TrocaTipoLegendaUseCase {
@@ -120,14 +119,17 @@ public class TrocaTipoLegendaUseCase {
      * mesma regra única que reprova na 4.1 e no remux; só leitura.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: pasta inválida lança {@link TrocaTipoLegendaException};
-     * arquivo ilegível vira linha {@code ERRO_LEITURA} e o lote segue.
+     * arquivo ilegível vira linha com {@code erroLeitura} (o motivo, para a tela mostrar como erro,
+     * nunca como OK), entra em {@code totalComErroLeitura} e o lote segue. Legendas em subpastas não
+     * são lidas, mas são contadas para a tela avisar.
      */
     public ResultadoGeralAuditoria escanear(Path diretorio) {
         validarDiretorio(diretorio);
 
-        List<Path> arquivos = listarLegendas(diretorio);
+        List<Path> arquivos = LegendasDaPasta.listar(diretorio);
         List<AuditoriaLegendaResultado> resultados = new ArrayList<>();
         int totalComProblemas = 0;
+        int totalComErroLeitura = 0;
 
         for (Path arq : arquivos) {
             try {
@@ -144,20 +146,27 @@ public class TrocaTipoLegendaUseCase {
                     arq.getFileName().toString(),
                     tipoLegenda(arq),
                     fontes,
-                    temProblemas
+                    temProblemas,
+                    null
                 ));
             } catch (Exception e) {
                 log.warn("Erro ao auditar fontes do arquivo: " + arq.getFileName(), e);
+                totalComErroLeitura++;
+                String motivo = e.getMessage() == null || e.getMessage().isBlank()
+                    ? e.getClass().getSimpleName()
+                    : e.getMessage();
                 resultados.add(new AuditoriaLegendaResultado(
                     arq.getFileName().toString(),
                     tipoLegenda(arq),
-                    List.of(new AuditoriaFonteInfo("ERRO_LEITURA", "N/A", "N/A", false)),
-                    false
+                    List.of(),
+                    false,
+                    motivo
                 ));
             }
         }
 
-        return new ResultadoGeralAuditoria(resultados, arquivos.size(), totalComProblemas);
+        return new ResultadoGeralAuditoria(resultados, arquivos.size(), totalComProblemas,
+            totalComErroLeitura, LegendasDaPasta.contarEmSubpastas(diretorio));
     }
 
     public ResultadoTrocaFonte aplicar(Path diretorio) {
@@ -173,7 +182,9 @@ public class TrocaTipoLegendaUseCase {
      * Arial, e o {@code \fn} legado das falas também).
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: pasta inválida lança {@link TrocaTipoLegendaException}; erro
-     * num arquivo vira linha FALHA na auditoria e o lote segue; relatório que não grava vira aviso.
+     * num arquivo vira linha FALHA na auditoria, entra em {@code totalFalhas} e o lote segue — com
+     * falha, o fim da operação é anunciado como aviso, nunca como sucesso; relatório que não grava
+     * vira aviso.
      */
     public ResultadoTrocaFonte aplicar(Path diretorio, boolean forcarArial) {
         SessaoTroca sessao = new SessaoTroca();
@@ -188,10 +199,11 @@ public class TrocaTipoLegendaUseCase {
                 + AnsiCores.RESET);
         }
 
-        List<Path> arquivos = listarLegendas(diretorio);
+        List<Path> arquivos = LegendasDaPasta.listar(diretorio);
         if (arquivos.isEmpty()) {
-            sessao.out(AnsiCores.YELLOW + "[AVISO] Nenhum arquivo .ass/.ssa encontrado." + AnsiCores.RESET);
-            return new ResultadoTrocaFonte(0, 0, 0, LocalDateTime.now().toString(), "N/A", null);
+            sessao.out(AnsiCores.YELLOW + "[AVISO] Nenhum arquivo .ass/.ssa nesta pasta."
+                + avisoSubpastas(LegendasDaPasta.contarEmSubpastas(diretorio)) + AnsiCores.RESET);
+            return new ResultadoTrocaFonte(0, 0, 0, LocalDateTime.now().toString(), "N/A", null, 0);
         }
 
         // Criar pasta de backup automático
@@ -203,6 +215,7 @@ public class TrocaTipoLegendaUseCase {
 
         int totalAlterados = 0;
         int totalSubstituicoes = 0;
+        int totalFalhas = 0;
 
         for (Path arq : arquivos) {
             if (Thread.currentThread().isInterrupted()) {
@@ -282,6 +295,7 @@ public class TrocaTipoLegendaUseCase {
                     sessao.out(AnsiCores.GREEN + "  [SUCESSO] Arquivo " + arq.getFileName() + " atualizado!" + AnsiCores.RESET);
                 }
             } catch (Exception e) {
+                totalFalhas++;
                 sessao.out(AnsiCores.RED + "  [ERRO] Falha ao processar arquivo: " + arq.getFileName() + ". Erro: " + e.getMessage() + AnsiCores.RESET);
                 log.error("Erro no processamento do arquivo " + arq, e);
                 
@@ -299,14 +313,20 @@ public class TrocaTipoLegendaUseCase {
             }
         }
 
-        sessao.out(AnsiCores.GREEN + "\n========================================================================" + AnsiCores.RESET);
-        sessao.out(AnsiCores.GREEN + "  [SUCESSO] OPERAÇÃO DE SUBSTITUIÇÃO DE FONTES FINALIZADA!" + AnsiCores.RESET);
-        sessao.out(AnsiCores.GREEN + "========================================================================" + AnsiCores.RESET);
+        // Com falha o fim é AVISO: "[SUCESSO]" verde sobre arquivos que não foram gravados fazia quem
+        // opera concluir que a pasta inteira estava em Arial.
+        String cor = totalFalhas > 0 ? AnsiCores.YELLOW : AnsiCores.GREEN;
+        sessao.out(cor + "\n========================================================================" + AnsiCores.RESET);
+        sessao.out(cor + (totalFalhas > 0
+            ? "  [AVISO] SUBSTITUIÇÃO DE FONTES TERMINOU COM " + totalFalhas + " ARQUIVO(S) SEM GRAVAR"
+            : "  [SUCESSO] OPERAÇÃO DE SUBSTITUIÇÃO DE FONTES FINALIZADA!") + AnsiCores.RESET);
+        sessao.out(cor + "========================================================================" + AnsiCores.RESET);
         sessao.out("  • Arquivos analisados  : " + arquivos.size());
         sessao.out("  • Arquivos alterados   : " + totalAlterados);
         sessao.out("  • Substituições feitas : " + totalSubstituicoes);
+        sessao.out("  • Arquivos com falha   : " + totalFalhas);
         sessao.out("  • Pasta de Backup      : " + pastaBackup);
-        sessao.out(AnsiCores.GREEN + "========================================================================" + AnsiCores.RESET);
+        sessao.out(cor + "========================================================================" + AnsiCores.RESET);
 
         // Salvar relatórios JSON e Markdown
         Path pastaRelatorios = TelemetriaService.resolverPastaRelatorios(diretorio);
@@ -319,7 +339,8 @@ public class TrocaTipoLegendaUseCase {
             totalSubstituicoes,
             LocalDateTime.now().toString(),
             pastaBackup.toString(),
-            caminhoJson.toAbsolutePath().toString()
+            caminhoJson.toAbsolutePath().toString(),
+            totalFalhas
         );
 
         try {
@@ -362,15 +383,15 @@ public class TrocaTipoLegendaUseCase {
         }
     }
 
-    private List<Path> listarLegendas(Path dir) {
-        try (Stream<Path> stream = Files.list(dir)) {
-            return stream
-                .filter(p -> Files.isRegularFile(p))
-                .filter(p -> p.toString().toLowerCase().endsWith(".ass") || p.toString().toLowerCase().endsWith(".ssa"))
-                .toList();
-        } catch (IOException e) {
-            throw new TrocaTipoLegendaException("Falha ao listar arquivos de legenda na pasta: " + dir, e);
+    /** Complemento do aviso de pasta vazia: o que ficou nas subpastas, ou que não deu para conferir. */
+    static String avisoSubpastas(int legendasEmSubpastas) {
+        if (legendasEmSubpastas > 0) {
+            return " Há " + legendasEmSubpastas + " legenda(s) em subpastas, que esta ferramenta não lê: escolha a subpasta.";
         }
+        if (legendasEmSubpastas < 0) {
+            return " Não deu para conferir as subpastas.";
+        }
+        return "";
     }
 
     private String tipoLegenda(Path arquivo) {
@@ -394,7 +415,8 @@ public class TrocaTipoLegendaUseCase {
         sb.append("|---|---:|\n");
         sb.append("| Arquivos analisados | ").append(res.totalAnalisados()).append(" |\n");
         sb.append("| Arquivos alterados | ").append(res.totalAlterados()).append(" |\n");
-        sb.append("| Substituições aplicadas | ").append(res.totalSubstituicoes()).append(" |\n\n");
+        sb.append("| Substituições aplicadas | ").append(res.totalSubstituicoes()).append(" |\n");
+        sb.append("| Arquivos com falha | ").append(res.totalFalhas()).append(" |\n\n");
 
         sb.append("## Arquivos\n\n");
         sb.append("- Data/hora: `").append(res.dataHora()).append("`\n");
@@ -403,6 +425,10 @@ public class TrocaTipoLegendaUseCase {
         sb.append("- Auditoria granular: `").append(auditoriaCache.caminhoCanonico()).append("`\n\n");
 
         sb.append("## Resultado\n\n");
+        if (res.totalFalhas() > 0) {
+            sb.append("**").append(res.totalFalhas())
+                .append(" arquivo(s) não foram gravados** — o motivo de cada um está no console e na auditoria granular.\n\n");
+        }
         if (res.totalSubstituicoes() > 0) {
             sb.append("Fontes detectadas ou escolhidas manualmente foram substituídas por `Arial`. ");
             sb.append("Use o backup para reverter arquivos específicos, se necessário.\n");

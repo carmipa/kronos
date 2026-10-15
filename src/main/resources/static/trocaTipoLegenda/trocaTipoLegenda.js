@@ -1,6 +1,6 @@
 import { logNoConsole, mostrarAlerta } from '../js/app.js';
 
-const PAINEL_HTML = 'trocaTipoLegenda/trocaTipoLegenda.html?v=3.5';
+const PAINEL_HTML = 'trocaTipoLegenda/trocaTipoLegenda.html?v=3.6';
 
 function escapeHtml(texto) {
     return String(texto ?? '')
@@ -93,8 +93,16 @@ function vincularEventos() {
     const badgeTotal = document.getElementById('badge-total-arquivos');
     const badgeProblemas = document.getElementById('badge-arquivos-problemas');
     const btnToggleOk = document.getElementById('btn-toggle-arquivos-ok');
+    const avisoSubpastas = document.getElementById('aviso-subpastas-troca');
 
     if (!btnEscanear || !inputEntrada || !tabelaFontesCorpo) return;
+
+    /** Texto do que ficou nas subpastas (a 1.3 só lê a pasta escolhida); vazio quando não há nada. */
+    const textoSubpastas = (n) => {
+        if (n > 0) return `${n} legenda(s) em subpastas não entram nesta ferramenta: escolha a subpasta para tratá-las.`;
+        if (n < 0) return 'Não deu para conferir se há legendas nas subpastas.';
+        return '';
+    };
 
     let ultimoResultadoAuditoria = null;
     let mostrarArquivosOk = false;
@@ -103,20 +111,24 @@ function vincularEventos() {
         tabelaFontesCorpo.innerHTML = '';
 
         if (!data.arquivos || data.arquivos.length === 0) {
-            tabelaFontesCorpo.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Nenhum arquivo de legenda encontrado na pasta.</td></tr>`;
+            tabelaFontesCorpo.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Nenhum arquivo de legenda nesta pasta.</td></tr>`;
             if (btnToggleOk) btnToggleOk.classList.add('hidden');
             return;
         }
 
+        // Ilegível é um terceiro grupo, sempre visível: antes caía em "OK", escondido atrás de
+        // "Mostrar OK", e a tela dizia que nenhuma legenda precisava de alteração.
+        const comErro = (arq) => Boolean(arq.erroLeitura);
+        const arquivosComErro = data.arquivos.filter(comErro);
         const arquivosComProblemas = data.arquivos.filter(arq =>
-            (arq.fontes || []).some(fonteInfo => fonteInfo.problematica)
+            !comErro(arq) && (arq.fontes || []).some(fonteInfo => fonteInfo.problematica)
         );
         const arquivosOk = data.arquivos.filter(arq =>
-            !(arq.fontes || []).some(fonteInfo => fonteInfo.problematica)
+            !comErro(arq) && !(arq.fontes || []).some(fonteInfo => fonteInfo.problematica)
         );
         const arquivosVisiveis = mostrarArquivosOk
-            ? [...arquivosComProblemas, ...arquivosOk]
-            : arquivosComProblemas;
+            ? [...arquivosComErro, ...arquivosComProblemas, ...arquivosOk]
+            : [...arquivosComErro, ...arquivosComProblemas];
 
         if (btnToggleOk) {
             if (arquivosOk.length > 0) {
@@ -144,6 +156,20 @@ function vincularEventos() {
             const nomeArq = arq.arquivo;
             const nomeArqSeguro = escapeHtml(nomeArq);
             const tipoLegenda = escapeHtml(arq.tipoLegenda || 'ASS/SSA');
+            if (comErro(arq)) {
+                const trErro = document.createElement('tr');
+                trErro.className = 'linha-auditoria-problema';
+                trErro.innerHTML = `
+                    <td class="td-arquivo-legenda" title="${nomeArqSeguro}"><strong>${nomeArqSeguro}</strong></td>
+                    <td><span class="meta-badge">${tipoLegenda}</span></td>
+                    <td><strong style="color: var(--accent-red);">Erro de leitura</strong></td>
+                    <td><code>${escapeHtml(arq.erroLeitura)}</code></td>
+                    <td><span style="color: var(--accent-yellow);">Conferir o arquivo: não abriu como .ass/.ssa</span></td>
+                    <td><span style="color: var(--text-muted);">Fica de fora: nenhum botão altera este arquivo</span></td>
+                `;
+                tabelaFontesCorpo.appendChild(trErro);
+                return;
+            }
             const fontesProblematicas = (arq.fontes || []).filter(fonteInfo => fonteInfo.problematica);
             const fontesDoArquivo = (arq.fontes || []);
             const temProblema = fontesProblematicas.length > 0;
@@ -216,6 +242,10 @@ function vincularEventos() {
         if (btnToggleOk) {
             btnToggleOk.classList.add('hidden');
         }
+        if (avisoSubpastas) {
+            avisoSubpastas.classList.add('hidden');
+            avisoSubpastas.textContent = '';
+        }
         ultimoResultadoAuditoria = null;
         mostrarArquivosOk = false;
         tabelaFontesCorpo.innerHTML = '';
@@ -235,13 +265,21 @@ function vincularEventos() {
 
             // Exibir a área de resultados
             areaResultado.classList.remove('hidden');
+            const totalComErro = data.totalComErroLeitura || 0;
             badgeTotal.textContent = `${data.totalArquivosAnalisados} arquivos`;
-            badgeProblemas.textContent = `${data.totalComProblemas} com problemas`;
-            
-            if (data.totalComProblemas > 0) {
+            badgeProblemas.textContent = `${data.totalComProblemas} com problemas`
+                + (totalComErro > 0 ? ` · ${totalComErro} ilegível(is)` : '');
+
+            if (data.totalComProblemas > 0 || totalComErro > 0) {
                 badgeProblemas.className = 'meta-badge score'; // Destaca em vermelho/rosa
             } else {
                 badgeProblemas.className = 'meta-badge genre'; // Destaca em verde
+            }
+
+            const avisoDasSubpastas = textoSubpastas(data.legendasEmSubpastas ?? 0);
+            if (avisoSubpastas && avisoDasSubpastas) {
+                avisoSubpastas.textContent = avisoDasSubpastas;
+                avisoSubpastas.classList.remove('hidden');
             }
 
             ultimoResultadoAuditoria = data;
@@ -266,11 +304,23 @@ function vincularEventos() {
                 }
             }
 
-            if (temProblemas) {
+            if (totalComErro > 0) {
+                logNoConsole('console-troca-tipo-legenda', `${totalComErro} arquivo(s) não abriram como .ass/.ssa e ficam de fora; o motivo está na tabela.`, 'aviso');
+            }
+            if (avisoDasSubpastas) {
+                logNoConsole('console-troca-tipo-legenda', avisoDasSubpastas, 'aviso');
+            }
+            if (!temArquivos) {
+                cardCorrecao.classList.add('hidden');
+                logNoConsole('console-troca-tipo-legenda', 'Auditoria concluída: nenhuma legenda .ass/.ssa nesta pasta.', 'aviso');
+                mostrarAlerta('Nenhuma legenda nesta pasta.' + (avisoDasSubpastas ? ' ' + avisoDasSubpastas : ''), 'aviso');
+            } else if (temProblemas) {
                 logNoConsole('console-troca-tipo-legenda', `Auditoria concluída: ${data.totalComProblemas} de ${data.totalArquivosAnalisados} arquivos possuem fontes vietnamitas legadas de alto risco. Área de substituição liberada!`, 'aviso');
                 mostrarAlerta('Auditoria concluída! Fontes legadas problemáticas foram detectadas.', 'aviso');
+            } else if (totalComErro > 0) {
+                logNoConsole('console-troca-tipo-legenda', `Auditoria concluída: nenhuma fonte antiga nos arquivos lidos, mas ${totalComErro} não puderam ser lidos.`, 'aviso');
+                mostrarAlerta(`${totalComErro} arquivo(s) não puderam ser lidos — veja a tabela.`, 'aviso');
             } else {
-                if (!temArquivos) cardCorrecao.classList.add('hidden');
                 logNoConsole('console-troca-tipo-legenda', `Auditoria concluída: ${data.totalArquivosAnalisados} arquivo(s) analisado(s). Normalização manual para Arial disponível.`, 'sucesso');
                 mostrarAlerta('Auditoria concluída. Se quiser, você pode normalizar as fontes para Arial.', 'sucesso');
             }
@@ -287,10 +337,15 @@ function vincularEventos() {
             const caminho = inputEntrada.value.trim();
             if (!caminho) return;
             if (forcarArial) {
+                // O texto antigo dizia "somente o cabeçalho" e "não altera as falas": a operação também
+                // troca o \fn de fonte antiga dentro das falas e grava no próprio arquivo.
                 const ok = window.confirm(
-                    'Forçar Arial troca somente o Fontname dos estilos no cabeçalho ASS/SSA.\n\n'
-                    + 'Não achata estilos, não remove efeitos e não altera os textos/tempos das falas. '
-                    + 'Um backup será criado antes da gravação.\n\nContinuar?');
+                    'Forçar Arial GRAVA NO PRÓPRIO ARQUIVO cada .ass/.ssa desta pasta (as subpastas não entram).\n\n'
+                    + 'O Fontname de todos os estilos vira Arial e, nas falas e comentários, o \\fn de fonte '
+                    + 'vietnamita antiga vira \\fnArial. Não achata estilos, não remove efeitos e não muda o '
+                    + 'texto visível nem os tempos.\n\n'
+                    + 'Antes de gravar, cada arquivo alterado é copiado para backups/troca_tipo_legenda_<data>/.\n\n'
+                    + 'Continuar?');
                 if (!ok) return;
             }
 

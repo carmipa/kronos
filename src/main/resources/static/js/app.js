@@ -14,7 +14,7 @@ import { initRevisao } from '../revisao/revisao.js?v=3.5';
 import { initCura } from '../cura/cura.js?v=3.0';
 import { initRevisaoLore } from '../revisaoLore/revisaoLore.js?v=3.3';
 import { initRevisaoConcordancia } from '../revisaoConcordancia/revisaoConcordancia.js?v=1.1';
-import { initTrocaTipoLegenda } from '../trocaTipoLegenda/trocaTipoLegenda.js?v=3.1';
+import { initTrocaTipoLegenda } from '../trocaTipoLegenda/trocaTipoLegenda.js?v=3.2';
 import { initRemuxer } from '../remuxer/remuxer.js?v=3.4';
 import { montarOpcoesContextos } from './selectContextos.js';
 import { travarAteEscolherLore } from './travaLore.js';

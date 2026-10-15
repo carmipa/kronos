@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **514** |
-| classes em `src/test` | **485** |
+| classes em `src/main` | **515** |
+| classes em `src/test` | **486** |
 
 ---
 
@@ -35,7 +35,7 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 
 ```mermaid
 graph TB
-    G0["<b>Preparação</b><br/>analisadorMidia (21)<br/>legendasExtracao (25)<br/>trocaTipoLegenda (24)<br/>auditorConteudoLegendas (25)"]:::fatia
+    G0["<b>Preparação</b><br/>analisadorMidia (21)<br/>legendasExtracao (25)<br/>trocaTipoLegenda (25)<br/>auditorConteudoLegendas (25)"]:::fatia
     G1["<b>Tradução</b><br/>traducao (79)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
@@ -141,7 +141,7 @@ legendasExtracao/
     └── ExtratorCLI.java
 ```
 
-#### `trocaTipoLegenda` — 24 classes
+#### `trocaTipoLegenda` — 25 classes
 
 ```text
 trocaTipoLegenda/
@@ -149,6 +149,7 @@ trocaTipoLegenda/
 │   ├── AchatadorEstilosDecorativosService.java
 │   ├── AchatarEstilosUseCase.java
 │   ├── AuditoriaFontesService.java
+│   ├── LegendasDaPasta.java
 │   └── TrocaTipoLegendaUseCase.java
 ├── domain/
 │   ├── exceptions/
@@ -934,7 +935,7 @@ core/
 
 ---
 
-## Testes — 485 classes
+## Testes — 486 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1677,13 +1678,14 @@ traducaoKaraoke/
     └── TelemetriaKaraokeDatasetTest.java
 ```
 
-#### `trocaTipoLegenda` — 6 classes
+#### `trocaTipoLegenda` — 7 classes
 
 ```text
 trocaTipoLegenda/
 ├── application/
 │   ├── AchatadorDescartaSilabaKaraokeTest.java
 │   ├── AchatadorEstilosDecorativosServiceTest.java
+│   ├── AchatarEstilosUseCaseFalhaTest.java
 │   ├── AuditoriaFontesServiceTest.java
 │   └── TrocaTipoLegendaUseCaseTest.java
 ├── arquitetura/

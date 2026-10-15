@@ -77,7 +77,7 @@
     <!-- ABA 1: troca de fontes vietnamitas/ANSI — roda ANTES da tradução -->
     <section class="troca-aba-painel" id="painel-aba-fontes" role="tabpanel" aria-labelledby="aba-fontes">
         <span class="troca-momento antes">Antes da tradução</span>
-        <p class="card-desc">Varre pastas de legendas <strong>.ass/.ssa</strong> em busca de fontes vietnamitas ou ANSI legadas (como <code>.VnBook-Antiqua</code>, <code>.VnArial</code> e <code>.VnTimes</code>). Essas fontes legacy possuem mapas de caracteres incompatíveis com caracteres acentuados do Português (PT-BR), exibindo Mojibake ou acentos corrompidos no VLC e outros players (libass), mesmo que o arquivo de legenda esteja correto e salvo em UTF-8.</p>
+        <p class="card-desc">Varre a pasta escolhida (as subpastas não entram) atrás de legendas <strong>.ass/.ssa</strong> em busca de fontes vietnamitas ou ANSI legadas (como <code>.VnBook-Antiqua</code>, <code>.VnArial</code> e <code>.VnTimes</code>). Essas fontes legacy possuem mapas de caracteres incompatíveis com caracteres acentuados do Português (PT-BR), exibindo Mojibake ou acentos corrompidos no VLC e outros players (libass), mesmo que o arquivo de legenda esteja correto e salvo em UTF-8.</p>
         <p class="card-hint">Primeiro execute o escaneamento da pasta para auditar os arquivos. Se fontes problemáticas forem encontradas, a área de correção em lote será desbloqueada.</p>
 
         <div class="correcao-actions">
@@ -124,6 +124,7 @@
             <button data-tooltip="Inclui na tabela os arquivos sem fonte antiga (OK), ocultos por padrão; clique de novo para ocultar. Não altera nenhum arquivo." type="button" class="meta-badge hidden" id="btn-toggle-arquivos-ok">Mostrar OK</button>
         </div>
     </div>
+    <p id="aviso-subpastas-troca" class="modal-aviso hidden" role="status"></p>
 
     <div class="resultado-tabela-container">
         <table class="tabela-auditoria-fontes" id="tabela-fontes">
@@ -131,7 +132,7 @@
                 <tr>
                     <th data-tooltip="Nome da legenda lida na pasta escaneada (subpastas não entram). Clicar no título não ordena a tabela.">Arquivo</th>
                     <th data-tooltip="Formato pela extensão do arquivo: ASS estilizada ou SSA estilizada. Clicar no título não ordena a tabela.">Tipo</th>
-                    <th data-tooltip="Problema: há fonte vietnamita antiga num estilo ou num \fn das falas. OK: não há. Clicar no título não ordena a tabela.">Diagnóstico</th>
+                    <th data-tooltip="Problema: fonte vietnamita antiga num estilo ou \fn das falas. OK: não há. Erro de leitura: o arquivo não abriu; o motivo sai em Fonte(s).">Diagnóstico</th>
                     <th data-tooltip="Com problema: estilo: fonte antiga -&gt; Arial (\fn nas falas é fonte escrita dentro da fala). Sem problema: estilo e fonte atuais. Não ordena.">Fonte(s)</th>
                     <th data-tooltip="O que a ferramenta recomenda: Substituir por Arial quando há fonte antiga; senão nada é obrigatório, mas Forçar Arial segue disponível. Não ordena.">Ação Sugerida</th>
                     <th data-tooltip="Alterar se aplicar lote: muda em Aplicar Substituições. Operador decide: só muda se você usar Forçar Arial. Clicar no título não ordena.">Decisão</th>

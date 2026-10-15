@@ -283,6 +283,84 @@ class TrocaTipoLegendaUseCaseTest {
             "a 1.3 resolve o que a reprovacao cobra: " + FonteVietnamitaLegada.achadosNoAss(corrigido));
     }
 
+    /**
+     * Arquivo ilegível aparecia como "OK" (fonte inventada {@code ERRO_LEITURA}, sem problema) e
+     * ficava escondido atrás de "Mostrar OK". Fronteira: o legítimo ao lado continua sem erro.
+     */
+    @Test
+    void arquivoIlegivelViraErroDeLeituraComMotivoNuncaOk(@TempDir Path tempDir) throws IOException {
+        criarLegendaDeTeste(tempDir, "boa.ass", "Arial");
+        Files.writeString(tempDir.resolve("quebrada.ass"), "[Script Info]\nTitle: sem eventos\n", StandardCharsets.UTF_8);
+
+        ResultadoGeralAuditoria resultado = useCase.escanear(tempDir);
+
+        assertEquals(2, resultado.totalArquivosAnalisados());
+        assertEquals(1, resultado.totalComErroLeitura());
+        assertEquals(0, resultado.totalComProblemas(), "erro de leitura não é problema de fonte");
+        AuditoriaLegendaResultado quebrada = resultado.arquivos().stream()
+            .filter(a -> a.arquivo().equals("quebrada.ass")).findFirst().orElseThrow();
+        assertNotNull(quebrada.erroLeitura());
+        assertTrue(quebrada.erroLeitura().contains("[Events]"), quebrada.erroLeitura());
+        assertTrue(quebrada.fontes().isEmpty(), "nenhuma fonte inventada para o ilegível");
+        assertFalse(quebrada.temProblemas());
+        AuditoriaLegendaResultado boa = resultado.arquivos().stream()
+            .filter(a -> a.arquivo().equals("boa.ass")).findFirst().orElseThrow();
+        assertEquals(null, boa.erroLeitura(), "arquivo lido não carrega erro");
+        assertFalse(boa.fontes().isEmpty());
+    }
+
+    /** Legendas um nível abaixo sumiam sem aviso ("0 arquivos"); agora são contadas, não lidas. */
+    @Test
+    void legendasEmSubpastasSaoContadasENaoLidas(@TempDir Path tempDir) throws IOException {
+        criarLegendaDeTeste(tempDir, "raiz.ass", ".VnBook-Antiqua");
+        Path sub = Files.createDirectories(tempDir.resolve("temporada 1"));
+        criarLegendaDeTeste(sub, "e01.ass", ".VnBook-Antiqua");
+        criarLegendaDeTeste(sub, "e02.ssa", "Arial");
+        Files.writeString(sub.resolve("leia-me.txt"), "não é legenda", StandardCharsets.UTF_8);
+        Path neta = Files.createDirectories(sub.resolve("extras"));
+        criarLegendaDeTeste(neta, "op.ass", "Arial");
+
+        ResultadoGeralAuditoria resultado = useCase.escanear(tempDir);
+
+        assertEquals(1, resultado.totalArquivosAnalisados(), "só a pasta escolhida é lida");
+        assertEquals(3, resultado.legendasEmSubpastas(), "as três legendas abaixo são contadas, o .txt não");
+
+        ResultadoGeralAuditoria soSub = useCase.escanear(neta);
+        assertEquals(0, soSub.legendasEmSubpastas(), "pasta sem subpasta conta zero, não -1");
+    }
+
+    /** Arquivo que não grava entra em totalFalhas; antes o fim saía "[SUCESSO]" e o resumo não contava. */
+    @Test
+    void aplicarContaArquivoQueNaoGravaComoFalha(@TempDir Path tempDir) throws IOException {
+        criarLegendaDeTeste(tempDir, "legenda1.ass", ".VnBook-Antiqua");
+        Files.writeString(tempDir.resolve("quebrada.ass"), "[Script Info]\nTitle: sem eventos\n", StandardCharsets.UTF_8);
+
+        ResultadoTrocaFonte resultado = useCase.aplicar(tempDir);
+
+        assertEquals(2, resultado.totalAnalisados());
+        assertEquals(1, resultado.totalAlterados());
+        assertEquals(1, resultado.totalFalhas());
+        String markdown = Files.readString(Path.of(resultado.caminhoRelatorioJson().replace(".json", ".md")),
+            StandardCharsets.UTF_8);
+        assertTrue(markdown.contains("| Arquivos com falha | 1 |"), markdown);
+    }
+
+    @Test
+    void aplicarSemFalhaContaZero(@TempDir Path tempDir) throws IOException {
+        criarLegendaDeTeste(tempDir, "legenda1.ass", ".VnBook-Antiqua");
+
+        ResultadoTrocaFonte resultado = useCase.aplicar(tempDir);
+
+        assertEquals(0, resultado.totalFalhas());
+    }
+
+    @Test
+    void avisoDePastaVaziaDizOQueFicouNasSubpastas() {
+        assertTrue(TrocaTipoLegendaUseCase.avisoSubpastas(4).contains("4 legenda(s) em subpastas"));
+        assertTrue(TrocaTipoLegendaUseCase.avisoSubpastas(-1).contains("Não deu para conferir"));
+        assertEquals("", TrocaTipoLegendaUseCase.avisoSubpastas(0));
+    }
+
     private void criarLegendaDeTeste(Path pasta, String nome, String fonte) throws IOException {
         String cabecalho = "[Script Info]\n" +
             "Title: Test Legend\n" +
