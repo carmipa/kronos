@@ -13,8 +13,8 @@ dela, mas porque ninguém a lê no momento em que ela importa.
 Documentação não impõe nada. Um arquivo de instruções pode ser ignorado por qualquer agente que
 abra o projeto amanhã. **Um teste vermelho, não.**
 
-Daí a peça central da arquitetura do KRONOS: **47 guardas executáveis** (37 `Catraca*` + 10
-`Fronteira*`), 185 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
+Daí a peça central da arquitetura do KRONOS: **48 guardas executáveis** (38 `Catraca*` + 10
+`Fronteira*`), 189 testes — mais as [guardas da vitrine pública](#guardas-da-vitrine-pública) —, que não
 verificam comportamento — verificam que **um padrão perigoso não voltou**. Elas leem o
 código-fonte, a estrutura de pacotes ou o HTML, e **reprovam o build** ao encontrar a forma do
 bug.
@@ -55,7 +55,7 @@ graph TB
         A3["Homologar é decisão consciente:<br/>entra na lista, com justificativa"]
     end
 
-    subgraph B["🔒 Catraca*Test — 37 guardas, 124 testes"]
+    subgraph B["🔒 Catraca*Test — 38 guardas, 128 testes"]
         direction TB
         B1["Varre o FONTE atrás da<br/>forma de um defeito conhecido"]
         B2["Sem número congelado<br/>quando o invariante é universal"]
@@ -81,9 +81,9 @@ do código.
 
 ## O inventário completo
 
-Contado em **14/10/2026** nas anotações `@Test` de cada classe: **47 guardas · 185 testes**
-(37 `Catraca*Test` com 124, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
-**3.031 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
+Contado em **14/10/2026** nas anotações `@Test` de cada classe: **48 guardas · 189 testes**
+(38 `Catraca*Test` com 128, 10 `Fronteira*` com 61). A suíte completa da mesma data rodou
+**3.039 testes, 0 falhas, 70 pulados** (os pulados são medições condicionadas).
 
 ### Fronteiras — congelam *quem pode importar quem* (10 guardas, 61 testes)
 
@@ -112,7 +112,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaEscritaDeFalaVetaMusicaConcordanciaTest` | 3 | Idem na **3.3** |
 | `CatracaFerramentaDeAcervoVetaMusicaTest` | 2 | Idem nas **ferramentas que varrem o acervo** — o caminho que não passa por tela nenhuma, e que reescreveu 103 linhas de romaji antes desta existir |
 
-### Catracas de interface (12 guardas, 44 testes)
+### Catracas de interface (13 guardas, 48 testes)
 
 | Guarda | Testes | O que impede |
 |--------|-------:|--------------|
@@ -128,6 +128,7 @@ catraca é cega fora do próprio prefixo — foi por isso que precisaram ser qua
 | `CatracaTelaDestrutivaNasceEmDryRunTest` | 2 | Tela que reescreve o acervo abrir com "gravar" como padrão |
 | `CatracaI18nAutomaticaTest` | 6 | Script da tela trocar o `lang` do `<html>` — com o Google bloqueado, a página ficava em português declarando `en-US`, e o leitor de tela lia com a voz inglesa —, o aviso de falha do tradutor perder o inglês ou o espanhol, ícone e código saírem da lista protegida, o `element.js` virar síncrono ou nascer dicionário (`data-i18n=`). O comportamento no navegador é provado por `ferramentas/navegador/verificar-i18n.mjs` |
 | `CatracaPaginasDeErroTest` | 4 | Página de erro sem o código do catálogo ou editada à mão, tooltip apontando para nada, módulo de idioma em versão diferente da do painel, `/q/health` (que o KRONOS não tem) ou `/login` de volta, endereço externo fora do site do autor e do repositório, e o retorno automático aceitando outra origem — no kit de origem, `?from=//outro-site` levava a pessoa para fora do KRONOS |
+| `CatracaResponsividadeTest` | 4 | O que a responsividade de 14/10/2026 conquistou voltar atrás em silêncio: folha de estilo, script, fonte ou `@import` vindo de fora (sem rede, o ícone virava o nome do glifo e empurrava a tela), `width: 100vw`, `auto-fill`, o balão antigo `[data-tooltip]::after` (invisível, ainda ocupava largura e o celular encolhia o zoom), a gaveta do menu andando por `transform` (a dica canônica abriria fora da tela), dica no HTML vazia ou acima de 160 caracteres, e o painel sem a dica canônica ligada. O comportamento no navegador — estouro de 320 a 1366 px, gaveta, alvos de toque, posição de cada dica, varredura 6-A e axe — é provado por `ferramentas/navegador/verificar-responsividade.mjs` |
 
 ### Catracas de lore (6 guardas, 19 testes)
 
@@ -194,7 +195,7 @@ classes provam isso, e o portão as roda pelo filtro `org.traducao.projeto.*Vitr
 ### 1. Guarda nasce de prejuízo real, nunca de bug hipotético
 
 Guarda preventiva é cerimônia, e cerimônia é a primeira coisa abandonada na pressa. Cada uma das
-37 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
+38 catracas carrega, no próprio javadoc, o incidente que a originou. Exemplos verdadeiros:
 
 - `CatracaRegraDuplicadaEntreFatiasTest` — *"cópia não declarada foi a causa de três defeitos em
   03/08/2026, um deles vivo por nove dias."*

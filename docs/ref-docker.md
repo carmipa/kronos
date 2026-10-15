@@ -237,7 +237,8 @@ docker compose -f docker-compose.vitrine.yml up -d --build   # prova local em ht
 
 ### O que a tela recebe
 
-- **Real (só lê memória):** estáticos (`html js css webp png svg ico`),
+- **Real (só lê memória):** estáticos (`html js css webp png svg ico woff2` — o `woff2` desde que
+  fontes e ícones passaram a ser servidos pelo próprio KRONOS; `woff`, `ttf` e `otf` seguem recusados),
   `/api/status`, `/api/pipeline/status`, `/api/contextos`,
   `/api/revisao-lore/contextos` e `/api/docs/*` (as 28 páginas desta pasta).
 - **Demonstração** (`src/main/resources/vitrine/demonstracao/`): telemetria,

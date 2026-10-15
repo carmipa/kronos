@@ -14,12 +14,12 @@ O **KRONOS CORE** é uma plataforma monolítica modular construída sobre o **Qu
 > |---|---|---|
 > | fatias funcionais | **21** | 28 pacotes de topo sob `org.traducao.projeto`, menos 5 peers, `core` e `config` |
 > | peers | **5** | `legenda` · `cachetraducao` · `lore` · `qualidadeTraducao` · `llm` |
-> | classes / linhas em `src/main` | **514** / **79.455** | `find … -name '*.java'` |
-> | classes / linhas em `src/test` | **484** / **90.556** | idem — o teste já pesa mais que o código |
+> | classes / linhas em `src/main` | **514** / **79.459** | `find … -name '*.java'` |
+> | classes / linhas em `src/test` | **485** / **90.765** | idem — o teste já pesa mais que o código |
 > | rotas `/api` | **49** | 39 em **21** `@RestController` + 10 em **6** recursos JAX-RS (`@Path`) |
 > | lore | **70** arquivos SQL, um por obra: **69** do lado da tradução, **69** do lado da revisão; **68** na lista da UI | `sem_lore` só existe na tradução e é oculta (`aparece_na_lista = 0`); `macross_dyrl` só existe na revisão — ver `lore/esquema.sql` |
-> | guardas executáveis | **47** | 37 `Catraca*Test` + 10 `Fronteira*`, somando 185 testes — mais as 7 classes de guarda da vitrine |
-> | suíte completa | **3.031** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
+> | guardas executáveis | **48** | 38 `Catraca*Test` + 10 `Fronteira*`, somando 189 testes — mais as 7 classes de guarda da vitrine |
+> | suíte completa | **3.039** testes | `gradlew test --rerun-tasks`: 0 falhas, 70 pulados (medições condicionadas) |
 >
 > Divergência entre um número aqui e o código é bug de documentação, não licença poética.
 > O número anterior desta página (72 lores) vinha de contagem de classes Java; a lore virou
@@ -91,7 +91,9 @@ A aplicação roda **localmente** (`quarkus.http.host=127.0.0.1`) — não expõ
 - **Redis** do fluxo ao vivo de telemetria (`quarkus.redis.hosts`) — sem ele o card mostra "desconectado" e nada mais muda;
 - **push do dataset público** no GitHub (`telemetria-dataset.repositorio-remoto`), só quando o operador clica em "Publicar Dataset";
 - **tradução da tela** — ver [Idioma da interface](#idioma-da-interface-bandeiras), abaixo;
-- **fontes e ícones** (Outfit, JetBrains Mono, Material Symbols) carregados do Google Fonts a cada abertura da tela.
+- **foto e números do perfil do autor** na página Sobre, pedidos ao GitHub ao abrir a tela; sem rede ela mostra os valores fixos do HTML.
+
+Fontes e ícones **não** saem mais: desde 14/10/2026 o próprio KRONOS os serve (`static/fontes/`, licenças em `licencas/fontes/`). Antes vinham do Google Fonts, e sem rede cada ícone virava o nome do glifo escrito por extenso.
 
 ### Idioma da interface (bandeiras)
 
@@ -102,6 +104,16 @@ As três bandeiras no topo da barra lateral (Brasil, Estados Unidos, Espanha) tr
 - **O `<html lang>` fica em `pt-BR`.** Quem o troca, depois de traduzir, é o próprio Google. Até 14/10/2026 o script trocava antes: com o Google bloqueado, a página ficava em português declarando `en-US`, e o leitor de tela lia com a voz inglesa.
 - **Quando o Google não responde** (rede, bloqueador, captcha por limite de uso, ou dez segundos sem tradução), um aviso no rodapé diz o que aconteceu **no idioma pedido** e oferece tentar de novo, ficar em português e — só em endereço público `https` — abrir a página pelo Google Tradutor.
 - **Guardas:** `CatracaI18nAutomaticaTest` no build; no navegador, `ferramentas/navegador/verificar-i18n.mjs` (tradução real com uma única carga ao Google, Google bloqueado, captcha, Google mudo, ícones intactos e calibração contra o script anterior).
+
+### Tela no celular e dicas
+
+O painel serve do celular de 320 px ao computador. Medido em 14/10/2026: antes, os 19 painéis passavam da largura de 360 px e, até 992 px, o menu empilhava mais de 1.100 px antes do painel.
+
+- **Menu em gaveta até 992 px** (`js/gaveta.js`): uma barra fina no topo traz o botão Menu; o menu abre por cima do conteúdo, fecha ao escolher uma tela (o foco vai para o título do painel), com Esc, com o botão Fechar ou tocando fora, e o conteúdo atrás fica inerte. A gaveta anda por `left`, nunca por `transform` — `transform` num ancestral desloca a dica. Acima de 992 px o menu lateral é o de sempre.
+- **Nada passa da borda:** cabeçalho de console que quebra linha, margem lateral em `%`, grades com `minmax(0, 1fr)` e `auto-fit`, textos longos que quebram.
+- **Alvo de toque:** com o dedo (`pointer: coarse`), botão, seletor e campo têm 44 px de altura e nada fica abaixo de 24 px; o mouse do computador não muda.
+- **Dicas:** todo botão, campo, título e cabeçalho de coluna tem dica pelo componente canônico da regra de tooltip (`/dica/`, sem edição). O HTML continua escrevendo o texto em `data-tooltip`; `js/dicas.js` o converte na marcação acessível — abre no foco, no toque e no hover, fecha com Esc e é lida pelo leitor de tela —, dá a mesma dica aos controles repetidos (`registrarDicaPadrao`) e converte o que aparece depois. O balão antigo, só de CSS, saiu: não abria pelo teclado e, mesmo invisível, ocupava largura (o celular encolhia o zoom da página).
+- **Guardas:** `CatracaResponsividadeTest` no build; no navegador, `ferramentas/navegador/verificar-responsividade.mjs` (19 painéis de 320 a 1366 px: estouro, gaveta, alvos de toque, posição e Esc de cada dica, varredura de tooltip e axe WCAG 2.2 AA, cada detector calibrado com um defeito plantado).
 
 ### Páginas de erro
 
@@ -172,7 +184,7 @@ graph TB
         CFG["config<br/>bootstrap de modo"]
     end
 
-    GUARD["🚦 47 guardas executáveis<br/>10 Fronteira* + 37 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
+    GUARD["🚦 48 guardas executáveis<br/>10 Fronteira* + 38 Catraca*Test<br/>+ guardas da vitrine<br/><i>reprovam o BUILD ao cruzar a fronteira</i>"]
 
     FUNC -->|"importa — arestas congeladas por tipo exato"| PEERS
     FUNC --> BASE
