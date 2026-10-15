@@ -113,7 +113,7 @@ O painel serve do celular de 320 px ao computador. Medido em 14/10/2026: antes, 
 - **Nada passa da borda:** cabeçalho de console que quebra linha, margem lateral em `%`, grades com `minmax(0, 1fr)` e `auto-fit`, textos longos que quebram.
 - **Alvo de toque:** com o dedo (`pointer: coarse`), botão, seletor e campo têm 44 px de altura e nada fica abaixo de 24 px; o mouse do computador não muda.
 - **Dicas:** todo botão, campo, título e cabeçalho de coluna tem dica pelo componente canônico da regra de tooltip (`/dica/`, sem edição). O HTML continua escrevendo o texto em `data-tooltip`; `js/dicas.js` o converte na marcação acessível — abre no foco, no toque e no hover, fecha com Esc e é lida pelo leitor de tela —, dá a mesma dica aos controles repetidos (`registrarDicaPadrao`) e converte o que aparece depois. O balão antigo, só de CSS, saiu: não abria pelo teclado e, mesmo invisível, ocupava largura (o celular encolhia o zoom da página).
-- **Guardas:** `CatracaResponsividadeTest` no build; no navegador, `ferramentas/navegador/verificar-responsividade.mjs` (19 painéis de 320 a 1366 px: estouro, gaveta, alvos de toque, posição e Esc de cada dica, varredura de tooltip e axe WCAG 2.2 AA, cada detector calibrado com um defeito plantado).
+- **Guardas:** `CatracaResponsividadeTest` no build; no navegador, `ferramentas/navegador/verificar-responsividade.mjs` (19 painéis de 320 a 1366 px: estouro, gaveta, alvos de toque, posição e Esc de cada dica, varredura de tooltip e axe WCAG 2.2 AA, e a tabela que vira cartão no celular — o histórico da telemetria — com o nome da coluna em cada célula; cada detector calibrado com um defeito plantado).
 
 ### Páginas de erro
 

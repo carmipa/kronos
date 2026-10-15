@@ -15,6 +15,8 @@
  *  - toque (pointer: coarse): nenhum controle abaixo de 24 px; botão e campo com 44 px de altura;
  *  - dica: no foco ela aparece dentro da tela, colada ao controle, e o Esc a esconde sem tirar o foco;
  *  - varredura canônica da regra 6-A (dica-varredura.js, cópia sem edição) e axe WCAG 2.2 AA limpos;
+ *  - tabela que vira cartão no celular (thead escondido): cada célula mostra, em texto, o nome da
+ *    coluna do seu <th> — senão quem lê vê "22s" e "100%" sem saber de que coluna são;
  *  - cada detector é calibrado por injeção de um defeito conhecido no mesmo navegador: se não acusar,
  *    o roteiro não aprova nada (sai 2).
  *
@@ -157,6 +159,30 @@ const varreduraEaxe = (page) => page.evaluate(async (tags) => {
   return { v, axe: axeR.violations.map((x) => `${x.id} (${x.nodes.length}): ${x.nodes[0].target.join(' ')}`) };
 }, TAGS_AXE);
 
+/** Tabelas do painel ativo com o thead escondido: toda célula (sem colspan) tem um filho visível com o nome da coluna. */
+const tabelasSemRotulo = (page) => page.evaluate(() => {
+  const limpo = (el) => { const c = el.cloneNode(true); c.querySelectorAll('.dica, svg, .material-symbols-outlined').forEach((n) => n.remove()); return c.textContent.replace(/\s+/g, ' ').trim(); };
+  const visivel = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+  let total = 0;
+  const ruins = [];
+  for (const t of document.querySelectorAll('.panel.active table')) {
+    if (!t.tHead || getComputedStyle(t.tHead).display !== 'none') { continue; }
+    const ths = [...t.tHead.querySelectorAll('th')].map(limpo);
+    for (const tr of [...t.tBodies].flatMap((b) => [...b.rows])) {
+      [...tr.cells].forEach((td, i) => {
+        if (td.colSpan > 1 || !ths[i]) { return; }
+        total++;
+        if (![...td.children].some((c) => visivel(c) && c.textContent.trim() === ths[i])) { ruins.push(`linha ${tr.rowIndex}, coluna "${ths[i]}"`); }
+      });
+    }
+  }
+  return { total, ruins };
+});
+/** Espera as linhas das tabelas em cartão chegarem da API (até 5 s); painel sem essas tabelas passa direto. */
+const linhasDasTabelas = (page) => page.waitForFunction(() => [...document.querySelectorAll('.panel.active table')]
+  .filter((t) => t.tHead && getComputedStyle(t.tHead).display === 'none')
+  .every((t) => t.querySelector('tbody td:not([colspan])')), null, { timeout: 5000 }).catch(() => {});
+
 /* ---------- 1. estouro, alvos, dicas, varredura e axe por largura e painel ---------- */
 for (const [largura, toque] of LARGURAS) {
   const { ctx, page, erros } = await abrir(largura, toque);
@@ -164,11 +190,18 @@ for (const [largura, toque] of LARGURAS) {
   await page.addScriptTag({ content: VARREDURA });
   const lista = await paineis(page);
   const est = []; const alv = []; const dic = []; const varr = []; const ax = []; let nDicas = 0;
+  const rotSem = []; let nCelulas = 0;
   for (const alvo of lista) {
     await mostrar(page, alvo);
     const e = await estouro(page);
     if (e.sw > e.vw + 1) { est.push(`${alvo} (${e.sw} em ${e.vw})`); }
     if (largura === 390) { for (const x of await alvosPequenos(page)) { alv.push(`${alvo}: ${x}`); } }
+    if (largura === 390) {
+      await linhasDasTabelas(page);
+      const tr = await tabelasSemRotulo(page);
+      nCelulas += tr.total;
+      for (const x of tr.ruins) { rotSem.push(`${alvo}: ${x}`); }
+    }
     if (largura === 390 || largura === 1366) {
       const d = await dicasRuins(page);
       nDicas += d.total;
@@ -181,6 +214,10 @@ for (const [largura, toque] of LARGURAS) {
   const rot = `${largura}px${toque ? ' com toque' : ''}`;
   confere(est.length === 0, `1. ${rot}: nada passa da borda nos ${lista.length} painéis` + (est.length ? ' — ' + est.join(' | ') : ''));
   if (largura === 390) { confere(alv.length === 0, `2. ${rot}: alvos de toque (botão/campo 44 px, nada abaixo de 24)` + (alv.length ? ' — ' + alv.slice(0, 12).join(' | ') : '')); }
+  if (largura === 390) {
+    const linha = `8. ${rot}: tabela em cartão diz a coluna em cada célula (${nCelulas} células)` + (rotSem.length ? ` — ${rotSem.length}: ` + rotSem.slice(0, 8).join(' | ') : '');
+    if (nCelulas === 0) { naoVerificado.push(linha + ' — nenhuma linha de dados para conferir'); } else { confere(rotSem.length === 0, linha); }
+  }
   if (largura === 390 || largura === 1366) {
     confere(nDicas > 0 && dic.length === 0, `3. ${rot}: ${nDicas} dicas abrem no foco, dentro da tela, coladas, e o Esc fecha` + (dic.length ? ' — ' + dic.slice(0, 10).join(' | ') : ''));
     confere(varr.length === 0, `4. ${rot}: varredura da regra 6-A limpa` + (varr.length ? ` — ${varr.length}: ` + varr.slice(0, 10).join(' | ') : ''));
@@ -254,6 +291,11 @@ for (const [largura, toque] of LARGURAS) {
   await page.evaluate(() => { const p = document.querySelector('.panel.active'); const f = document.createElement('p'); f.textContent = 'contraste plantado'; f.style.cssText = 'color:#111;background:#000'; p.append(f); });
   const r2 = await varreduraEaxe(page);
   cal.push([r2.axe.some((x) => x.startsWith('color-contrast')), 'axe', 'texto #111 sobre #000']);
+  await mostrar(page, 'telemetria');
+  await linhasDasTabelas(page);
+  await page.evaluate(() => document.querySelectorAll('.panel.active td > .td-rotulo').forEach((n) => n.remove()));
+  const tr = await tabelasSemRotulo(page);
+  cal.push([tr.total > 0 && tr.ruins.length === tr.total, 'rótulo da tabela em cartão', `rótulos removidos (${tr.ruins.length} de ${tr.total} células acusadas)`]);
   for (const [acusou, nome, como] of cal) {
     (acusou ? ok : naoVerificado).push(`0. calibração do detector de ${nome}: ${acusou ? 'acusou' : 'NÃO acusou'} o defeito plantado (${como})`);
   }
