@@ -19,6 +19,7 @@ import { initRemuxer } from '../remuxer/remuxer.js?v=3.4';
 import { montarOpcoesContextos } from './selectContextos.js';
 import { travarAteEscolherLore } from './travaLore.js';
 import { inicializarGaveta } from './gaveta.js?v=1.0';
+import { inicializarDicas } from './dicas.js?v=1.0';
 import { initMapa } from '../mapa/mapa.js?v=5.0';
 import { initTelemetria } from '../telemetria/telemetria.js?v=3.1';
 import { initDocumentacao } from '../documentacao/documentacao.js?v=3.0';
@@ -144,6 +145,7 @@ document.addEventListener('traducao-karaoke:painel-carregado', () => {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
+    inicializarDicas();
     inicializarI18n();
     inicializarNavegacao();
     inicializarGruposMenu();
@@ -191,7 +193,8 @@ function abrirPainelDoEndereco() {
 function inicializarNavegacao() {
     const botoesMenu = document.querySelectorAll('.nav-item');
     const paineis = document.querySelectorAll('.panel');
-    const tituloPagina = document.getElementById('page-title');
+    // o texto mora num span: o h1 também guarda o "?" da dica, que textContent no h1 apagaria
+    const tituloPagina = document.getElementById('page-title-texto');
     const subtituloPagina = document.getElementById('page-subtitle');
 
     botoesMenu.forEach(botao => {
@@ -537,9 +540,8 @@ function ativarFaixaVitrine() {
     faixa.setAttribute('role', 'note');
     faixa.tabIndex = 0;
     faixa.setAttribute('data-tooltip',
-        'Vitrine: cada tela mostra como o KRONOS funciona. Executar, gravar e ler o acervo só acontece '
-        + 'na instalação local, na máquina de quem usa. Os números da Telemetria são um retrato '
-        + 'de 14/10/2026, não atualizam ao vivo.');
+        'Aqui as telas são só para conhecer: executar, gravar e ler o acervo só na instalação local. '
+        + 'A Telemetria mostra um retrato de 14/10/2026.');
 
     const icone = document.createElement('span');
     icone.className = 'material-symbols-outlined';

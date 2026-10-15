@@ -887,7 +887,8 @@
     #panel-telemetria .telemetry-actions {
         justify-content: stretch;
     }
-    #panel-telemetria .telemetry-actions .btn {
+    #panel-telemetria .telemetry-actions .btn,
+    #panel-telemetria .telemetry-actions > .dica {
         width: 100%;
     }
     #panel-telemetria .telemetry-metrics-grid {

@@ -10,7 +10,8 @@
  * INVARIANTES DO DOMÍNIO:
  *  - a gaveta só existe em tela estreita; ao alargar a janela com ela aberta, ela fecha e o
  *    conteúdo volta a responder (nada fica `inert` para sempre);
- *  - aberta, só ela recebe foco e toque: o conteúdo atrás fica `inert`;
+ *  - aberta, só ela recebe foco e toque: o conteúdo atrás fica `inert`; o foco de abertura é a
+ *    própria gaveta (focar um item abriria a dica dele e o primeiro Esc fecharia só a dica);
  *  - Esc com uma dica (tooltip) aberta dentro da gaveta fecha só a dica; o Esc seguinte fecha a
  *    gaveta (a dica tem de poder ser dispensada sem mover o foco);
  *  - a gaveta se move por `left`, nunca por `transform`: `transform` num ancestral muda a
@@ -52,8 +53,9 @@ export function inicializarGaveta() {
         document.body.classList.add('gaveta-aberta');
         botao.setAttribute('aria-expanded', 'true');
         conteudo.inert = true;
-        const ativo = gaveta.querySelector('.nav-item.active');
-        const alvo = ativo && ativo.offsetParent !== null ? ativo : (fecharDentro || gaveta.querySelector('.nav-item'));
+        // O foco vai para a própria gaveta (contêiner), não para um item: focar um item abriria a
+        // dica dele na hora, e o primeiro Esc fecharia só a dica. Daqui o Tab segue para os itens.
+        const alvo = gaveta;
         // Medido no Chromium: logo depois de a gaveta deixar de estar escondida o focus() falha
         // calado, e o número de quadros até ele pegar variou (2 bastaram 3 de 3 num ensaio e
         // faltaram noutro). Então tenta, confere se pegou e repete no quadro seguinte.
