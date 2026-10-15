@@ -1,17 +1,17 @@
 <!-- Card 1 — Entrada: caminhos dos arquivos original e traduzido -->
 <div class="glass-card">
-    <h2 class="auditor-card-titulo"><span class="material-symbols-outlined auditor-titulo-icone">fact_check</span>Análise de Conteúdo de Legendas</h2>
+    <h2 data-tooltip="Audita uma legenda .ass, .ssa ou .srt, ou o par original e traduzido. Só lê: a legenda não muda; o relatório JSON fica salvo em relatorios/." class="auditor-card-titulo"><span class="material-symbols-outlined auditor-titulo-icone">fact_check</span>Análise de Conteúdo de Legendas</h2>
     <p class="card-desc">Auditoria profunda de arquivos de legenda para encontrar alucinações de IA, efeitos visuais vazados e formatação quebrada.</p>
 
     <!-- Abas de modo: Ambas (comparativa) · Só Original (EN) · Só Traduzida (PT-BR) -->
     <div class="auditor-modo-tabs" role="tablist" aria-label="Modo de análise">
-        <button type="button" class="auditor-modo-tab ativo" role="tab" aria-selected="true" data-modo="AMBAS">
+        <button data-tooltip="Compara o inglês com o PT-BR e acusa o que mudou: fala perdida ou inventada, quebra alucinada, karaokê ou efeito danificado. Pede os dois arquivos." type="button" class="auditor-modo-tab ativo" role="tab" aria-selected="true" data-modo="AMBAS">
             <span class="material-symbols-outlined">compare_arrows</span>Ambas (comparar)
         </button>
-        <button type="button" class="auditor-modo-tab" role="tab" aria-selected="false" data-modo="ORIGINAL">
+        <button data-tooltip="Audita só a legenda em inglês: tags não fechadas, tempos inválidos ou sobrepostos, falas vazias, quebras demais. Não compara com a tradução." type="button" class="auditor-modo-tab" role="tab" aria-selected="false" data-modo="ORIGINAL">
             <span class="material-symbols-outlined">description</span>Só Original (EN)
         </button>
-        <button type="button" class="auditor-modo-tab" role="tab" aria-selected="false" data-modo="TRADUZIDO">
+        <button data-tooltip="Audita só a legenda em português: tags não fechadas, tempos inválidos ou sobrepostos, falas vazias, quebras demais. Não compara com o original." type="button" class="auditor-modo-tab" role="tab" aria-selected="false" data-modo="TRADUZIDO">
             <span class="material-symbols-outlined">translate</span>Só Traduzida (PT-BR)
         </button>
     </div>
@@ -56,7 +56,7 @@
     <div class="glass-card op-caixa">
         <div class="op-caixa-cabecalho">
             <span class="material-symbols-outlined op-caixa-icone">content_paste_search</span>
-            <h3>O que a análise procura</h3>
+            <h3 data-tooltip="Explica o que cada modo acha e o que não acha, e qual tela conserta cada defeito (2.3, 4.2 ou 4.3). Esta tela só diagnostica.">O que a análise procura</h3>
             <span class="op-caixa-etiqueta">somente leitura</span>
         </div>
         <p class="op-caixa-desc">Auditoria profunda do arquivo de legenda: alucinação do modelo, efeito visual vazado para o texto e formatação quebrada. <strong>Nunca altera arquivo nenhum</strong> — é 100% leitura.</p>
@@ -92,13 +92,13 @@
 <!-- Card 2 — Relatório de Anomalias: resumo, filtros por severidade e lista de cards -->
 <div class="glass-card auditor-relatorio-card">
     <div class="console-header">
-        <h3 class="auditor-relatorio-titulo">Relatório de Anomalias</h3>
+        <h3 data-tooltip="Resultado da auditoria: anomalias por severidade, com filtro e três visões (cards, tabela comparativa, gráfico). Exporta em .md ou JSON." class="auditor-relatorio-titulo">Relatório de Anomalias</h3>
         <div class="console-actions auditor-export-actions">
-            <button type="button" class="btn btn-secondary btn-exportar-auditor" id="btn-exportar-auditor-md" data-tooltip="Exporta o relatório em Markdown (.md) — formato didático para revisão">
+            <button type="button" class="btn btn-secondary btn-exportar-auditor" id="btn-exportar-auditor-md" aria-label="Exportar .md" data-tooltip="Exporta o relatório em Markdown (.md) — formato didático para revisão">
                 <span class="material-symbols-outlined btn-icon">download</span>
                 <span>Exportar .md</span>
             </button>
-            <button type="button" class="btn btn-secondary btn-exportar-auditor" id="btn-exportar-auditor-json" data-tooltip="Exporta o relatório em JSON (formato técnico)">
+            <button type="button" class="btn btn-secondary btn-exportar-auditor" id="btn-exportar-auditor-json" aria-label="Exportar JSON" data-tooltip="Exporta o relatório em JSON (formato técnico)">
                 <span class="material-symbols-outlined btn-icon">data_object</span>
                 <span>Exportar JSON</span>
             </button>
@@ -184,7 +184,7 @@
 <!-- Card 3 — Logs da Auditoria: console dark com ações -->
 <div class="glass-card console-card">
     <div class="console-header">
-        <h3>Logs da Auditoria</h3>
+        <h3 data-tooltip="Mostra o modo, os formatos detectados, cada anomalia com a severidade, o caminho do relatório JSON salvo e o tempo total. Some da tela ao recarregar.">Logs da Auditoria</h3>
         <div class="console-actions">
             <button class="btn-toggle-console" data-target="console-auditor-conteudo" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
             <button class="btn-copy-console" data-target="console-auditor-conteudo" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>

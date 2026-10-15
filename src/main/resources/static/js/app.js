@@ -6,30 +6,30 @@
 
 import { initAnalise } from '../analise/analise.js?v=4.0';
 import { initExtracao } from '../extracao/extracao.js?v=3.0';
-import { initAuditorConteudo } from '../auditorConteudoLegendas/auditorConteudoLegendas.js?v=4.0';
+import { initAuditorConteudo } from '../auditorConteudoLegendas/auditorConteudoLegendas.js?v=4.1';
 import { initTraducao } from '../traducao/traducao.js?v=3.2';
 import { initTraducaoSemLore } from '../traducaoSemLore/traducaoSemLore.js?v=1.0';
 import { initCorrecao } from '../correcao/correcao.js?v=3.1';
 import { initRevisao } from '../revisao/revisao.js?v=3.5';
 import { initCura } from '../cura/cura.js?v=3.0';
-import { initRevisaoLore } from '../revisaoLore/revisaoLore.js?v=3.2';
-import { initRevisaoConcordancia } from '../revisaoConcordancia/revisaoConcordancia.js?v=1.0';
-import { initTrocaTipoLegenda } from '../trocaTipoLegenda/trocaTipoLegenda.js?v=3.0';
+import { initRevisaoLore } from '../revisaoLore/revisaoLore.js?v=3.3';
+import { initRevisaoConcordancia } from '../revisaoConcordancia/revisaoConcordancia.js?v=1.1';
+import { initTrocaTipoLegenda } from '../trocaTipoLegenda/trocaTipoLegenda.js?v=3.1';
 import { initRemuxer } from '../remuxer/remuxer.js?v=3.4';
 import { montarOpcoesContextos } from './selectContextos.js';
 import { travarAteEscolherLore } from './travaLore.js';
-import { inicializarGaveta } from './gaveta.js?v=1.0';
-import { inicializarDicas } from './dicas.js?v=1.0';
+import { inicializarGaveta } from './gaveta.js?v=1.1';
+import { inicializarDicas, registrarDicaPadrao, rotuloDe } from './dicas.js?v=1.1';
 import { initMapa } from '../mapa/mapa.js?v=5.0';
-import { initTelemetria } from '../telemetria/telemetria.js?v=3.1';
+import { initTelemetria } from '../telemetria/telemetria.js?v=3.2';
 import { initDocumentacao } from '../documentacao/documentacao.js?v=3.0';
-import { initSobre } from '../sobre/sobre.js?v=3.0';
-import { initRenomearArquivos } from '../renomearArquivos/renomearArquivos.js?v=3.0';
+import { initSobre } from '../sobre/sobre.js?v=3.1';
+import { initRenomearArquivos } from '../renomearArquivos/renomearArquivos.js?v=3.1';
 // 4.3 Karaokê Simples foi ABSORVIDO pela tela única 4.1 Karaokê em 21/09/2026: o achatamento virou
 // o Passo 2 da mesma tela (chama /api/novo-karaoke/* direto). O backend do achatador continua vivo;
 // só o módulo/tela frontend próprio deixou de existir. Ver traducaoKaraoke.js.
-import { initTraducaoKaraoke } from '../traducaoKaraoke/traducaoKaraoke.js?v=1.4';
-import { initInicio } from '../inicio/inicio.js?v=1.0';
+import { initTraducaoKaraoke } from '../traducaoKaraoke/traducaoKaraoke.js?v=1.5';
+import { initInicio } from '../inicio/inicio.js?v=1.1';
 import { inicializarI18n } from '../i18n/i18n.js?v=2.2';
 
 // Definições de Títulos e Subtítulos por seção do menu
@@ -145,6 +145,7 @@ document.addEventListener('traducao-karaoke:painel-carregado', () => {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
+    registrarDicasRecorrentes();
     inicializarDicas();
     inicializarI18n();
     inicializarNavegacao();
@@ -164,6 +165,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     abrirPainelDoEndereco();
     window.addEventListener('hashchange', abrirPainelDoEndereco);
 });
+
+/**
+ * PROPÓSITO DE NEGÓCIO: dá dica (regra 6-A) aos controles que se repetem em várias telas ou que o
+ * JS cria em lote, com um texto só para cada tipo — o "Procurar..." de cada formulário, o "Limpar"
+ * de cada console, as bandeiras, os grupos do menu e as páginas da Documentação.
+ *
+ * INVARIANTES DO DOMÍNIO: dica própria escrita no HTML vence a padrão; o texto diz o que o
+ * controle faz de fato (Procurar escolhe pasta ou arquivo conforme o data-type do botão; Limpar só
+ * esvazia o console na tela).
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: seletor sem elemento na página não faz nada; elementos que
+ * aparecerem depois (painel carregado por fetch) recebem a dica quando entrarem.
+ */
+function registrarDicasRecorrentes() {
+    registrarDicaPadrao('.btn-procurar', (b) => (b.getAttribute('data-type') === 'arquivo'
+        ? 'Abre o seletor de arquivos desta máquina e põe o arquivo escolhido no campo ao lado.'
+        : 'Abre o seletor de pastas desta máquina e põe a pasta escolhida no campo ao lado.'));
+    registrarDicaPadrao('.btn-clear-console',
+        'Apaga as linhas mostradas neste console; o trabalho em execução e os arquivos não mudam.');
+    const idiomas = {
+        'pt-BR': 'Mostra a interface em português do Brasil, o idioma original das telas.',
+        'en-US': 'Traduz a interface para o inglês com o Google Tradutor.',
+        'es-ES': 'Traduz a interface para o espanhol com o Google Tradutor.'
+    };
+    registrarDicaPadrao('.seletor-idioma-botao', (b) => idiomas[b.getAttribute('data-idioma')] || '');
+    registrarDicaPadrao('.nav-group-header', (b) =>
+        `Abre ou fecha o grupo ${rotuloDe(b)} do menu; o menu lembra a escolha neste navegador.`);
+    registrarDicaPadrao('.doc-nav-item', (b) => `Abre a página "${rotuloDe(b)}" da documentação neste painel.`);
+}
 
 /**
  * PROPÓSITO DE NEGÓCIO: abre o painel nomeado no endereço (ex.: /#telemetria). É o que faz o

@@ -1,4 +1,4 @@
-const PAINEL_HTML = 'sobre/sobre.html?v=3.0';
+const PAINEL_HTML = 'sobre/sobre.html?v=3.1';
 const GITHUB_USER = 'carmipa';
 const GITHUB_REPO = 'carmipa/traducao_animes_llm_local_quarkus';
 

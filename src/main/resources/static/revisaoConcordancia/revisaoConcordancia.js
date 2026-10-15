@@ -11,7 +11,7 @@ import { ligarCartaoAlvoAtivo } from '../js/cartaoAlvoAtivo.js?v=1.1';
 // A versão sobe a cada mudança no HTML do painel (1.1 = seletor de obra; 1.2 = cartão do alvo
 // ativo e a caixa "o que acontece"): o painel é buscado por fetch, e sem trocar a query o
 // navegador serve o HTML antigo do cache — as partes novas simplesmente não apareceriam.
-const PAINEL_HTML = 'revisaoConcordancia/revisaoConcordancia.html?v=1.4';
+const PAINEL_HTML = 'revisaoConcordancia/revisaoConcordancia.html?v=1.5';
 
 async function carregarPainelHtml() {
     const painel = document.getElementById('panel-revisao-concordancia');

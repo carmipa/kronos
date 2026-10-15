@@ -92,6 +92,7 @@ async function carregarFatias(selecionar) {
         b.className = 'fatia-aba' + (f.fatia === alvo ? ' ativo' : '');
         b.setAttribute('role', 'tab');
         b.setAttribute('aria-selected', String(f.fatia === alvo));
+        b.dataset.tooltip = `Mostra as operações da fatia ${f.fatia}; o número é quantas ela tem registradas.`;
         b.innerHTML = '<span></span><span class="fatia-contagem"></span>';
         b.firstElementChild.textContent = f.fatia;
         b.lastElementChild.textContent = (f.total || 0).toLocaleString('pt-BR');
@@ -126,8 +127,16 @@ async function mostrarFatia(fatia) {
 
     const tabela = document.createElement('table');
     tabela.className = 'tabela-fatia';
-    tabela.innerHTML = '<thead><tr><th>Tipo</th><th>Detalhe</th><th>Tempo</th>'
-        + '<th>Arquivos</th><th>Detectados</th><th>Corrigidos</th><th>Quando</th></tr></thead>';
+    // data-tooltip: js/dicas.js põe o "?" canônico em cada cabeçalho (regra 6-A)
+    tabela.innerHTML = '<thead><tr>'
+        + '<th data-tooltip="Que tipo de operação a fatia registrou.">Tipo</th>'
+        + '<th data-tooltip="Descrição curta da operação, como veio no registro de telemetria.">Detalhe</th>'
+        + '<th data-tooltip="Duração total da operação, em milissegundos.">Tempo</th>'
+        + '<th data-tooltip="Quantos arquivos a operação processou.">Arquivos</th>'
+        + '<th data-tooltip="Quantos itens a operação encontrou para tratar; o que conta como item depende da fatia.">Detectados</th>'
+        + '<th data-tooltip="Quantos dos itens encontrados a operação de fato corrigiu.">Corrigidos</th>'
+        + '<th data-tooltip="Data e hora em que a operação foi registrada.">Quando</th>'
+        + '</tr></thead>';
     const corpo = document.createElement('tbody');
     // Mais recentes primeiro, e teto de 300 linhas: a fatia de auditoria tem
     // 2.930 operações e renderizar tudo trava a aba sem entregar nada a mais.
@@ -507,6 +516,9 @@ function criarChip(valor, label, contagem, cor) {
     btn.type = 'button';
     btn.className = 'filter-chip' + (filtroOperacaoAtivo === valor ? ' active' : '');
     btn.dataset.filtro = valor;
+    btn.dataset.tooltip = valor === 'todas'
+        ? 'Mostra todas as operações do histórico; o número é o total.'
+        : `Mostra só as operações "${label}" no histórico; o número é quantas há.`;
     btn.innerHTML = `
         <span class="chip-dot" style="background:${cor}"></span>
         <span class="chip-label">${label}</span>

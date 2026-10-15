@@ -149,6 +149,11 @@
     overflow: hidden;
 }
 
+#panel-inicio .pipeline-card:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 3px;
+}
+
 #panel-inicio .pipeline-card:hover {
     border-color: var(--border-active);
     background-color: rgba(255, 255, 255, 0.015);
@@ -176,7 +181,11 @@
     transform: scale(1.1);
 }
 
-#panel-inicio .pipeline-card h4 {
+/* Título do cartão: era <h4>; o cartão virou botão (role="button") e título dentro de botão perde
+   o papel de título para o leitor de tela — virou span com a mesma aparência. */
+#panel-inicio .pipeline-card .card-titulo {
+    display: block;
+    font-family: var(--font-title);
     font-size: 0.95rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
@@ -357,7 +366,8 @@
     align-items: center;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    /* sem backdrop-filter: ele vira a referência do position:fixed e a dica do título abria fora do
+       lugar; atrás do banner o próprio fundo já é 85-95% opaco, o desfoque não aparecia */
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
 }
 
@@ -398,6 +408,11 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
+}
+
+/* o título pinta o texto com o fundo (text-fill transparente); a dica e o "?" dentro dele, não */
+#panel-inicio .welcome-hero-banner h2 .dica {
+    -webkit-text-fill-color: initial;
 }
 
 #panel-inicio .hero-tagline-sub {
@@ -588,7 +603,7 @@
     z-index: 2;
 }
 
-#panel-inicio .pipeline-card h4 {
+#panel-inicio .pipeline-card .card-titulo {
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);

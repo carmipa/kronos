@@ -4,7 +4,7 @@ import { ligarCartaoAlvoAtivo } from '../js/cartaoAlvoAtivo.js?v=1.1';
 // acompanhar a fila a tela dizia "iniciado" e calava — quem dispara 22 episodios sai de perto.
 import { armarAvisoSonoro, tocarAvisoSonoro, mensagemDoAviso } from '../js/avisoSonoro.js';
 
-const PAINEL_HTML = 'traducaoKaraoke/traducaoKaraoke.html?v=1.3';
+const PAINEL_HTML = 'traducaoKaraoke/traducaoKaraoke.html?v=1.4';
 const CONSOLE_ID = 'console-traducao-karaoke';
 const SUFIXO_SAIDA_TRADUCAO = '-karaoke-ptbr';
 

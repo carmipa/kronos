@@ -15,14 +15,18 @@
  *    hover e abriria translúcida ou fora do lugar;
  *  - o envoltório não pode mexer no layout: controle de nível bloco ganha `dica--bloco`, e o CSS do
  *    projeto faz o envoltório ocupar o lugar dele;
- *  - título e cabeçalho de coluna: o "?" (`dica__gatilho`) vai DENTRO, no fim (padrão 3);
+ *  - título e cabeçalho de coluna: o "?" (`dica__gatilho`) vai DENTRO, no fim (padrão 3); se o JS
+ *    da tela reescrever o texto do título e o "?" sumir junto, o observador o põe de volta;
  *  - rótulo de campo e o "?" antigo (`.help-icon`): o "?" vai logo DEPOIS do rótulo, fora dele
  *    (padrão 2) — dentro, o nome do campo lido pelo leitor de tela ganharia "Ajuda sobre…" junto;
  *    o campo do rótulo aponta para a mesma dica (`aria-describedby`);
  *  - cada dica tem `id` único e `role="tooltip"`; a conversão é idempotente (o atributo sai);
  *  - conteúdo criado depois (painéis carregados por fetch, linhas de tabela, faixa da vitrine) é
  *    convertido pelo observador; trocar o `data-tooltip` de um controle já convertido atualiza o
- *    texto da dica.
+ *    texto da dica;
+ *  - dica padrão por seletor (`registrarDicaPadrao`) nunca sobrescreve a dica própria do elemento;
+ *  - ícone que acompanha texto sai da leitura (`aria-hidden`); ícone que é o único nome de um
+ *    controle fica.
  *
  * COMPORTAMENTO EM CASO DE FALHA: elemento com `data-tooltip` vazio só perde o atributo; rótulo sem
  * texto usa "este campo" no nome do "?"; sem `MutationObserver` converte só o que já existe. Se este
@@ -38,6 +42,38 @@ const SVG_AJUDA = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"
 const BLOCO = /^(block|flex|grid|list-item|table|flow-root)$/;
 
 let sequencia = 0;
+const padroes = [];
+
+/**
+ * PROPÓSITO DE NEGÓCIO: dá a mesma dica a todo controle repetido (o "Procurar..." de 25 formulários,
+ * o "Limpar" de 15 consoles) e aos itens que o JS cria, num lugar só — inclusive aos que aparecem
+ * depois (painel carregado por fetch, lista montada de novo).
+ *
+ * INVARIANTES DO DOMÍNIO: nunca sobrescreve uma dica própria (atributo `data-tooltip` já presente ou
+ * controle já convertido); vale para o que já existe e para o que entrar na página.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: texto vazio (ou função que devolve vazio) não cria dica.
+ *
+ * @param {string} seletor CSS dos elementos que recebem a dica
+ * @param {string|function(Element): string} texto texto fixo ou calculado a partir do elemento
+ */
+export function registrarDicaPadrao(seletor, texto) {
+    padroes.push({ seletor, texto });
+    if (document.body) converterDicas(document);
+}
+
+function aplicarPadroes(raiz) {
+    for (const { seletor, texto } of padroes) {
+        const alvos = [];
+        if (raiz.nodeType === 1 && raiz.matches(seletor)) alvos.push(raiz);
+        alvos.push(...raiz.querySelectorAll(seletor));
+        for (const el of alvos) {
+            if (el.hasAttribute('data-tooltip') || el.hasAttribute('data-dica') || el.querySelector(':scope > .dica')) continue;
+            const t = typeof texto === 'function' ? texto(el) : texto;
+            if (t) el.setAttribute('data-tooltip', t);
+        }
+    }
+}
 
 /**
  * PROPÓSITO DE NEGÓCIO: converte todas as dicas de um trecho da página e passa a vigiar o que
@@ -62,6 +98,7 @@ export function inicializarDicas(raiz = document) {
             for (const no of m.addedNodes) {
                 if (no.nodeType === 1 && !no.closest('.dica__texto')) converterDicas(no);
             }
+            recolocarAjuda(m.target);
         }
     }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-tooltip'] });
 }
@@ -77,6 +114,8 @@ export function inicializarDicas(raiz = document) {
  * @param {Element|Document} raiz
  */
 export function converterDicas(raiz) {
+    aplicarPadroes(raiz);
+    marcarIconesDecorativos(raiz);
     const lista = [];
     if (raiz.nodeType === 1 && raiz.hasAttribute('data-tooltip')) lista.push(raiz);
     lista.push(...raiz.querySelectorAll('[data-tooltip]'));
@@ -84,6 +123,29 @@ export function converterDicas(raiz) {
         if (!el.isConnected || el.closest('.dica__texto')) continue;
         converter(el);
     }
+}
+
+/**
+ * Regra 6, blindagem 3: ícone que acompanha um texto é decorativo e sai da leitura do leitor de tela
+ * (sem isso ele lê o nome do glifo: "content_copy Copiar"). Ícone que é o ÚNICO nome de um controle
+ * fica — tirá-lo deixaria o botão sem nome.
+ */
+function marcarIconesDecorativos(raiz) {
+    const icones = [];
+    if (raiz.nodeType === 1 && raiz.matches('.material-symbols-outlined')) icones.push(raiz);
+    icones.push(...raiz.querySelectorAll('.material-symbols-outlined'));
+    for (const icone of icones) {
+        if (icone.hasAttribute('aria-hidden')) continue;
+        const controle = icone.closest(CONTROLE);
+        if (controle && !rotuloDe(controle) && !controle.getAttribute('aria-label')) continue;
+        icone.setAttribute('aria-hidden', 'true');
+    }
+}
+
+/** Título cujo texto o JS reescreveu (o "?" de dentro foi junto): põe o "?" de volta. */
+function recolocarAjuda(el) {
+    if (el.nodeType !== 1 || !el.hasAttribute('data-dica-texto') || el.querySelector(':scope > .dica')) return;
+    el.append(criarAjuda(novoId(el), rotuloDe(el), el.getAttribute('data-dica-texto')));
 }
 
 function atualizarOuConverter(el) {
@@ -105,7 +167,13 @@ function converter(el) {
     if (!texto) return;
     if (el.classList.contains('help-icon')) { converterAjudaAntiga(el, texto); return; }
     if (el.matches('label')) { colocarAposRotulo(el, texto, rotuloDe(el)); return; }
-    if (el.matches(TEXTO)) { el.append(criarAjuda(novoId(el), rotuloDe(el), texto)); return; }
+    if (el.matches(TEXTO)) {
+        // guarda o texto: se o JS da tela reescrever o título (textContent/innerHTML), o observador
+        // recoloca o "?" (ver recolocarAjuda)
+        el.setAttribute('data-dica-texto', texto);
+        el.append(criarAjuda(novoId(el), rotuloDe(el), texto));
+        return;
+    }
     if (el.matches(CONTROLE)) { envolverControle(el, texto); }
 }
 
@@ -180,12 +248,23 @@ function descrever(el, id) {
     el.setAttribute('aria-describedby', atuais.join(' '));
 }
 
-/** Nome visível do elemento, sem o glifo de ícone nem um "?" antigo. */
-function rotuloDe(el) {
+/**
+ * PROPÓSITO DE NEGÓCIO: nome que a pessoa lê no elemento, para compor o "Ajuda sobre …" do "?" e as
+ * dicas padrão (ex.: "Abre a página X da documentação").
+ *
+ * INVARIANTES DO DOMÍNIO: tira o glifo do ícone (que é palavra técnica, ex. "content_copy"), o "?"
+ * antigo, dicas já postas e os dois-pontos finais do rótulo; até 60 caracteres.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: elemento ausente devolve string vazia.
+ *
+ * @param {Element|null} el
+ * @returns {string}
+ */
+export function rotuloDe(el) {
     if (!el) return '';
     const copia = el.cloneNode(true);
     copia.querySelectorAll('.material-symbols-outlined, .help-icon, .dica, svg').forEach((n) => n.remove());
-    return copia.textContent.replace(/\s+/g, ' ').trim().slice(0, 60);
+    return copia.textContent.replace(/\s+/g, ' ').trim().replace(/[\s:?]+$/, '').slice(0, 60);
 }
 
 function novoId(el) {

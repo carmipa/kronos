@@ -1,5 +1,5 @@
 <div class="glass-card">
-    <h2>Revisão de Concordância</h2>
+    <h2 data-tooltip="Corrige gênero e acentos direto nos .ass em português, sem LLM, sem cache e sem inglês. Antes de gravar cada arquivo, guarda um backup dele.">Revisão de Concordância</h2>
     <p class="card-desc">Corrige <strong>erros de gênero</strong> inequívocos e <strong>acentos e caracteres trocados</strong> direto na legenda em português — <strong>sem inglês, sem cache e sem LLM</strong>. São cinco corretores em cadeia: caractere fora do português, gênero, acento pela análise gramatical, acento por padrão e acento por dicionário. Ex.: "o menina" → "a menina", "uma menino" → "um menino", "ela está cansado" → "cansada".</p>
     <p class="card-hint">Determinístico e conservador: só toca substantivos/adjetivos de gênero conhecido; o ambíguo fica intocado. Toda alteração faz backup automático.</p>
 
@@ -7,7 +7,7 @@
 
     <form id="form-revisao-concordancia" class="standard-form">
         <div class="form-group">
-            <label for="revisao-concordancia-contexto">Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Exibe a capa e os dados do anime e registra QUAL obra foi revisada no console. NÃO muda a correção: esta tela é determinística e não usa lore — a obra escolhida não altera uma vírgula do que é corrigido.">?</span></label>
+            <label for="revisao-concordancia-contexto">Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Mostra a capa e os dados do anime e registra no console qual obra foi revisada. Não muda a correção: esta tela não usa lore.">?</span></label>
             <select id="revisao-concordancia-contexto">
                 <option value="" disabled selected>Carregando contextos...</option>
             </select>
@@ -25,7 +25,7 @@
                  um clique distraído bastava. Agora gravar exige desmarcar, que é um gesto
                  deliberado. As telas irmãs (novoKaraoke, renomearArquivos, traducaoKaraoke) já
                  separam simular de aplicar em BOTÕES distintos; esta era a exceção. -->
-            <label class="checkbox-label">
+            <label data-tooltip="Marcado (como a tela abre), o console só mostra o que mudaria. Desmarcado, Iniciar reescreve os .ass, com backup em backup_revisao_concordancia." class="checkbox-label">
                 <input type="checkbox" id="revisao-concordancia-simular" checked>
                 Apenas simular (dry-run — mostra o que mudaria, sem gravar). <strong>Desmarque para
                 gravar de verdade.</strong>
@@ -55,7 +55,7 @@
 <div class="glass-card op-caixa">
     <div class="op-caixa-cabecalho">
         <span class="material-symbols-outlined op-caixa-icone">spellcheck</span>
-        <h3>O que acontece ao rodar</h3>
+        <h3 data-tooltip="Resumo do que a revisão grava nos .ass da pasta e do que ela não toca: lore, cache, inglês, música, karaokê e arquivos .parcial.">O que acontece ao rodar</h3>
         <span class="op-caixa-etiqueta">determinística</span>
     </div>
     <p class="op-caixa-desc">A tela lê e grava os <strong>próprios arquivos .ass</strong> da pasta PT-BR — não mexe no
@@ -110,7 +110,7 @@
 
 <div class="glass-card console-card">
     <div class="console-header">
-        <h3>Logs da Revisão de Concordância</h3>
+        <h3 data-tooltip="Resultado arquivo por arquivo: verde gravado, amarelo mudaria, cinza sem nada a corrigir, vermelho erro. Abaixo, cada fala antes -&gt; depois.">Logs da Revisão de Concordância</h3>
         <div class="console-actions">
             <button class="btn-toggle-console" data-target="console-revisao-concordancia" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
             <button class="btn-copy-console" data-target="console-revisao-concordancia" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>

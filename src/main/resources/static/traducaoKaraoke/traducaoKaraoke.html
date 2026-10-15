@@ -1,5 +1,5 @@
                     <div class="glass-card">
-                        <h2>Karaokê — Traduzir e Limpar (Romaji + PT-BR)</h2>
+                        <h2 data-tooltip="Traduz as letras de música para PT-BR mantendo o romaji e depois remove a animação. A entrada nunca é alterada: cada passada grava em pasta nova.">Karaokê — Traduzir e Limpar (Romaji + PT-BR)</h2>
                         <p class="card-desc">Uma tela, <strong>duas passadas na ordem</strong>: primeiro <strong>traduz</strong> as letras de música para PT-BR mantendo o japonês/romaji original; depois <strong>achata</strong> (limpa) a animação de karaokê e entrega uma linha limpa — romaji em cima, PT-BR embaixo. Escolha a obra (ou <em>sem lore</em>) para exibir a capa e a lore e liberar as opções. Os arquivos de entrada nunca são alterados; cada passada grava em pasta irmã com manifesto de auditoria.</p>
 
                         <div class="anime-meta-banner hidden" id="meta-banner-traducao-karaoke"></div>
@@ -14,7 +14,7 @@
 
                         <form id="form-traducao-karaoke" class="standard-form">
                             <div class="form-group">
-                                <label for="traducao-karaoke-contexto">Obra / Contexto: <span class="help-icon" data-tooltip="Escolha a obra para usar a lore correta no prompt do LLM e carregar a capa. 'Sem lore' libera só o Passo 2 (achatar): traduzir exige a obra, porque a lore alimenta o LLM. A escolha libera os campos abaixo.">?</span></label>
+                                <label for="traducao-karaoke-contexto">Obra / Contexto: <span class="help-icon" data-tooltip="A obra define a lore usada pelo LLM e a capa, e libera os campos. &#x27;Sem lore&#x27; libera só o Passo 2 (achatar); traduzir exige a obra.">?</span></label>
                                 <select id="traducao-karaoke-contexto">
                                     <option value="" disabled selected>Carregando contextos...</option>
                                 </select>
@@ -38,7 +38,7 @@
     <div class="glass-card op-caixa">
         <div class="op-caixa-cabecalho">
             <span class="material-symbols-outlined op-caixa-icone">lyrics</span>
-            <h3>Duas passadas, nesta ordem: traduza, depois limpe</h3>
+            <h3 data-tooltip="Passo 1 traduz as letras pelo LLM e grava em -karaoke-ptbr; Passo 2 achata essa saída, sem LLM, em legenda-simplificada. Simule cada um antes.">Duas passadas, nesta ordem: traduza, depois limpe</h3>
             <span class="op-caixa-etiqueta">aplique uma, depois a outra</span>
         </div>
         <p class="op-caixa-desc">Cada passo é <strong>independente</strong> e grava em pasta própria. O caminho normal é <strong>traduzir</strong> (Passo 1) e depois <strong>achatar</strong> (Passo 2) a saída da tradução, deixando a letra legível sem a animação que quebra a tradução na tela.</p>
@@ -99,7 +99,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Log do Karaokê (tradução e limpeza, linha a linha)</h3>
+                            <h3 data-tooltip="As duas passadas escrevem aqui: classificação e tradução de cada linha, limpeza da animação, avisos e o relatório final.">Log do Karaokê (tradução e limpeza, linha a linha)</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-traducao-karaoke" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
                                 <button class="btn-copy-console" data-target="console-traducao-karaoke" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>

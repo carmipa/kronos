@@ -14,8 +14,8 @@
     <!-- Dica (tooltip) canônica da regra 6-A, sem edição; antes do CSS do projeto para as regras dele vencerem empates -->
     <link rel="stylesheet" href="dica/dica.css?v=1.0">
     <link rel="stylesheet" href="fontes/fontes.css?v=1.0">
-    <link rel="stylesheet" href="css/base.css?v=5.5">
-    <link rel="stylesheet" href="inicio/inicio.css?v=4.0">
+    <link rel="stylesheet" href="css/base.css?v=5.6">
+    <link rel="stylesheet" href="inicio/inicio.css?v=4.1">
     <link rel="stylesheet" href="analise/analise.css?v=5.0">
     <link rel="stylesheet" href="extracao/extracao.css?v=4.0">
     <link rel="stylesheet" href="traducao/traducao.css?v=4.0">
@@ -29,10 +29,10 @@
     <link rel="stylesheet" href="renomearArquivos/renomearArquivos.css?v=4.0">
     <link rel="stylesheet" href="traducaoKaraoke/traducaoKaraoke.css?v=1.1">
     <link rel="icon" type="image/png" href="img/kronos_logo.png">
-    <link rel="stylesheet" href="telemetria/telemetria.css?v=4.0">
+    <link rel="stylesheet" href="telemetria/telemetria.css?v=4.1">
     <link rel="stylesheet" href="mapa/mapa.css?v=6.0">
     <link rel="stylesheet" href="documentacao/documentacao.css?v=4.0">
-    <link rel="stylesheet" href="sobre/sobre.css?v=4.0">
+    <link rel="stylesheet" href="sobre/sobre.css?v=4.1">
     <link rel="stylesheet" href="i18n/i18n.css?v=1.3">
 </head>
 
@@ -63,7 +63,7 @@
                         style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;">
                 </div>
                 <div class="brand-info">
-                    <h2>KRONOS CORE</h2>
+                    <h2 data-tooltip="Sistema que roda no seu computador para analisar vídeos e extrair, traduzir com LLM local, revisar e remuxar legendas de animes. As etapas ficam no menu.">KRONOS CORE</h2>
                     <span>Pipeline Industrial</span>
                 </div>
             </div>
@@ -71,15 +71,15 @@
             <div class="seletor-idioma-wrapper" translate="no">
                 <div class="seletor-idioma" role="group" aria-label="Idioma da interface">
                     <button type="button" class="seletor-idioma-botao" data-idioma="pt-BR"
-                        aria-label="Português (Brasil)" title="Português (Brasil)" aria-pressed="false">
+                        aria-label="Português (Brasil)" aria-pressed="false">
                         <img src="i18n/flags/br.svg" width="26" height="18" alt="" aria-hidden="true" draggable="false">
                     </button>
                     <button type="button" class="seletor-idioma-botao" data-idioma="en-US"
-                        aria-label="English (United States)" title="English (United States)" aria-pressed="false">
+                        aria-label="English (United States)" aria-pressed="false">
                         <img src="i18n/flags/us.svg" width="26" height="18" alt="" aria-hidden="true" draggable="false">
                     </button>
                     <button type="button" class="seletor-idioma-botao" data-idioma="es-ES"
-                        aria-label="Español (España)" title="Español (España)" aria-pressed="false">
+                        aria-label="Español (España)" aria-pressed="false">
                         <img src="i18n/flags/es.svg" width="26" height="18" alt="" aria-hidden="true" draggable="false">
                     </button>
                 </div>
@@ -268,7 +268,7 @@
             <!-- Header Global -->
             <header class="main-header">
                 <div class="header-title">
-                    <h1 id="page-title" tabindex="-1"><span id="page-title-texto">Painel Inicial</span></h1>
+                    <h1 data-tooltip="Nome da tela aberta agora; muda quando você escolhe outro item do menu. A frase logo abaixo resume para que a tela serve." id="page-title" tabindex="-1"><span id="page-title-texto">Painel Inicial</span></h1>
                     <p id="page-subtitle">Orquestrador automatizado e pipeline industrial de processamento de animes</p>
                 </div>
                 <div class="quick-stats">
@@ -338,7 +338,7 @@
                         <div class="hero-content">
                             <div class="hero-title-container">
                                 <span class="hero-eyebrow">AUTOMATION SUITE</span>
-                                <h2>KRONOS CORE</h2>
+                                <h2 data-tooltip="Apresentação do sistema: o que ele faz com legendas de animes, da auditoria dos vídeos à remuxagem, com a tradução feita por IA no seu computador.">KRONOS CORE</h2>
                                 <p class="hero-tagline-sub">Pipeline Industrial de Processamento & Tradução de Animes
                                 </p>
                             </div>
@@ -361,13 +361,13 @@
                     <!-- Pipeline Flow Section com Estilo Grid Ultra Moderno -->
                     <div class="pipeline-flow-section">
                         <div class="flow-header">
-                            <h3>Lógica do Fluxo de Trabalho (Pipeline)</h3>
+                            <h3 data-tooltip="Cartões das etapas na ordem de uso, de 1.1 a 5.2; escolha um cartão para abrir a tela dele. Os de travessão são ferramentas, não etapas.">Lógica do Fluxo de Trabalho (Pipeline)</h3>
                             <span class="flow-line-decorator"></span>
                         </div>
                         <div class="pipeline-cards-grid">
 
                             <!-- 1.1 -->
-                            <div class="pipeline-card card-analise"
+                            <div class="pipeline-card card-analise" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-analise').click()"
                                 data-tooltip="Clique para auditar codecs e bitrate">
                                 <div class="card-glow-bg"></div>
@@ -375,13 +375,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">radar</span>
                                 </div>
-                                <h4>Análise de Mídia</h4>
+                                <span class="card-titulo">Análise de Mídia</span>
                                 <p>Audite faixas, codecs e bitrate dos arquivos de vídeo originais.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 1.2 -->
-                            <div class="pipeline-card card-extracao"
+                            <div class="pipeline-card card-extracao" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-extracao').click()"
                                 data-tooltip="Clique para extrair as legendas originais">
                                 <div class="card-glow-bg"></div>
@@ -389,13 +389,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">download</span>
                                 </div>
-                                <h4>Extração</h4>
+                                <span class="card-titulo">Extração</span>
                                 <p>Extraia faixas de legendas (ASS/PGS/SRT) em lote de arquivos MKV.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 1.3 — conserta a FONTE antes de traduzir; ver comentário no menu -->
-                            <div class="pipeline-card card-troca-legenda"
+                            <div class="pipeline-card card-troca-legenda" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-troca-tipo-legenda').click()"
                                 data-tooltip="Clique para auditar e substituir fontes legadas">
                                 <div class="card-glow-bg"></div>
@@ -403,13 +403,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">font_download</span>
                                 </div>
-                                <h4>Troca de Tipo de Legenda</h4>
+                                <span class="card-titulo">Troca de Tipo de Legenda</span>
                                 <p>Antes de traduzir: troca fontes legadas (VNI/ANSI) por Unicode, para o texto não chegar corrompido ao LLM.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 1.4 -->
-                            <div class="pipeline-card card-auditor-conteudo"
+                            <div class="pipeline-card card-auditor-conteudo" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-auditor-conteudo').click()"
                                 data-tooltip="Clique para auditar conteúdo">
                                 <div class="card-glow-bg"></div>
@@ -417,13 +417,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">content_paste_search</span>
                                 </div>
-                                <h4>Análise de Legenda</h4>
+                                <span class="card-titulo">Análise de Legenda</span>
                                 <p>Verifique anomalias de LLM, formatação e metadados nas legendas traduzidas.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 2.1 -->
-                            <div class="pipeline-card card-traducao"
+                            <div class="pipeline-card card-traducao" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-traducao').click()"
                                 data-tooltip="Clique para traduzir com LLM local">
                                 <div class="card-glow-bg"></div>
@@ -431,14 +431,14 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">translate</span>
                                 </div>
-                                <h4>Tradução Local</h4>
+                                <span class="card-titulo">Tradução Local</span>
                                 <p>Traduza legendas por IA usando LLM local com proteção de estilos.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 2.2 — existia no menu desde sempre e NUNCA teve cartão aqui.
                                  A home ensinava um fluxo com um passo a menos que o menu. -->
-                            <div class="pipeline-card card-traducao-sem-lore"
+                            <div class="pipeline-card card-traducao-sem-lore" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-traducao-sem-lore').click()"
                                 data-tooltip="Clique para traduzir um anime que ainda não tem lore declarada">
                                 <div class="card-glow-bg"></div>
@@ -446,13 +446,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">bolt</span>
                                 </div>
-                                <h4>Tradução sem Lore</h4>
+                                <span class="card-titulo">Tradução sem Lore</span>
                                 <p>Traduza uma obra ainda sem lore declarada — teste rápido, com saída em pasta separada.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 2.3 -->
-                            <div class="pipeline-card card-correcao"
+                            <div class="pipeline-card card-correcao" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-correcao').click()"
                                 data-tooltip="Clique para preencher linhas falhas do cache">
                                 <div class="card-glow-bg"></div>
@@ -460,13 +460,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">sync</span>
                                 </div>
-                                <h4>Correção de Cache</h4>
+                                <span class="card-titulo">Correção de Cache</span>
                                 <p>Varra e corrija falas vazias ou não traduzidas do banco de cache.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 3.1 -->
-                            <div class="pipeline-card card-revisao"
+                            <div class="pipeline-card card-revisao" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-revisao').click()"
                                 data-tooltip="Clique para revisar legendas .ass já traduzidas">
                                 <div class="card-glow-bg"></div>
@@ -474,13 +474,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">spellcheck</span>
                                 </div>
-                                <h4>Revisão de Legendas</h4>
+                                <span class="card-titulo">Revisão de Legendas</span>
                                 <p>Detecte e corrija erros remanescentes nas legendas .ass já traduzidas.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 3.2 -->
-                            <div class="pipeline-card card-revisao-lore"
+                            <div class="pipeline-card card-revisao-lore" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-revisao-lore').click()"
                                 data-tooltip="Clique para revisar termos de lore nas legendas">
                                 <div class="card-glow-bg"></div>
@@ -488,14 +488,14 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">menu_book</span>
                                 </div>
-                                <h4>Revisão de Lore</h4>
+                                <span class="card-titulo">Revisão de Lore</span>
                                 <p>Padronize nomes, locais e termos de mundo nas legendas traduzidas via lore oficial.
                                 </p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 3.3 -->
-                            <div class="pipeline-card card-revisao-concordancia"
+                            <div class="pipeline-card card-revisao-concordancia" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-revisao-concordancia').click()"
                                 data-tooltip="Clique para corrigir concordância de gênero na legenda PT-BR">
                                 <div class="card-glow-bg"></div>
@@ -503,13 +503,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">spellcheck</span>
                                 </div>
-                                <h4>Revisão de Concordância</h4>
+                                <span class="card-titulo">Revisão de Concordância</span>
                                 <p>Corrige gênero (o menina, ela está cansado) direto na legenda PT-BR, sem inglês nem LLM.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 4.1 — tela única: traduzir + achatar (absorveu o antigo 4.3). -->
-                            <div class="pipeline-card card-traducao-karaoke"
+                            <div class="pipeline-card card-traducao-karaoke" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-traducao-karaoke').click()"
                                 data-tooltip="Clique para traduzir as letras e depois achatar/limpar a animação">
                                 <div class="card-glow-bg"></div>
@@ -517,14 +517,14 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">lyrics</span>
                                 </div>
-                                <h4>Karaokê</h4>
+                                <span class="card-titulo">Karaokê</span>
                                 <p>Traduza as letras (romaji + PT-BR juntos) e depois achate/limpe a animação — duas
                                     passadas na mesma tela.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 4.2 -->
-                            <div class="pipeline-card card-cura"
+                            <div class="pipeline-card card-cura" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-cura').click()"
                                 data-tooltip="Clique para corrigir a legenda traduzida">
                                 <div class="card-glow-bg"></div>
@@ -532,14 +532,14 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">music_note</span>
                                 </div>
-                                <h4>Correção de Karaokê</h4>
+                                <span class="card-titulo">Correção de Karaokê</span>
                                 <p>Corrige a legenda PT-BR sem alterar a original, preservando estrutura, tempos e tags.
                                 </p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 5.1 -->
-                            <div class="pipeline-card card-remuxer"
+                            <div class="pipeline-card card-remuxer" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-remuxer').click()"
                                 data-tooltip="Clique para acoplar legendas traduzidas nos vídeos">
                                 <div class="card-glow-bg"></div>
@@ -547,13 +547,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">layers</span>
                                 </div>
-                                <h4>Remuxer</h4>
+                                <span class="card-titulo">Remuxer</span>
                                 <p>Mescle os vídeos originais e as legendas traduzidas em novos MKVs.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- 5.2 -->
-                            <div class="pipeline-card card-renomear-arquivos"
+                            <div class="pipeline-card card-renomear-arquivos" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-renomear-arquivos').click()"
                                 data-tooltip="Clique para renomear e sanitizar arquivos de vídeos">
                                 <div class="card-glow-bg"></div>
@@ -561,7 +561,7 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">drive_file_rename_outline</span>
                                 </div>
-                                <h4>Renomear Arquivos</h4>
+                                <span class="card-titulo">Renomear Arquivos</span>
                                 <p>Sanitize e padronize nomes de arquivos usando regex e metadados oficiais.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
@@ -569,7 +569,7 @@
                             <!-- SISTEMA — não é passo do pipeline, por isso não tem número.
                                  Badge com travessão: numerar aqui daria a entender que existe
                                  um "passo 6" a executar, e não existe. -->
-                            <div class="pipeline-card card-mapa"
+                            <div class="pipeline-card card-mapa" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-mapa').click()"
                                 data-tooltip="Clique para analisar o código Java">
                                 <div class="card-glow-bg"></div>
@@ -577,13 +577,13 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">account_tree</span>
                                 </div>
-                                <h4>Mapa do Projeto</h4>
+                                <span class="card-titulo">Mapa do Projeto</span>
                                 <p>Visualize a árvore estrutural e taxonomia de classes Java do projeto.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
 
                             <!-- SISTEMA -->
-                            <div class="pipeline-card card-telemetria"
+                            <div class="pipeline-card card-telemetria" role="button" tabindex="0"
                                 onclick="document.getElementById('btn-menu-telemetria').click()"
                                 data-tooltip="Clique para acessar a telemetria">
                                 <div class="card-glow-bg"></div>
@@ -591,7 +591,7 @@
                                 <div class="card-icon-container">
                                     <span class="material-symbols-outlined">monitoring</span>
                                 </div>
-                                <h4>Telemetria</h4>
+                                <span class="card-titulo">Telemetria</span>
                                 <p>Monitore hits de cache, tokens e logs em tempo real do sistema.</p>
                                 <span class="card-action-link">Acessar Painel →</span>
                             </div>
@@ -603,7 +603,7 @@
                 <!-- 1.1 PAINEL DE ANÁLISE DE MÍDIA -->
                 <div class="panel" id="panel-analise">
                     <div class="glass-card">
-                        <h2>Iniciar Auditoria de Mídia</h2>
+                        <h2 data-tooltip="Aponte a pasta ou o vídeo para ver contêiner, codecs e faixas de legenda de cada arquivo (subpastas incluídas). Só lê os vídeos; o resultado fica na tela.">Iniciar Auditoria de Mídia</h2>
                         <p class="card-desc">Forneça o caminho da pasta contendo os episódios em formato de vídeo (.mkv,
                             .mp4, etc.) para analisar codecs e sincronias.</p>
 
@@ -632,7 +632,7 @@
                             <div class="form-group">
                                 <label for="analise-saida">Pasta de saída dos relatórios (Opcional): <span
                                         class="help-icon"
-                                        data-tooltip="Hoje a análise não grava relatório em disco: o resultado aparece na tela, em cartões e na tabela de legendas, e pode ser exportado em TXT pelo botão do relatório. Este campo é aceito, mas ignorado.">?</span></label>
+                                        data-tooltip="Hoje este campo é ignorado: o resultado aparece na tela e pode ser exportado em TXT pelo botão do relatório.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="analise-saida"
                                         placeholder="Não é usado: o resultado fica na tela e se exporta em TXT">
@@ -659,7 +659,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">radar</span>
-                            <h3>O que a análise faz</h3>
+                            <h3 data-tooltip="Resume o que a análise lê com o ffprobe e como separa cada legenda: texto (traduzível, segue para a 1.2) ou imagem (exige OCR). Não confere sincronia.">O que a análise faz</h3>
                             <span class="op-caixa-etiqueta">somente leitura</span>
                         </div>
                         <p class="op-caixa-desc">Roda o <strong>ffprobe</strong> em cada vídeo da pasta e devolve contêiner, codecs e <strong>cada faixa de legenda embutida</strong>, classificada por traduzibilidade. <strong>Nada é gravado em disco</strong> — o relatório vive na tela, e o TXT só sai se você clicar em Exportar.</p>
@@ -694,7 +694,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Logs do Analisador</h3>
+                            <h3 data-tooltip="Mostra o pedido, os erros e, ao fim, os cartões e a tabela de legendas de cada vídeo, com o desfecho e o tempo total. Some da tela ao recarregar.">Logs do Analisador</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-analise"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -719,7 +719,7 @@
                 <!-- 1.2 PAINEL DE EXTRAÇÃO -->
                 <div class="panel" id="panel-extracao">
                     <div class="glass-card">
-                        <h2>Extração Industrial de Legendas</h2>
+                        <h2 data-tooltip="Tira de cada vídeo da pasta (e subpastas) uma faixa de legenda no formato escolhido e grava como .ass, .srt ou .sup. Nunca sobrescreve arquivo existente.">Extração Industrial de Legendas</h2>
                         <p class="card-desc">Extraia faixas de legendas embutidas em vídeos (MKV/WebM via MKVToolNix;
                             MP4/MOV/AVI e outros via ffmpeg) com alta precisão.</p>
 
@@ -735,7 +735,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="extracao-entrada">Pasta com arquivos de vídeo: <span class="help-icon"
-                                        data-tooltip="Diretório (busca em subpastas também) onde se encontram os vídeos originais dos quais serão extraídas as faixas de legenda. Suporta MKV/WebM e, via ffmpeg, MP4/MOV/AVI/TS/M2TS/FLV/WMV.">?</span></label>
+                                        data-tooltip="Pasta dos vídeos de onde sai a legenda; as subpastas entram também. Aceita MKV e WebM, e MP4, MOV, AVI, TS, M2TS, FLV e WMV pelo ffmpeg.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="extracao-entrada"
                                         placeholder="Ex: C:\animes\[Sokudo] DanMachi\Season 04" required>
@@ -758,7 +758,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="extracao-formato">Formato desejado: <span class="help-icon"
-                                        data-tooltip="O formato de destino da extração. Prefira ASS para animes para preservar estilos, fontes e posições dos textos. Dica: rode a Análise de Mídia antes para descobrir o formato e o tipo de cada faixa (texto = traduzível; bitmap = requer OCR). Apenas ASS e SRT seguem para a tradução; PGS é bitmap e não é traduzível.">?</span></label>
+                                        data-tooltip="ASS guarda estilos, fontes e posições, o melhor para anime. Só ASS e SRT seguem para a tradução; PGS é imagem e não se traduz.">?</span></label>
                                 <select id="extracao-formato">
                                     <option value="ASS" selected>ASS (estilos/karaokê — recomendado p/ tradução)</option>
                                     <option value="SRT">SRT (texto simples — traduzível)</option>
@@ -783,7 +783,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">download</span>
-                            <h3>O que a extração faz</h3>
+                            <h3 data-tooltip="Diz qual programa extrai cada tipo de vídeo (MKVToolNix ou ffmpeg) e avisa: a pasta de saída é plana, e o segundo vídeo de mesmo nome não é extraído.">O que a extração faz</h3>
                             <span class="op-caixa-etiqueta">escreve arquivos novos</span>
                         </div>
                         <p class="op-caixa-desc">Tira as faixas de legenda de dentro do vídeo e as grava como arquivos soltos. A ferramenta muda conforme o contêiner, e você não precisa escolher.</p>
@@ -820,7 +820,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Logs do Extrator</h3>
+                            <h3 data-tooltip="Mostra vídeo a vídeo o que houve (OK, JÁ EXISTE, SEM FAIXA, COLISÃO, FALHA), a tabela final e o resumo com o tempo total. Some da tela ao recarregar.">Logs do Extrator</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-extracao"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -844,7 +844,7 @@
                 <!-- 2.1 PAINEL DE TRADUÇÃO LOCAL -->
                 <div class="panel" id="panel-traducao">
                     <div class="glass-card">
-                        <h2>Tradução via LLM Local</h2>
+                        <h2 data-tooltip="Traduz uma pasta de legendas do inglês para PT-BR com o modelo do LM Studio e a lore da obra escolhida, reaproveitando o cache. A obra é obrigatória.">Tradução via LLM Local</h2>
                         <p class="card-desc">Traduz legendas ASS/SSA/SRT do Inglês para Português usando IA local
                             (ex: aya-expanse-8b no LM Studio).</p>
 
@@ -873,7 +873,7 @@
                             <div class="form-group">
                                 <label for="traducao-saida">Pasta de SAÍDA para as legendas em Português: <span
                                         class="help-icon"
-                                        data-tooltip="Pasta de destino onde as legendas traduzidas serão salvas. Por padrão (campo vazio), cria a pasta 'traducao_ptbr' no MESMO NÍVEL da pasta de legendas originais (ao lado dela, dentro da pasta da mídia/temporada).">?</span></label>
+                                        data-tooltip="Onde gravar as legendas traduzidas. Vazio: cria a pasta traducao_ptbr ao lado da pasta das legendas originais.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="traducao-saida"
                                         placeholder="Deixe vazio p/ criar 'traducao_ptbr' ao lado da pasta de legendas originais">
@@ -887,7 +887,7 @@
                                     <input type="checkbox" id="traducao-liberar-protecao">
                                     Liberar proteção, refazer o cache e atualizar arquivos PT-BR
                                     <span class="help-icon"
-                                        data-tooltip="Arquiva o cache anterior da pasta selecionada, retraduz integralmente sem reaproveitá-lo e atualiza os arquivos PT-BR. Cache e legenda anteriores recebem backup obrigatório.">?</span>
+                                        data-tooltip="Arquiva o cache desta pasta, retraduz tudo sem reaproveitá-lo e atualiza as legendas PT-BR. Cache e legenda antigos ganham backup.">?</span>
                                 </label>
                                 <small>Desativado por padrão. Ative somente para retomar ou substituir uma tradução existente.</small>
                             </div>
@@ -909,7 +909,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">translate</span>
-                            <h3>O que a tradução faz</h3>
+                            <h3 data-tooltip="Quadro explicativo: como as tags do ASS são protegidas, como o cache evita traduzir duas vezes e o que fica salvo se a tradução parar no meio.">O que a tradução faz</h3>
                             <span class="op-caixa-etiqueta">usa cache</span>
                         </div>
                         <p class="op-caixa-desc">Traduz cada fala do <code>.ass</code> com o <strong>LLM rodando na sua máquina</strong> (LM Studio) e a <strong>lore da obra</strong>. O que já foi traduzido antes vem do cache e <strong>não vai ao modelo de novo</strong> — rodar duas vezes na mesma pasta custa quase nada.</p>
@@ -956,7 +956,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Console da Tradução</h3>
+                            <h3 data-tooltip="Mostra ao vivo o andamento, arquivo por arquivo (concluído, parcial, bloqueado ou falha), e o relatório final do lote com tempo e pendências.">Console da Tradução</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-traducao"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -977,7 +977,7 @@
                 <!-- 2.2 PAINEL DE TRADUÇÃO SEM LORE -->
                 <div class="panel" id="panel-traducao-sem-lore">
                     <div class="glass-card">
-                        <h2>Tradução sem Lore (crua)</h2>
+                        <h2 data-tooltip="Tradução rápida de anime que ainda não tem lore: não pede obra, grava em pasta separada e não protege nomes próprios. Se a obra já tem lore, use a 2.1.">Tradução sem Lore (crua)</h2>
                         <p class="card-desc">Para o anime que você acabou de baixar e que <strong>ainda não tem lore
                             declarada</strong> — teste rápido ou pressa. Não exige escolher obra, e por isso não aplica
                             terminologia nenhuma.</p>
@@ -1026,7 +1026,7 @@
                                     <input type="checkbox" id="traducao-sem-lore-ignorar">
                                     Ignorar lore existente desta obra
                                     <span class="help-icon"
-                                        data-tooltip="Por padrão, se a pasta for de uma obra que JÁ tem lore declarada, a execução é bloqueada e a mensagem diz qual contexto usar. Marque só se quiser mesmo traduzir cru uma obra que tem lore.">?</span>
+                                        data-tooltip="Se a obra já tem lore, a tela bloqueia e diz qual contexto usar. Marque só se quiser mesmo traduzir sem lore uma obra que tem.">?</span>
                                 </label>
                                 <small>Desmarcado, pasta de obra com lore declarada é <strong>bloqueada</strong> — e
                                     quase sempre é isso que você quer.</small>
@@ -1049,7 +1049,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">bolt</span>
-                            <h3>O que você ganha e o que perde</h3>
+                            <h3 data-tooltip="Quadro explicativo dos riscos e garantias desta tela: nomes podem ser traduzidos, a saída fica em pasta própria e as guardas de qualidade seguem valendo.">O que você ganha e o que perde</h3>
                             <span class="op-caixa-etiqueta">sem terminologia</span>
                         </div>
                         <p class="op-caixa-desc">É o caminho do <em>acabei de baixar e quero ver como fica</em>. Não pede obra — e por isso <strong>não aplica terminologia nenhuma</strong>.</p>
@@ -1096,7 +1096,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Console da Tradução sem Lore</h3>
+                            <h3 data-tooltip="Mostra ao vivo o andamento desta tradução crua, arquivo por arquivo, com avisos, falhas e o relatório final. Não se mistura com o console da 2.1.">Console da Tradução sem Lore</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-traducao-sem-lore"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -1117,7 +1117,7 @@
                 <!-- 2.3 PAINEL DE CORREÇÃO DE CACHE -->
                 <div class="panel" id="panel-correcao">
                     <div class="glass-card">
-                        <h2>Correção do Cache de Tradução</h2>
+                        <h2 data-tooltip="Conserta as traduções guardadas no cache, não a legenda já gerada. Depois de corrigir, rode a 2.1 de novo para gerar o ASS com o cache novo.">Correção do Cache de Tradução</h2>
                         <p class="card-desc">Corrija o banco persistente da pasta <code>cache</code> sem perder a
                             proveniência da lore. A limpeza prepara falhas para nova tradução, o Google preenche
                             lacunas como contingência online e o LLM local revisa concordância. Cada alteração gera
@@ -1169,7 +1169,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">mop</span>
-                            <h3>Higienizar o cache</h3>
+                            <h3 data-tooltip="Três passos para rodar em ordem: limpar falhas, preencher lacunas pelo Google e revisar concordância pelo LLM. Todos gravam no cache, com backup.">Higienizar o cache</h3>
                             <span class="op-caixa-etiqueta">rode na ordem</span>
                         </div>
                         <p class="op-caixa-desc">Os três passos agem sobre o alvo escolhido acima e cada um gera backup
@@ -1247,7 +1247,7 @@
                     <div class="glass-card op-caixa op-caixa-perigo">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">match_case</span>
-                            <h3>Terminologia oficial da lore</h3>
+                            <h3 data-tooltip="Restaura no cache os termos oficiais de cada obra. O Ensaiar só mede; o Aplicar grava em lote, com backup, e só roda se a configuração liberar.">Terminologia oficial da lore</h3>
                             <span class="op-caixa-etiqueta op-caixa-etiqueta-perigo">ensaio antes</span>
                         </div>
                         <p class="op-caixa-desc">Restaura os termos oficiais de cada obra no cache <strong>já
@@ -1298,7 +1298,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Logs de Correção</h3>
+                            <h3 data-tooltip="Mostra ao vivo cada operação desta tela: arquivos analisados e alterados, itens corrigidos e pendentes, falhas e, no ensaio, quantas trocas por termo.">Logs de Correção</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-correcao"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -1319,7 +1319,7 @@
                 <!-- 3.1 PAINEL DE REVISÃO DE LEGENDAS -->
                 <div class="panel" id="panel-revisao">
                     <div class="glass-card">
-                        <h2>Revisão de Legendas</h2>
+                        <h2 data-tooltip="Corrige nos próprios .ass em PT-BR as falas que ficaram em inglês, usando o inglês ou o cache como referência. Grava na pasta traduzida, com backup.">Revisão de Legendas</h2>
                         <p class="card-desc">Varre arquivos .ass/.ssa já em português e traduz o que ficou em inglês:
                             a passada principal usa o <strong>LLM local</strong> com os dicionários, e o
                             <strong>Google Tradutor</strong> só roda no botão próprio, por escolha sua. Concordância aqui
@@ -1333,10 +1333,10 @@
 
                         <form id="form-revisao" class="standard-form">
                             <div class="revisao-modo-tabs" role="tablist" aria-label="Fonte de referência">
-                                <button type="button" class="revisao-modo-tab ativo" role="tab" aria-selected="true" data-modo="AMBOS">
+                                <button data-tooltip="Usa como referência a legenda em inglês (.ass) e também o cache do projeto. É o modo padrão e mostra o campo da pasta em inglês." type="button" class="revisao-modo-tab ativo" role="tab" aria-selected="true" data-modo="AMBOS">
                                     <span class="material-symbols-outlined">compare_arrows</span>Ambos (EN + cache)
                                 </button>
-                                <button type="button" class="revisao-modo-tab" role="tab" aria-selected="false" data-modo="CACHE">
+                                <button data-tooltip="Sem legenda em inglês: o original guardado no cache vira a referência e aparece o campo da pasta de cache. Entrada do cache sem vínculo seguro fica de fora." type="button" class="revisao-modo-tab" role="tab" aria-selected="false" data-modo="CACHE">
                                     <span class="material-symbols-outlined">database</span>Cache (sem EN)
                                 </button>
                             </div>
@@ -1366,7 +1366,7 @@
                             <div class="form-group">
                                 <label for="revisao-entrada">2º — Pasta com legendas TRADUZIDAS (.ass / .ssa) — <strong>é esta que será reescrita</strong>: <span
                                         class="help-icon"
-                                        data-tooltip="Arquivos *_PT-BR.ass ou *_PTBR_TrackN.ass gerados pela tradução. ATENÇÃO: é aqui que a revisão GRAVA, sempre com backup. Não aponte para a pasta de legendas extraídas.">?</span></label>
+                                        data-tooltip="Pasta dos *_PT-BR.ass que a tradução gerou. É aqui que a revisão GRAVA, sempre com backup; não aponte para as legendas extraídas.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="revisao-entrada" name="entrada" autocomplete="off"
                                         spellcheck="false"
@@ -1409,7 +1409,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">edit_note</span>
-                            <h3>Passadas de revisão</h3>
+                            <h3 data-tooltip="Os dois botões que gravam nos .ass: o 1 traduz com o LLM local o que ficou em inglês; o 2 usa só o Google. Ambos fazem backup antes de gravar.">Passadas de revisão</h3>
                             <span class="op-caixa-etiqueta">independentes</span>
                         </div>
                         <p class="op-caixa-desc">As duas leem e gravam os <strong>próprios arquivos .ass</strong> — não o
@@ -1484,7 +1484,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Logs da Revisão</h3>
+                            <h3 data-tooltip="Mostra ao vivo a revisão e, no fim, arquivos analisados, problemas achados, falas corrigidas e pendentes. Avisa se alguma linha de música mudou.">Logs da Revisão</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-revisao"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -1505,7 +1505,7 @@
                 <!-- 4.2 PAINEL DE CORREÇÃO DE KARAOKÊ -->
                 <div class="panel" id="panel-cura">
                     <div class="glass-card">
-                        <h2>Correção de Karaoke</h2>
+                        <h2 data-tooltip="Devolve à legenda PT-BR as tags, os tempos e a estrutura da original, que nunca é alterada. O traduzido é regravado no lugar, sem cópia de backup.">Correção de Karaoke</h2>
                         <p class="card-desc">Usa a legenda original como referência imutável e altera apenas a legenda
                             traduzida. Preserva estrutura, tempos e tags ASS; com contexto selecionado, também corrige
                             falas suspeitas via LLM local.</p>
@@ -1568,7 +1568,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">healing</span>
-                            <h3>O que a correção faz</h3>
+                            <h3 data-tooltip="Quadro explicativo das duas camadas: o conserto estrutural, que sempre roda e não usa LLM, e a correção pelo LLM, que só liga se você escolher a obra.">O que a correção faz</h3>
                             <span class="op-caixa-etiqueta">compara com a original</span>
                         </div>
                         <p class="op-caixa-desc">Põe o <code>.ass</code> original ao lado do traduzido e devolve ao traduzido a <strong>estrutura, os tempos, os estilos e as tags</strong> da original. <strong>A original nunca é reescrita</strong> — ela é só a referência.</p>
@@ -1579,7 +1579,7 @@
                                     <span class="op-titulo">Correção estrutural — sem LLM, sem internet</span>
                                     <span class="op-desc">É determinística: compara evento a evento e conserta o que se desalinhou. <strong>Sem obra escolhida, é só isto que roda</strong>, e é o caminho seguro.</span>
                                     <span class="op-selos">
-                                        <span class="op-selo op-selo-escreve">grava só o traduzido</span>
+                                        <span class="op-selo op-selo-escreve">grava o traduzido no lugar, sem backup</span>
                                         <span class="op-selo op-selo-seguro">não usa LLM</span>
                                     </span>
                                 </div>
@@ -1590,7 +1590,7 @@
                                     <span class="op-titulo">Correção por LLM — só quando você escolhe a obra</span>
                                     <span class="op-desc">Com a obra informada, as falas que <em>ainda</em> parecem quebradas depois do conserto estrutural podem ir ao modelo local. É camada extra e opcional, não o motor.</span>
                                     <span class="op-selos">
-                                        <span class="op-selo op-selo-escreve">grava só o traduzido</span>
+                                        <span class="op-selo op-selo-escreve">grava o traduzido no lugar, sem backup</span>
                                         <span class="op-selo op-selo-llm">LM Studio local</span>
                                         <span class="op-selo op-selo-rede">precisa do LM Studio no ar</span>
                                     </span>
@@ -1606,7 +1606,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Logs de Correção de Karaoke</h3>
+                            <h3 data-tooltip="Mostra ao vivo cada arquivo corrigido, pulado ou sem par, os avisos para revisar à mão, o caminho do relatório JSON e o tempo total no fim.">Logs de Correção de Karaoke</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-cura"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -1636,7 +1636,7 @@
                 <!-- 5.1 PAINEL DE REMUXER -->
                 <div class="panel" id="panel-remuxer">
                     <div class="glass-card">
-                        <h2>Remuxer Industrial</h2>
+                        <h2 data-tooltip="Gera MKVs novos juntando o vídeo original e a legenda PT-BR, sem recodificar e mantendo as legendas originais. O vídeo original não é alterado.">Remuxer Industrial</h2>
                         <p class="card-desc">Gere novos arquivos de vídeo contendo a faixa de vídeo original e as novas
                             legendas em português acopladas de maneira limpa.</p>
 
@@ -1645,7 +1645,7 @@
                         <form id="form-remuxer" class="standard-form">
                             <div class="form-group">
                                 <label for="remuxer-contexto">Obra / Contexto (obrigatório): <span class="help-icon"
-                                        data-tooltip="Escolha a obra antes de qualquer coisa: os campos de pasta e o botão só liberam depois. O remux publica arquivo definitivo, de gigabytes, com nome derivado da legenda — começar o lote sem ter dito de qual obra se trata é o caminho curto para publicar a temporada errada e só descobrir depois.">?</span></label>
+                                        data-tooltip="Escolha a obra primeiro: pastas e botão só liberam depois. O remux publica MKV definitivo; com a obra errada, sai a temporada errada.">?</span></label>
                                 <select id="remuxer-contexto">
                                     <option value="" disabled selected>Carregando contextos...</option>
                                 </select>
@@ -1665,7 +1665,7 @@
                             <div class="form-group">
                                 <label for="remuxer-legendas">Pasta com as legendas traduzidas (.ass/.srt): <span
                                         class="help-icon"
-                                        data-tooltip="Diretório onde estão as novas legendas ASS traduzidas. Deixe vazio para o KRONOS procurar sozinho a subpasta 'traducao_ptbr' ao lado dos vídeos — que é a pasta que a Tradução Local realmente gera.">?</span></label>
+                                        data-tooltip="Pasta das legendas ASS traduzidas. Vazio: o KRONOS procura a traducao_ptbr ao lado dos vídeos, que é onde a Tradução Local grava.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="remuxer-legendas"
                                         placeholder="Vazio = procura 'traducao_ptbr' dentro da pasta de vídeos">
@@ -1686,7 +1686,7 @@
                                 <div class="form-group">
                                     <label for="remuxer-destino">Pasta de destino (opcional): <span
                                             class="help-icon"
-                                            data-tooltip="Vazio = comportamento de sempre: cria a subpasta 'mkv_final_ptbr' DENTRO da pasta de vídeos. Use Procurar... para gravar em outro disco ou pasta. O destino não pode ser a própria pasta de vídeos nem a das legendas — o MKV gerado seria lido como entrada na próxima execução.">?</span></label>
+                                            data-tooltip="Vazio: grava em mkv_final_ptbr dentro da pasta de vídeos. Não use a pasta de vídeos nem a das legendas: o MKV viraria entrada depois.">?</span></label>
                                     <div class="input-with-button">
                                         <input type="text" id="remuxer-destino"
                                             placeholder="Deixe vazio p/ criar 'mkv_final_ptbr' dentro da pasta de vídeos">
@@ -1703,7 +1703,7 @@
                             <div class="form-group">
                                 <label for="remuxer-sync-offset">Sincronismo manual da legenda (ms, opcional): <span
                                         class="help-icon"
-                                        data-tooltip="Use quando o vídeo e a legenda vêm de releases/fontes diferentes e a legenda fica atrasada ou adiantada em relação à fala. Positivo atrasa a legenda, negativo adianta. Ex: 350 ou -1200.">?</span></label>
+                                        data-tooltip="Para legenda de outra release fora de tempo: positivo atrasa a legenda, negativo adianta. Em milissegundos, ex.: 350 ou -1200.">?</span></label>
                                 <input type="number" id="remuxer-sync-offset"
                                     placeholder="Ex: 350 (atrasa) ou -1200 (adianta)" step="1"
                                     min="-86400000" max="86400000">
@@ -1713,7 +1713,7 @@
                                     <input type="checkbox" id="remuxer-preservar-legendas" checked disabled>
                                     As legendas originais do MKV são sempre preservadas
                                     <span class="help-icon"
-                                        data-tooltip="A legenda PT-BR entra como PRIMEIRA opção — é a que abre por padrão no player. As faixas que já estavam no arquivo continuam disponíveis como segunda escolha. Nenhuma legenda é removida: perder a faixa de origem é irreversível a partir do MKV remuxado.">?</span>
+                                        data-tooltip="A PT-BR entra como primeira faixa, a que o player abre. As antigas continuam como opção; nenhuma sai, porque perdê-la no MKV é irreversível.">?</span>
                                 </label>
                             </div>
                             <div class="correcao-actions">
@@ -1734,7 +1734,7 @@
                     <div class="glass-card op-caixa">
                         <div class="op-caixa-cabecalho">
                             <span class="material-symbols-outlined op-caixa-icone">layers</span>
-                            <h3>O que o remuxer faz</h3>
+                            <h3 data-tooltip="Explica, antes do clique, como o MKV é gerado em temporário, conferido e publicado sem sobrescrever, e como o atraso em ms desloca a legenda.">O que o remuxer faz</h3>
                             <span class="op-caixa-etiqueta">publica sem sobrescrever</span>
                         </div>
                         <p class="op-caixa-desc">Junta o <strong>vídeo original</strong> com a <strong>legenda já revisada</strong> num <code>.mkv</code> novo, via <code>mkvmerge</code>. Vídeo e áudio passam sem recodificar — não há perda de qualidade e não demora como uma conversão.</p>
@@ -1771,7 +1771,7 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Logs do Remuxer</h3>
+                            <h3 data-tooltip="Resultado de cada arquivo do lote e o resumo final: sucessos, pendências, falhas, vídeos sem legenda e destinos já existentes preservados.">Logs do Remuxer</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-remuxer"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -1800,7 +1800,7 @@
                 <!-- SISTEMA — PAINEL DE MAPA DO PROJETO -->
                 <div class="panel" id="panel-mapa">
                     <div class="glass-card">
-                        <h2>Mapeamento de Estrutura & Taxonomia</h2>
+                        <h2 data-tooltip="Gera o mapa do código do KRONOS: árvore de pastas e lista dos arquivos-fonte Java e Python com o cabeçalho de cada um, para consulta e documentação.">Mapeamento de Estrutura & Taxonomia</h2>
                         <p class="card-desc">Varre recursivamente os arquivos do repositório Java, gerando o relatório
                             markdown de arquitetura e taxonomia automaticamente.</p>
 
@@ -1815,7 +1815,7 @@
 
                     <div class="glass-card console-card viewer-card">
                         <div class="console-header">
-                            <h3>Estrutura do Projeto</h3>
+                            <h3 data-tooltip="Mostra o mapa gerado: árvore de pastas e arquivos-fonte com seus cabeçalhos. Pode ser copiado ou baixado pelos botões desta barra.">Estrutura do Projeto</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="viewer-mapa"
                                     data-tooltip="Alternar altura expandida do console"><span
@@ -1846,7 +1846,7 @@
                         <div class="telemetry-toolbar">
                             <div>
                                 <span class="section-kicker">Telemetria KRONOS</span>
-                                <h2>Observabilidade da Tradução</h2>
+                                <h2 data-tooltip="Métricas do KRONOS lidas dos arquivos de telemetria: cache, LLM, revisão de lore, servidor Java e histórico. Atualiza a cada 5 s com a tela aberta.">Observabilidade da Tradução</h2>
                             </div>
                             <div class="telemetry-actions">
                                 <button type="button" class="btn btn-secondary" id="btn-refresh-telemetria"
@@ -1860,7 +1860,7 @@
                                     <span>Exportar Estatisticas</span>
                                 </button>
                                 <button type="button" class="btn btn-primary btn-green" id="btn-publicar-dataset"
-                                    data-tooltip="Gera um snapshot sanitizado (só métricas, sem textos de legenda nem caminhos), commita e faz push para o repositório público kronos-anime-translation-telemetry-dataset no GitHub.">
+                                    data-tooltip="Gera um retrato só com métricas (sem texto de legenda nem caminhos), faz commit e push para o repositório público do dataset no GitHub.">
                                     <span class="material-symbols-outlined btn-icon">cloud_upload</span>
                                     <span>Publicar Dataset</span>
                                 </button>
@@ -1873,7 +1873,7 @@
                              consolidado da própria fatia e publica o próprio dataset. -->
                         <section class="glass-card fatias-card">
                             <div class="card-header-com-stats">
-                                <h3>Telemetria por fatia</h3>
+                                <h3 data-tooltip="Operações reunidas por fatia a partir das pastas de relatório. Escolha uma aba para ver a tabela; use Consolidar para incluir registros novos.">Telemetria por fatia</h3>
                                 <div class="stats-badges-container">
                                     <span class="meta-badge" id="fatias-total">—</span>
                                     <button type="button" class="btn btn-secondary btn-consolidar-fatias"
@@ -1980,11 +1980,11 @@
                             <div class="lore-strip-header">
                                 <div class="lore-strip-title">
                                     <span class="insight-kicker accent-magenta">Revisão de Lore</span>
-                                    <h3>Terminologia e nomes canônicos</h3>
+                                    <h3 data-tooltip="Totais das sessões da 3.2 Revisão de Lore que ainda estão no histórico: arquivos, falas sinalizadas e falas corrigidas.">Terminologia e nomes canônicos</h3>
                                     <p class="lore-strip-hint" id="t-lore-hint">Aguardando sessões de revisão de lore.
                                     </p>
                                 </div>
-                                <button type="button" class="btn btn-secondary btn-compact"
+                                <button data-tooltip="Filtra o Histórico Operacional abaixo para mostrar só as sessões de Revisão de Lore, limpa a busca e rola a tela até a tabela." type="button" class="btn btn-secondary btn-compact"
                                     id="btn-filtrar-lore-historico" hidden>
                                     Ver no histórico
                                 </button>
@@ -2016,7 +2016,7 @@
                         <div class="telemetry-insights-grid">
                             <section class="telemetry-insight-card">
                                 <span class="insight-kicker accent-purple">Triagem e Custo</span>
-                                <h3>Funil de Processamento Cognitivo</h3>
+                                <h3 data-tooltip="Falas dos episódios traduzidos divididas entre cache e LLM local. A barra Brutas não é medida: é o total de falas mais 15%.">Funil de Processamento Cognitivo</h3>
                                 <p>Volume de falas filtradas ate o acionamento real do LLM local.</p>
                                 <div class="telemetry-chart-box">
                                     <div id="chart-funil-processamento" class="telemetry-dom-chart"></div>
@@ -2028,7 +2028,7 @@
                             </section>
                             <section class="telemetry-insight-card">
                                 <span class="insight-kicker accent-yellow">Modelos Utilizados</span>
-                                <h3>Distribuicao de Modelos LLM</h3>
+                                <h3 data-tooltip="Quantos episódios traduzidos usaram cada modelo do LLM local, pelo registro mais recente de cada episódio. O centro mostra o total.">Distribuicao de Modelos LLM</h3>
                                 <p>Frequencia agregada das chamadas locais registradas no historico.</p>
                                 <div class="telemetry-chart-box">
                                     <div id="chart-modelos-llm" class="telemetry-dom-chart"></div>
@@ -2040,7 +2040,7 @@
                             </section>
                             <section class="telemetry-insight-card">
                                 <span class="insight-kicker accent-cyan">Recursos da JVM</span>
-                                <h3>Servidor Java</h3>
+                                <h3 data-tooltip="CPU, threads e memória (heap) do processo Java do KRONOS. O gráfico mostra as últimas 15 leituras: roxo é CPU, ciano é heap.">Servidor Java</h3>
                                 <p>Monitoramento operacional inferido pela atividade recente da API local.</p>
                                 <div class="jvm-list" style="margin-bottom: 10px;">
                                     <span>CPU Processo: <strong id="t-jvm-cpu">--</strong></span>
@@ -2057,35 +2057,35 @@
                             <div class="telemetry-card-header">
                                 <div>
                                     <span class="section-kicker">Eventos &middot; Pipeline</span>
-                                    <h3>Historico Operacional</h3>
+                                    <h3 data-tooltip="Operações do pipeline, traduções por episódio e análises de mídia, da mais recente para a mais antiga, 12 por página.">Historico Operacional</h3>
                                     <p class="telemetry-table-count" id="t-table-count">0 operacoes registradas</p>
                                 </div>
                                 <div class="telemetry-search">
                                     <span class="material-symbols-outlined search-icon-sym"
                                         style="font-size: 16px; margin-right: 4px; vertical-align: middle; color: var(--text-muted);">search</span>
-                                    <input type="search" id="t-table-search"
+                                    <input data-tooltip="Digite parte do nome da operação ou do detalhe (pasta, episódio). A tabela filtra enquanto você digita, sem diferenciar maiúsculas." type="search" id="t-table-search"
                                         placeholder="Buscar por operacao ou conteudo..." autocomplete="off">
                                 </div>
                             </div>
 
                             <div class="telemetry-filter-chips" id="t-filter-chips">
-                                <button type="button" class="filter-chip active" data-filtro="todas">
+                                <button type="button" class="filter-chip active" data-filtro="todas" data-tooltip="Mostra todas as operações do histórico; o número é o total.">
                                     <span class="chip-dot" style="background:#8b97ad"></span>
                                     <span class="chip-label">Todas</span>
                                     <span class="chip-count" id="chip-count-todas">0</span>
                                 </button>
                             </div>
 
-                            <div class="telemetria-details-container">
+                            <div class="telemetria-details-container" tabindex="0" role="region" aria-label="Tabela do histórico operacional, com rolagem">
                                 <table class="telemetria-table">
                                     <thead>
                                         <tr>
-                                            <th>Data/Hora</th>
-                                            <th>Operacao</th>
-                                            <th>Origem</th>
-                                            <th>Detalhe / Chave</th>
-                                            <th>Duracao</th>
-                                            <th>Confianca</th>
+                                            <th data-tooltip="Quando a operação foi registrada, em horário UTC, não no fuso local. A tabela já vem da mais recente para a mais antiga; clicar não ordena.">Data/Hora</th>
+                                            <th data-tooltip="Tipo de operação registrada, como Tradução LLM ou Análise de Mídia. O ponto colorido indica a origem; para filtrar, use os botões acima.">Operacao</th>
+                                            <th data-tooltip="Quem fez o trabalho, deduzido do nome da operação: LLM, LORE, GOOGLE, CACHE ou SISTEMA. Clicar no título não filtra nem ordena.">Origem</th>
+                                            <th data-tooltip="Pasta, arquivo ou episódio da operação, com arquivos, detectados e corrigidos quando houver. Texto longo aparece cortado; passe o mouse para ler.">Detalhe / Chave</th>
+                                            <th data-tooltip="Tempo total da operação em segundos ou minutos. Verde: menos de 5 s; amarelo: 1 minuto ou mais. Traço quando não foi medido.">Duracao</th>
+                                            <th data-tooltip="Percentual dos itens detectados que a operação corrigiu, arredondado para baixo. Traço quando nada foi detectado; não mede a qualidade.">Confianca</th>
                                         </tr>
                                     </thead>
                                     <tbody id="telemetria-table-body">
@@ -2100,9 +2100,9 @@
                             <div class="telemetry-pagination">
                                 <span class="pagination-info" id="t-pagination-info">Pagina 1 de 1</span>
                                 <div class="pagination-buttons">
-                                    <button type="button" class="btn btn-secondary" id="t-page-prev"
+                                    <button data-tooltip="Volta para a página anterior, com operações mais recentes (12 por página). Fica desativado na primeira página." type="button" class="btn btn-secondary" id="t-page-prev"
                                         disabled>Anterior</button>
-                                    <button type="button" class="btn btn-secondary" id="t-page-next"
+                                    <button data-tooltip="Avança para a próxima página, com operações mais antigas (12 por página). Fica desativado na última página." type="button" class="btn btn-secondary" id="t-page-next"
                                         disabled>Proxima</button>
                                 </div>
                             </div>
@@ -2111,7 +2111,7 @@
                         <section class="glass-card telemetry-audit-card">
                             <div>
                                 <span class="section-kicker accent-cyan">KRONOS Audit Stream</span>
-                                <h3>Log Auditavel do Pipeline de Traducao</h3>
+                                <h3 data-tooltip="Resumo da última atualização: hora em UTC, total de operações, falas registradas e percentual de cache. Muda a cada nova leitura.">Log Auditavel do Pipeline de Traducao</h3>
                                 <p>Registro sintetico das metricas recebidas do endpoint local de telemetria.</p>
                             </div>
                             <span class="telemetry-status stream">Stream ativo</span>
@@ -2126,7 +2126,7 @@
                     <div class="doc-layout">
                         <aside class="doc-sidebar">
                             <div class="doc-sidebar-header">
-                                <h3><span class="material-symbols-outlined doc-sidebar-icon"
+                                <h3 data-tooltip="Índice de todas as páginas, em quatro grupos: fundamentos, etapas do pipeline, módulos de apoio e referência. Clique num item para ler a página."><span class="material-symbols-outlined doc-sidebar-icon"
                                         style="vertical-align: middle; margin-right: 6px;">menu_book</span>Documentação
                                 </h3>
                                 <span class="doc-version">KRONOS CORE</span>
@@ -2262,12 +2262,12 @@
                                     <span class="current" id="doc-breadcrumb-atual">Visão Geral</span>
                                 </div>
                                 <div class="doc-toolbar-actions">
-                                    <button class="doc-btn-tool" id="btn-doc-copiar"><span
+                                    <button data-tooltip="Copia o texto da página aberta, em Markdown, para a área de transferência. Sem página escolhida no índice, só mostra um aviso." class="doc-btn-tool" id="btn-doc-copiar"><span
                                             class="material-symbols-outlined btn-inline-icon">content_copy</span>Copiar</button>
-                                    <button class="doc-btn-tool" id="btn-doc-exportar"><span
+                                    <button data-tooltip="Baixa a página aberta como arquivo Markdown, com o nome da página. Sem página escolhida no índice, só mostra um aviso." class="doc-btn-tool" id="btn-doc-exportar"><span
                                             class="material-symbols-outlined btn-inline-icon">download</span>Exportar
                                         .md</button>
-                                    <button class="doc-btn-tool" id="btn-doc-imprimir"><span
+                                    <button data-tooltip="Abre a janela de impressão do navegador só com o conteúdo da documentação, sem os menus, o cabeçalho e esta barra de botões." class="doc-btn-tool" id="btn-doc-imprimir"><span
                                             class="material-symbols-outlined btn-inline-icon">print</span>Imprimir</button>
                                 </div>
                             </div>
@@ -2277,7 +2277,7 @@
                                     <div style="font-size:48px; margin-bottom:12px; color: var(--accent-magenta);"><span
                                             class="material-symbols-outlined" style="font-size: 48px;">menu_book</span>
                                     </div>
-                                    <h1>Documentação Técnica</h1>
+                                    <h1 data-tooltip="Página de entrada da documentação. Os cartões abaixo são atalhos para cinco páginas; o índice da documentação lista todas.">Documentação Técnica</h1>
                                     <p>Guia completo do <strong>KRONOS CORE</strong> — arquitetura, todos os módulos do
                                         pipeline, referência de API REST e diagnósticos.</p>
                                     <div class="doc-welcome-grid">
@@ -2370,7 +2370,7 @@
     <div id="modal-sair" class="modal-overlay hidden" role="dialog" aria-modal="true"
         aria-labelledby="modal-sair-titulo">
         <div class="modal-box">
-            <h3 id="modal-sair-titulo">Encerrar a aplicação?</h3>
+            <h3 data-tooltip="Confirmação antes de desligar o servidor do KRONOS. Nada é encerrado até você clicar em Encerrar; Cancelar ou clicar fora fecha esta janela." id="modal-sair-titulo">Encerrar a aplicação?</h3>
             <p>O servidor web será desligado e a interface deixará de responder. Para usar o KRONOS CORE novamente será
                 preciso iniciá-lo outra vez.</p>
             <p id="modal-sair-aviso-pipeline" class="modal-aviso hidden">
@@ -2378,8 +2378,8 @@
                 preservado.
             </p>
             <div class="modal-acoes">
-                <button id="btn-sair-cancelar" class="btn btn-secondary" type="button">Cancelar</button>
-                <button id="btn-sair-confirmar" class="btn btn-danger" type="button">Encerrar</button>
+                <button data-tooltip="Fecha esta janela sem encerrar nada: o servidor e o trabalho em andamento continuam rodando normalmente." id="btn-sair-cancelar" class="btn btn-secondary" type="button">Cancelar</button>
+                <button data-tooltip="Desliga o servidor. O trabalho em andamento para no próximo ponto seguro e as tarefas à espera na fila são descartadas. Para voltar, inicie o KRONOS de novo." id="btn-sair-confirmar" class="btn btn-danger" type="button">Encerrar</button>
             </div>
         </div>
     </div>
@@ -2394,7 +2394,7 @@
     <div id="modal-navegador" class="modal-overlay hidden" role="dialog" aria-modal="true"
         aria-labelledby="modal-navegador-titulo">
         <div class="modal-box modal-navegador-box">
-            <h3 id="modal-navegador-titulo">Escolher pasta</h3>
+            <h3 data-tooltip="Pastas que o servidor do KRONOS enxerga, só dentro das raízes permitidas. Clique numa pasta para entrar; se o campo pede arquivo, clique no arquivo." id="modal-navegador-titulo">Escolher pasta</h3>
             <div class="navegador-barra">
                 <button type="button" id="btn-navegador-subir" class="btn btn-secondary btn-navegador-subir"
                     data-tooltip="Subir um nível (nunca sai da raiz permitida)">
@@ -2406,8 +2406,8 @@
                 aria-labelledby="modal-navegador-titulo"></div>
             <p id="navegador-aviso" class="modal-aviso hidden"></p>
             <div class="modal-acoes">
-                <button id="btn-navegador-cancelar" class="btn btn-secondary" type="button">Cancelar</button>
-                <button id="btn-navegador-confirmar" class="btn btn-primary" type="button">Usar esta pasta</button>
+                <button data-tooltip="Fecha a janela sem escolher nada; o campo do formulário fica como estava. A tecla Esc faz o mesmo." id="btn-navegador-cancelar" class="btn btn-secondary" type="button">Cancelar</button>
+                <button data-tooltip="Preenche o campo com a pasta aberta agora, cujo caminho aparece no alto. Fica desativado na lista de raízes: entre numa pasta antes." id="btn-navegador-confirmar" class="btn btn-primary" type="button">Usar esta pasta</button>
             </div>
         </div>
     </div>
@@ -2415,7 +2415,7 @@
     <!-- Cobertura de tela após o encerramento ser confirmado -->
     <div id="overlay-encerrado" class="modal-overlay hidden">
         <div class="modal-box overlay-encerrado-box">
-            <h3>Aplicação encerrada</h3>
+            <h3 data-tooltip="Aviso final: o servidor do KRONOS foi desligado e esta tela não responde mais. Para usar de novo, é preciso iniciar a aplicação outra vez.">Aplicação encerrada</h3>
             <p>O servidor foi desligado. Pode fechar esta aba com segurança.</p>
         </div>
     </div>

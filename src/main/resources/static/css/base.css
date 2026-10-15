@@ -17,7 +17,8 @@
     
     --text-primary: #eaf0f8;
     --text-secondary: #8b97ad;
-    --text-muted: #5b6679;
+    /* #5b6679 dava 3,1-3,5:1 nos fundos do painel (axe, WCAG 1.4.3); este passa de 4,7:1 em todos */
+    --text-muted: #77849a;
     
     /* Cores de Destaque */
     --accent-blue: #38bdf8;
@@ -174,6 +175,10 @@ body {
 }
 
 .brand-info h2 {
+    /* texto e o "?" da dica na mesma linha (a coluna da marca é estreita) */
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: 0.03125rem;
@@ -1311,7 +1316,8 @@ span.console-action-icon.material-symbols-outlined {
 }
 
 .system-message {
-    color: var(--text-muted);
+    /* --text-muted (#5b6679) não chegava a 4,5:1 sobre o fundo do console (axe) */
+    color: var(--text-secondary);
     font-style: italic;
 }
 

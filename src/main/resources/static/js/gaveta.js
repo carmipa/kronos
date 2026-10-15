@@ -12,8 +12,9 @@
  *    conteúdo volta a responder (nada fica `inert` para sempre);
  *  - aberta, só ela recebe foco e toque: o conteúdo atrás fica `inert`; o foco de abertura é a
  *    própria gaveta (focar um item abriria a dica dele e o primeiro Esc fecharia só a dica);
- *  - Esc com uma dica (tooltip) aberta dentro da gaveta fecha só a dica; o Esc seguinte fecha a
- *    gaveta (a dica tem de poder ser dispensada sem mover o foco);
+ *  - Esc com uma dica (tooltip) aberta pelo foco ou pelo toque dentro da gaveta fecha só a dica; o
+ *    Esc seguinte fecha a gaveta (a dica tem de poder ser dispensada sem mover o foco); dica aberta
+ *    só por hover fecha junto com a gaveta;
  *  - a gaveta se move por `left`, nunca por `transform`: `transform` num ancestral muda a
  *    referência do `position: fixed` e o tooltip canônico abriria fora da tela;
  *  - abrir o painel pelo endereço (`/#telemetria`) com a gaveta fechada não mexe no foco.
@@ -97,7 +98,10 @@ export function inicializarGaveta() {
     // se havia uma dica aberta neste Esc.
     window.addEventListener('keydown', (evento) => {
         if (evento.key !== 'Escape' || !estaAberta()) return;
-        const dicaAberta = [...gaveta.querySelectorAll('.dica__texto')]
+        // Só dica aberta pelo foco (teclado) ou pelo toque segura a gaveta: fechar a gaveta tiraria
+        // o foco de quem só queria esconder a dica. Dica aberta por hover (o ponteiro parado onde a
+        // gaveta abriu) fecha junto, no mesmo Esc.
+        const dicaAberta = [...gaveta.querySelectorAll('.dica:focus-within > .dica__texto, .dica[data-aberta] > .dica__texto')]
             .some((t) => getComputedStyle(t).visibility === 'visible');
         if (dicaAberta) return;
         fechar('botao');

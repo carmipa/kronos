@@ -1,5 +1,5 @@
                     <div class="glass-card">
-                        <h2>Sanitizador Industrial de Nomes (Bulk Renamer)</h2>
+                        <h2 data-tooltip="Troca nomes de release por &#x27;Nome - S01E01&#x27; nos vídeos e legendas da pasta. Simule antes; cada aplicação pode ser desfeita com Reverter.">Sanitizador Industrial de Nomes (Bulk Renamer)</h2>
                         <p class="card-desc">Limpe nomes confusos de release groups de tracker em nomes de arquivo limpos (vídeos e legendas) usando expressões regulares e metadados, mantendo suporte ao rollback (Reversão).</p>
 
                         <div class="anime-meta-banner hidden" id="meta-banner-limpanome"></div>
@@ -19,7 +19,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="limpanome-padrao">Nome Novo Padrão (Sem Extensão): <span class="help-icon" data-tooltip="O padrão de nomenclatura para o arquivo base. Exemplo: 'Nome do Anime'. Em séries, o sistema adicionará ' - SxxE[Num]' usando a temporada informada e o episódio detectado.">?</span></label>
+                                <label for="limpanome-padrao">Nome Novo Padrão (Sem Extensão): <span class="help-icon" data-tooltip="Nome-base do arquivo, ex.: &#x27;Nome do Anime&#x27;. Em séries entra &#x27; - SxxE&#x27; com a temporada informada e o episódio detectado.">?</span></label>
                                 <input type="text" id="limpanome-padrao" placeholder="Ex: DanMachi Season 4" required>
                             </div>
                             <div class="form-group">
@@ -51,7 +51,7 @@
     <div class="glass-card op-caixa">
         <div class="op-caixa-cabecalho">
             <span class="material-symbols-outlined op-caixa-icone">drive_file_rename_outline</span>
-            <h3>O que a renomeação faz</h3>
+            <h3 data-tooltip="Garantias da ferramenta: a simulação não renomeia nada, arquivo sem episódio legível fica intacto e cada aplicação grava um manifesto para desfazer.">O que a renomeação faz</h3>
             <span class="op-caixa-etiqueta">simula antes, desfaz depois</span>
         </div>
         <p class="op-caixa-desc">Troca o nome de release group por <code>Nome do Anime - S01E01</code>, tirando o número do episódio por padrão de texto.</p>
@@ -93,7 +93,7 @@
                     
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3>Relatório de Renomeação</h3>
+                            <h3 data-tooltip="Uma linha por arquivo: de -&gt; para na simulação, OK ou FALHA ao aplicar, REVERTENDO ao desfazer; IGNORADO e CONFLITO mantêm o nome antigo.">Relatório de Renomeação</h3>
                             <div class="console-actions">
                                 <button class="btn-toggle-console" data-target="console-renomear-arquivos" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
                                 <button class="btn-copy-console" data-target="console-renomear-arquivos" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
