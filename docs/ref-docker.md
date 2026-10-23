@@ -240,7 +240,12 @@ docker compose -f docker-compose.vitrine.yml up -d --build   # prova local em ht
 - **Real (só lê memória):** estáticos (`html js css webp png svg ico woff2` — o `woff2` desde que
   fontes e ícones passaram a ser servidos pelo próprio KRONOS; `woff`, `ttf` e `otf` seguem recusados),
   `/api/status`, `/api/pipeline/status`, `/api/contextos`,
-  `/api/revisao-lore/contextos` e `/api/docs/*` (as 28 páginas desta pasta).
+  `/api/revisao-lore/contextos` e `/api/docs/*` (as 29 páginas desta pasta).
+- **Para os buscadores** (`vitrine/application/IndexacaoVitrine`, fonte única): `/robots.txt` e
+  `/sitemap.xml` são respondidos pela própria vitrine; `/index.html` redireciona com 301 para `/`.
+  O robots fecha `/api` e os pedaços de tela que o JavaScript encaixa na página, pelo arquivo
+  exato, e deixa abertas as páginas de erro (elas levam `noindex`). Revisão e guardas em
+  [seo-2026-10-23.md](seo-2026-10-23.md).
 - **Demonstração** (`src/main/resources/vitrine/demonstracao/`): telemetria,
   fatias, fluxo, LLM e capacidade do diálogo. A telemetria é um **retrato saneado**
   da real, de 14/10/2026: caminhos encurtados para os dois últimos segmentos e

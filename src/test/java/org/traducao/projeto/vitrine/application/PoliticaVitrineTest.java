@@ -46,7 +46,6 @@ class PoliticaVitrineTest {
         "GET,/api/telemetria/stream,SSE_TELEMETRIA",
         // estático
         "GET,/,PERMITIR",
-        "GET,/index.html,PERMITIR",
         "GET,/js/app.js,PERMITIR",
         "HEAD,/css/base.css,PERMITIR",
         "GET,/img/kronos_logo.svg,PERMITIR",
@@ -100,6 +99,19 @@ class PoliticaVitrineTest {
         "GET,/Mcp/sse,BLOQUEAR",
         "GET,/Q/dev-ui,BLOQUEAR",
         "POST,/pagina-que-nao-existe,BLOQUEAR",
+        // indexação: os três endereços exatos; o mesmo sinal em outro lugar segue a regra geral
+        "GET,/robots.txt,ROBOTS",
+        "HEAD,/robots.txt,ROBOTS",
+        "GET,/sitemap.xml,SITEMAP",
+        "GET,/index.html,REDIRECIONAR_RAIZ",
+        "HEAD,/index.html,REDIRECIONAR_RAIZ",
+        "POST,/robots.txt,BLOQUEAR",
+        "POST,/index.html,BLOQUEAR",
+        "GET,/sobre/robots.txt,NAO_ENCONTRADO",
+        "GET,/robots.txt.bak,NAO_ENCONTRADO",
+        "GET,/sitemap.xml.gz,NAO_ENCONTRADO",
+        "GET,/sobre/index.html,PERMITIR",
+        "GET,/Robots.txt,NAO_ENCONTRADO",
     })
     @DisplayName("tabela de decisão da vitrine")
     void tabela(String metodo, String caminho, Acao esperado) {

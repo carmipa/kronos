@@ -10,6 +10,21 @@
     <title>KRONOS CORE Pipeline Industrial</title>
     <meta name="description"
         content="Interface web premium para gerenciar a tradução, extração, análise de mídia, remuxer e telemetria de legendas de animes.">
+    <!-- Endereço oficial e prévia em redes sociais. O host é fixo (o mesmo da classe IndexacaoVitrine,
+         conferido por teste), nunca o que veio na requisição. -->
+    <link rel="canonical" href="https://kronos.carminati.dev.br/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="KRONOS CORE">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:url" content="https://kronos.carminati.dev.br/">
+    <meta property="og:title" content="KRONOS CORE Pipeline Industrial">
+    <meta property="og:description"
+        content="Interface web premium para gerenciar a tradução, extração, análise de mídia, remuxer e telemetria de legendas de animes.">
+    <meta property="og:image" content="https://kronos.carminati.dev.br/img/og-kronos.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Painel inicial do KRONOS CORE com o menu das etapas e os cartões do pipeline.">
+    <meta name="twitter:card" content="summary_large_image">
     <!-- Fontes e ícones servidos pelo próprio KRONOS: sem rede, o ícone não pode virar palavra -->
     <!-- Dica (tooltip) canônica da regra 6-A, sem edição; antes do CSS do projeto para as regras dele vencerem empates -->
     <link rel="stylesheet" href="dica/dica.css?v=1.0">
@@ -59,7 +74,7 @@
             </button>
             <div class="brand" translate="no">
                 <div class="brand-logo">
-                    <img src="img/kronos_logo.svg" alt="Logo"
+                    <img src="img/kronos_logo.svg" alt="" width="38" height="38"
                         style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;">
                 </div>
                 <div class="brand-info">
@@ -2128,6 +2143,7 @@
                         <aside class="doc-sidebar">
                             <div class="doc-sidebar-header">
                                 <h3 data-tooltip="Índice de todas as páginas, em quatro grupos: fundamentos, etapas do pipeline, módulos de apoio e referência. Clique num item para ler a página."><span class="material-symbols-outlined doc-sidebar-icon"
+                                        aria-hidden="true" translate="no"
                                         style="vertical-align: middle; margin-right: 6px;">menu_book</span>Documentação
                                 </h3>
                                 <span class="doc-version">KRONOS CORE</span>
@@ -2243,6 +2259,10 @@
                                         data-titulo="Docker &amp; Contêineres"><span
                                             class="material-symbols-outlined doc-item-icon">deployed_code</span>Docker &amp;
                                         Contêineres</button>
+                                    <button class="doc-nav-item" data-pagina="seo-2026-10-23"
+                                        data-titulo="Revisão de SEO da Vitrine"><span
+                                            class="material-symbols-outlined doc-item-icon">search</span>Revisão de
+                                        SEO</button>
                                     <button class="doc-nav-item" data-pagina="ref-solucao-problemas"
                                         data-titulo="Solução de Problemas"><span
                                             class="material-symbols-outlined doc-item-icon">healing</span>Solução de

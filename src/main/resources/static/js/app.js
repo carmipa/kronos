@@ -1441,7 +1441,7 @@ function renderizarBannerMetadata(banner, meta) {
     }
 
     const posterHtml = meta.posterUrl 
-        ? `<div class="meta-poster-container"><img src="${escapeHtml(meta.posterUrl)}" alt="${escapeHtml(meta.titulo)}" class="meta-poster-img" onerror="this.src='img/kronos_logo.svg'"></div>`
+        ? `<div class="meta-poster-container"><img src="${escapeHtml(meta.posterUrl)}" alt="${escapeHtml(meta.titulo)}" width="100" height="140" class="meta-poster-img" onerror="this.src='img/kronos_logo.svg'"></div>`
         : '';
 
     const scoreHtml = meta.score ? `<span class="meta-badge score"><span class="material-symbols-outlined">star</span> ${meta.score}</span>` : '';

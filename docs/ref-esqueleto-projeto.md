@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **515** |
-| classes em `src/test` | **486** |
+| classes em `src/main` | **516** |
+| classes em `src/test` | **489** |
 
 ---
 
@@ -40,7 +40,7 @@ graph TB
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
-    G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (3)<br/>vitrine (4)"]:::fatia
+    G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (3)<br/>vitrine (5)"]:::fatia
     PEERS["<b>🧱 peers</b><br/><i>importáveis por qualquer fatia</i><br/>cachetraducao (5)<br/>legenda (15)<br/>llm (4)<br/>lore (24)<br/>qualidadeTraducao (17)"]:::peer
     BASE["<b>⚙️ infra transversal</b><br/>config (2)<br/>core (36)"]:::base
     G0 --> PEERS
@@ -730,11 +730,12 @@ sistema/
     └── SistemaController.java
 ```
 
-#### `vitrine` — 4 classes
+#### `vitrine` — 5 classes
 
 ```text
 vitrine/
 ├── application/
+│   ├── IndexacaoVitrine.java
 │   └── PoliticaVitrine.java
 ├── infrastructure/
 │   └── DadosDemonstracao.java
@@ -935,7 +936,7 @@ core/
 
 ---
 
-## Testes — 486 classes
+## Testes — 489 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1694,7 +1695,7 @@ trocaTipoLegenda/
     └── ClassificadorCamadaMusicalLegendaAdapterTest.java
 ```
 
-#### `vitrine` — 6 classes
+#### `vitrine` — 9 classes
 
 ```text
 vitrine/
@@ -1702,13 +1703,16 @@ vitrine/
 │   └── PoliticaVitrineTest.java
 ├── arquitetura/
 │   ├── VitrineConteudoPublicoTest.java
+│   ├── VitrineIndexacaoArquivosTest.java
 │   └── VitrineRotasDoCodigoTest.java
 └── presentation/
     ├── bootstrap/
     │   └── ConferenciaArranqueVitrineTest.java
     └── web/
         ├── GuardaVitrineDesligadaTest.java
-        └── GuardaVitrineHttpTest.java
+        ├── GuardaVitrineHttpTest.java
+        ├── IndexacaoVitrineHttpTest.java
+        └── LeitorRobotsTxt.java
 ```
 
 ---

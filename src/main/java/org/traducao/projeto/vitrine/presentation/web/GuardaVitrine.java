@@ -10,6 +10,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traducao.projeto.core.vitrine.ModoVitrine;
+import org.traducao.projeto.vitrine.application.IndexacaoVitrine;
 import org.traducao.projeto.vitrine.application.PoliticaVitrine;
 import org.traducao.projeto.vitrine.application.PoliticaVitrine.Decisao;
 import org.traducao.projeto.vitrine.infrastructure.DadosDemonstracao;
@@ -155,8 +156,35 @@ public class GuardaVitrine {
             case SSE_LOGS -> abrirSse(rc, false);
             case SSE_TELEMETRIA -> abrirSse(rc, true);
             case NAO_ENCONTRADO -> naoEncontrado(rc);
+            case ROBOTS -> responderIndexacao(rc, "text/plain; charset=utf-8", IndexacaoVitrine.robotsTxt());
+            case SITEMAP -> responderIndexacao(rc, "application/xml; charset=utf-8", IndexacaoVitrine.sitemapXml());
+            case REDIRECIONAR_RAIZ -> rc.response()
+                .setStatusCode(301)
+                .putHeader("Location", "/")
+                .putHeader("Cache-Control", "no-store")
+                .end();
             default -> recusar(rc);
         }
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: entrega o {@code robots.txt} ou o {@code sitemap.xml} da vitrine.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: texto montado de constantes, nunca da requisição; HEAD recebe só os
+     * cabeçalhos.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: não há caminho de falha próprio.
+     */
+    private static void responderIndexacao(RoutingContext rc, String tipo, String corpo) {
+        HttpServerResponse resposta = rc.response()
+            .setStatusCode(200)
+            .putHeader("Content-Type", tipo)
+            .putHeader("Cache-Control", "public, max-age=3600");
+        if ("HEAD".equals(rc.request().method().name())) {
+            resposta.putHeader("Content-Length", String.valueOf(corpo.getBytes(StandardCharsets.UTF_8).length)).end();
+            return;
+        }
+        resposta.end(corpo);
     }
 
     /**

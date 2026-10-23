@@ -57,7 +57,8 @@ class CatracaResponsividadeTest {
 
     /** Recurso carregado de fora: folha de estilo, script, url() e @import com http(s). */
     private static final Pattern RECURSO_EXTERNO = Pattern.compile(
-        "<link\\b[^>]*\\bhref\\s*=\\s*[\"']https?://[^\"']+[\"']"
+        // <link rel="canonical"> declara o endereço oficial da página; o navegador não o baixa
+        "<link\\b(?![^>]*\\brel\\s*=\\s*[\"']canonical[\"'])[^>]*\\bhref\\s*=\\s*[\"']https?://[^\"']+[\"']"
             + "|<script\\b[^>]*\\bsrc\\s*=\\s*[\"']https?://[^\"']+[\"']"
             + "|url\\(\\s*[\"']?https?://[^)]+\\)"
             + "|@import\\s+(?:url\\()?\\s*[\"']https?://[^\"']+[\"']",
@@ -117,6 +118,9 @@ class CatracaResponsividadeTest {
         assertEquals(1, violacoesHtml("<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=X\">").size());
         assertEquals(1, violacoesHtml("<script src=\"https://cdn.jsdelivr.net/npm/x.js\"></script>").size());
         assertEquals(0, violacoesHtml("<a href=\"https://github.com/carmipa\" target=\"_blank\">GitHub</a>").size());
+        // endereço oficial da página x folha de estilo de fora, as duas em <link href="https://...">
+        assertEquals(0, violacoesHtml("<link rel=\"canonical\" href=\"https://kronos.carminati.dev.br/\">").size());
+        assertEquals(1, violacoesHtml("<link rel=\"preload\" href=\"https://kronos.carminati.dev.br/x.css\">").size());
         assertEquals(0, violacoesHtml("<!-- antes vinha de <link href=\"https://fonts.googleapis.com/x\"> -->").size());
         assertEquals(1, violacoesCss("@font-face { src: url(https://fonts.gstatic.com/x.woff2); }").size());
         assertEquals(1, violacoesCss("@import url(\"https://fonts.googleapis.com/css2?family=X\");").size());

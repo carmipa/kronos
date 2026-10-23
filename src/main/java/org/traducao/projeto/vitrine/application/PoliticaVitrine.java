@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
  *   <li>Rota real só para leitura de memória ({@link #GET_REAIS}); o que lê disco, chama rede,
  *       LLM ou Redis vira dado de demonstração ({@link #GET_DEMONSTRACAO}).</li>
  *   <li>MCP e {@code /q/*} são sempre recusados.</li>
+ *   <li>{@code /robots.txt} e {@code /sitemap.xml} são respondidos pela própria vitrine, de
+ *       {@link IndexacaoVitrine}; {@code /index.html} redireciona para {@code /}. Comparação exata.</li>
  * </ul>
  *
  * <p>COMPORTAMENTO EM CASO DE FALHA: entrada nula ou malformada devolve
@@ -50,6 +52,12 @@ public final class PoliticaVitrine {
          * disco — a resposta não diz se um arquivo existe.
          */
         NAO_ENCONTRADO,
+        /** Responde o {@code robots.txt} de {@link IndexacaoVitrine}. */
+        ROBOTS,
+        /** Responde o {@code sitemap.xml} de {@link IndexacaoVitrine}. */
+        SITEMAP,
+        /** {@code /index.html} é o mesmo documento de {@code /}: redireciona com 301 para um endereço só. */
+        REDIRECIONAR_RAIZ,
         /** Recusa com 403. */
         BLOQUEAR
     }
@@ -68,6 +76,9 @@ public final class PoliticaVitrine {
         static final Decisao SSE_LOGS = new Decisao(Acao.SSE_LOGS, null);
         static final Decisao SSE_TELEMETRIA = new Decisao(Acao.SSE_TELEMETRIA, null);
         static final Decisao NAO_ENCONTRADO = new Decisao(Acao.NAO_ENCONTRADO, null);
+        static final Decisao ROBOTS = new Decisao(Acao.ROBOTS, null);
+        static final Decisao SITEMAP = new Decisao(Acao.SITEMAP, null);
+        static final Decisao REDIRECIONAR_RAIZ = new Decisao(Acao.REDIRECIONAR_RAIZ, null);
 
         static Decisao demonstrar(String nome) {
             return new Decisao(Acao.DEMONSTRAR, nome);
@@ -149,6 +160,17 @@ public final class PoliticaVitrine {
         }
         if (c.equals("/")) {
             return Decisao.PERMITIR;
+        }
+        // Indexação: só os três endereços exatos. O mesmo sinal em outro lugar (/x/robots.txt,
+        // /robots.txt.bak) segue a regra geral e cai em "não encontrado".
+        if (c.equals(IndexacaoVitrine.CAMINHO_ROBOTS)) {
+            return Decisao.ROBOTS;
+        }
+        if (c.equals(IndexacaoVitrine.CAMINHO_SITEMAP)) {
+            return Decisao.SITEMAP;
+        }
+        if (c.equals(IndexacaoVitrine.CAMINHO_INDEX)) {
+            return Decisao.REDIRECIONAR_RAIZ;
         }
         if (extensaoEstaticaPermitida(c)) {
             return Decisao.PERMITIR;
