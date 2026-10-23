@@ -205,6 +205,26 @@ class IndexacaoVitrineHttpTest {
     }
 
     @Test
+    @DisplayName("ícone: a página declara um PNG quadrado com lado múltiplo de 48, como o Google exige no resultado de busca")
+    void iconeAceitoPeloBuscador() {
+        List<String> icones = tags(paginaInicial(null), "link").stream()
+            .filter(t -> "icon".equals(atributo(t, "rel"))).map(t -> atributo(t, "href")).toList();
+        assertFalse(icones.isEmpty(), "a página não declara <link rel=\"icon\">");
+        boolean algumAceito = false;
+        for (String href : icones) {
+            Response r = given().get("/" + href.replaceFirst("^/", ""));
+            assertEquals(200, r.statusCode(), "ícone declarado não responde 200: " + href);
+            byte[] b = r.asByteArray();
+            if (b.length > 24 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G') {
+                int largura = java.nio.ByteBuffer.wrap(b, 16, 4).getInt();
+                int altura = java.nio.ByteBuffer.wrap(b, 20, 4).getInt();
+                algumAceito |= largura == altura && largura % 48 == 0;
+            }
+        }
+        assertTrue(algumAceito, "nenhum ícone declarado é PNG quadrado com lado múltiplo de 48: " + icones);
+    }
+
+    @Test
     @DisplayName("/index.html redireciona com 301 para /, um endereço só para o mesmo documento")
     void indexRedirecionaParaRaiz() {
         for (Response r : List.of(
