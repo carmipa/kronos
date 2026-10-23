@@ -277,7 +277,10 @@ Publicada por Paulo em <https://kronos.carminati.dev.br/>. O contêiner publica 
 comum na VPS: ela é o sistema completo.
 
 Para o proxy servir as páginas de erro do KRONOS quando o contêiner estiver fora do
-ar (502/503/504), o bloco pronto está em `ferramentas/paginas-de-erro/nginx-kronos-erros.conf`.
+ar (502/503/504), o bloco está em `ferramentas/paginas-de-erro/nginx-kronos-erros.conf`. **Instalado
+no proxy da VPS em 15/10/2026**: no deploy daquele dia a troca do contêiner mostrou a 502 do KRONOS.
+O proxy guarda uma **cópia** de `errors/`, `dica/` e `i18n/`: quando as páginas de erro mudarem, a
+cópia é refeita junto com o deploy, senão a 502 sai na versão antiga.
 
 ### O que já foi verificado (14/10/2026, notebook, Docker 29.3.1)
 
