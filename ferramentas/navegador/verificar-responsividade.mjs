@@ -14,7 +14,8 @@
  *    janela devolve o menu lateral;
  *  - toque (pointer: coarse): nenhum controle abaixo de 24 px; botão e campo com 44 px de altura;
  *  - dica: no foco ela aparece dentro da tela, colada ao controle, e o Esc a esconde sem tirar o foco;
- *  - varredura canônica da regra 6-A (dica-varredura.js, cópia sem edição) e axe WCAG 2.2 AA limpos;
+ *  - varreduras do componente compartilhado (dica-varredura.js e icone-varredura.js, cópias sem
+ *    edição) e axe WCAG 2.2 AA limpos: toda dica com "?" à vista e todo rótulo com ícone;
  *  - tabela que vira cartão no celular (thead escondido): cada célula mostra, em texto, o nome da
  *    coluna do seu <th> — senão quem lê vê "22s" e "100%" sem saber de que coluna são;
  *  - cada detector é calibrado por injeção de um defeito conhecido no mesmo navegador: se não acusar,
@@ -29,6 +30,9 @@
  * --disco: serve o HTML/CSS/JS da árvore de trabalho (src/main/resources/static) e usa o servidor só
  * para a API — para conferir antes de empacotar. A prova de entrega é SEM --disco (o que o servidor
  * entrega de fato).
+ * --amostra: máquina sem histórico de telemetria (logs/ vazio) não tem linha para conferir a tabela em
+ * cartão (item 8 sai NÃO VERIFICOU). Com --amostra, a resposta real de /api/telemetria ganha três
+ * operações de exemplo SÓ quando o histórico vier vazio, e o relatório diz que a amostra foi usada.
  */
 import { chromium } from 'playwright';
 import { readFileSync, existsSync } from 'node:fs';
@@ -39,10 +43,18 @@ const AQUI = dirname(fileURLToPath(import.meta.url));
 const BASE = (process.argv.slice(2).find((a) => a.startsWith('http')) || 'http://127.0.0.1:18099').replace(/\/$/, '');
 const AXE = readFileSync(join(AQUI, 'node_modules', 'axe-core', 'axe.min.js'), 'utf8');
 const VARREDURA = readFileSync(join(AQUI, 'dica-varredura.js'), 'utf8');
+const VARREDURA_ICONE = readFileSync(join(AQUI, 'icone-varredura.js'), 'utf8');
 const EXTERNO = /(^|\.)(google\.com|googleapis\.com|gstatic\.com|translate\.goog|shields\.io|github\.com|githubusercontent\.com)$/;
 const LARGURAS = [[320, false], [360, false], [390, false], [768, true], [1024, true], [1366, false]];
 const TAGS_AXE = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const DISCO = process.argv.includes('--disco');
+const AMOSTRA = process.argv.includes('--amostra');
+let amostraUsada = false;
+const OPERACOES_DE_EXEMPLO = [
+  { registradoEm: '2026-10-26T12:00:00Z', nomeOperacao: 'TRADUCAO_LOCAL', origem: 'LLM', detalheOperacao: 'ep01.ass', duracaoMs: 22000, duracaoFormatada: '22s', itensDetectados: 10, itensCorrigidos: 10 },
+  { registradoEm: '2026-10-26T12:05:00Z', nomeOperacao: 'REVISAO_LORE', origem: 'LLM', detalheOperacao: 'ep02.ass', duracaoMs: 61000, duracaoFormatada: '1min 1s', itensDetectados: 4, itensCorrigidos: 3 },
+  { registradoEm: '2026-10-26T12:10:00Z', nomeOperacao: 'EXTRACAO', origem: 'SISTEMA', detalheOperacao: 'ep03.mkv', duracaoMs: 900, duracaoFormatada: '0,9s', taxaSucesso: 100 },
+];
 const ESTATICO = join(AQUI, '..', '..', 'src', 'main', 'resources', 'static');
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.ico': 'image/x-icon' };
@@ -72,9 +84,15 @@ try {
 async function abrir(largura, toque) {
   const ctx = await browser.newContext({ locale: 'pt-BR', viewport: { width: largura, height: 800 }, hasTouch: toque || largura < 900, isMobile: toque || largura < 900, reducedMotion: 'reduce' });
   await ctx.addInitScript(() => { try { localStorage.setItem('kronos.idioma.interface', 'pt-BR'); } catch { /* sem armazenamento */ } });
-  await ctx.route('**/*', (route) => {
+  await ctx.route('**/*', async (route) => {
     const url = new URL(route.request().url());
     if (EXTERNO.test(url.hostname)) { return route.abort(); }
+    if (AMOSTRA && url.origin === BASE && url.pathname === '/api/telemetria') {
+      const real = await route.fetch();
+      const dados = await real.json();
+      if (!(dados.historicoOperacoes || []).length) { dados.historicoOperacoes = OPERACOES_DE_EXEMPLO; amostraUsada = true; }
+      return route.fulfill({ response: real, json: dados });
+    }
     if (DISCO && url.origin === BASE && !url.pathname.startsWith('/api/')) {
       const arq = join(ESTATICO, decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname));
       if (existsSync(arq)) { return route.fulfill({ status: 200, contentType: TIPOS[extname(arq)] || 'application/octet-stream', body: readFileSync(arq) }); }
@@ -130,6 +148,9 @@ const dicasRuins = (page) => page.evaluate(async () => {
   });
   const ruins = [];
   for (const d of lista) {
+    // a tela que se atualiza sozinha (Telemetria, a cada 5 s) recria os chips no meio da medição: o
+    // controle que saiu da página não é medido aqui, e o recriado entra na próxima largura
+    if (!d.isConnected) { continue; }
     const g = d.querySelector(':scope > [data-dica], :scope > .dica__gatilho');
     const t = d.querySelector(':scope > .dica__texto');
     g.focus();
@@ -154,7 +175,9 @@ const dicasRuins = (page) => page.evaluate(async () => {
 const varreduraEaxe = (page) => page.evaluate(async (tags) => {
   const raizes = [document.querySelector('.panel.active'), document.querySelector('.main-header')].filter(Boolean);
   // eslint-disable-next-line no-undef
-  const v = raizes.flatMap((r) => varreduraDica(r)).map((f) => `${f.elemento} — ${f.problema}`);
+  const v = raizes.flatMap((r) => varreduraDica(r)).map((f) => `${f.elemento} — ${f.problema}`)
+    // eslint-disable-next-line no-undef
+    .concat(raizes.flatMap((r) => varreduraIcone(r)).map((f) => `${f.tipo} "${f.elemento}" — ${f.problema}`));
   const axeR = await window.axe.run(document.querySelector('.panel.active') || document, { runOnly: { type: 'tag', values: tags } });
   return { v, axe: axeR.violations.map((x) => `${x.id} (${x.nodes.length}): ${x.nodes[0].target.join(' ')}`) };
 }, TAGS_AXE);
@@ -187,7 +210,7 @@ const linhasDasTabelas = (page) => page.waitForFunction(() => [...document.query
 for (const [largura, toque] of LARGURAS) {
   const { ctx, page, erros } = await abrir(largura, toque);
   await page.addScriptTag({ content: AXE });
-  await page.addScriptTag({ content: VARREDURA });
+  await page.addScriptTag({ content: VARREDURA }); await page.addScriptTag({ content: VARREDURA_ICONE });
   const lista = await paineis(page);
   const est = []; const alv = []; const dic = []; const varr = []; const ax = []; let nDicas = 0;
   const rotSem = []; let nCelulas = 0;
@@ -220,7 +243,7 @@ for (const [largura, toque] of LARGURAS) {
   }
   if (largura === 390 || largura === 1366) {
     confere(nDicas > 0 && dic.length === 0, `3. ${rot}: ${nDicas} dicas abrem no foco, dentro da tela, coladas, e o Esc fecha` + (dic.length ? ' — ' + dic.slice(0, 10).join(' | ') : ''));
-    confere(varr.length === 0, `4. ${rot}: varredura da regra 6-A limpa` + (varr.length ? ` — ${varr.length}: ` + varr.slice(0, 10).join(' | ') : ''));
+    confere(varr.length === 0, `4. ${rot}: varredura das dicas e dos ícones limpa` + (varr.length ? ` — ${varr.length}: ` + varr.slice(0, 10).join(' | ') : ''));
     confere(ax.length === 0, `5. ${rot}: axe WCAG 2.2 AA sem violação` + (ax.length ? ' — ' + ax.slice(0, 8).join(' | ') : ''));
   }
   confere(erros.length === 0, `6. ${rot}: nenhum erro de página` + (erros.length ? ' — ' + erros.slice(0, 3).join(' | ') : ''));
@@ -269,13 +292,18 @@ for (const [largura, toque] of LARGURAS) {
 {
   const { ctx, page } = await abrir(390, true);
   await page.addScriptTag({ content: AXE });
-  await page.addScriptTag({ content: VARREDURA });
+  await page.addScriptTag({ content: VARREDURA }); await page.addScriptTag({ content: VARREDURA_ICONE });
   await mostrar(page, 'analise');
   await page.evaluate(() => {
     const p = document.querySelector('.panel.active');
     const largo = document.createElement('div'); largo.style.width = '2000px'; largo.style.height = '4px'; p.append(largo);
     const mini = document.createElement('button'); mini.type = 'button'; mini.textContent = 'x';
     mini.style.cssText = 'min-height:0!important;height:12px;width:12px;padding:0;font-size:8px'; mini.setAttribute('aria-label', 'Plantado'); p.append(mini);
+    // dica de botão com texto sem o "?" à vista, e título sem ícone: as duas varreduras têm de acusar
+    const d = document.createElement('span'); d.className = 'dica';
+    d.innerHTML = '<button type="button" aria-describedby="d-plantada">Plantado</button><span id="d-plantada" role="tooltip" class="dica__texto">Faz algo plantado.</span>';
+    p.append(d);
+    const h = document.createElement('h3'); h.textContent = 'Título plantado'; p.append(h);
   });
   const e = await estouro(page);
   const a = await alvosPequenos(page);
@@ -283,7 +311,8 @@ for (const [largura, toque] of LARGURAS) {
   const cal = [
     [e.sw > e.vw + 1, 'estouro', `div de 2000 px deu largura ${e.sw}`],
     [a.some((x) => x.includes('12x12')), 'alvo de toque', 'botão de 12x12 px'],
-    [r.v.some((x) => x.includes('Plantado') || x.includes('sem tooltip')), 'varredura 6-A', 'botão sem dica'],
+    [r.v.some((x) => x.includes('Plantado') && x.includes('sem "?"')), 'varredura das dicas', 'dica de botão sem "?" à vista'],
+    [r.v.some((x) => x.includes('Título plantado') && x.includes('sem ícone')), 'varredura dos ícones', 'título sem ícone'],
   ];
   await page.evaluate(() => { const s = document.createElement('style'); s.textContent = '.panel.active { transform: translateX(0); }'; document.head.append(s); });
   const d = await dicasRuins(page);
@@ -291,6 +320,9 @@ for (const [largura, toque] of LARGURAS) {
   await page.evaluate(() => { const p = document.querySelector('.panel.active'); const f = document.createElement('p'); f.textContent = 'contraste plantado'; f.style.cssText = 'color:#111;background:#000'; p.append(f); });
   const r2 = await varreduraEaxe(page);
   cal.push([r2.axe.some((x) => x.startsWith('color-contrast')), 'axe', 'texto #111 sobre #000']);
+  // tira a faixa de 2000 px plantada acima: com ela o celular alarga a área de layout e a tabela não
+  // vira cartão, e a calibração seguinte não teria o que medir
+  await page.evaluate(() => { for (const n of document.querySelectorAll('div')) { if (n.style.width === '2000px') { n.remove(); } } });
   await mostrar(page, 'telemetria');
   await linhasDasTabelas(page);
   await page.evaluate(() => document.querySelectorAll('.panel.active td > .td-rotulo').forEach((n) => n.remove()));
@@ -306,5 +338,6 @@ await browser.close();
 for (const l of ok) { console.log('  ok   ', l); }
 for (const l of falhas) { console.log('  FALHA', l); }
 for (const l of naoVerificado) { console.log('  NAO VERIFICOU', l); }
+if (amostraUsada) { console.log('  AVISO o histórico de telemetria veio vazio: a tabela em cartão foi conferida com 3 operações de exemplo (--amostra)'); }
 console.log(`\n${ok.length} ok, ${falhas.length} falha(s), ${naoVerificado.length} não verificado(s)`);
 process.exit(naoVerificado.length ? 2 : (falhas.length ? 1 : 0));

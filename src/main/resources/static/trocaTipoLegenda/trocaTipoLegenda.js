@@ -133,9 +133,9 @@ function vincularEventos() {
         if (btnToggleOk) {
             if (arquivosOk.length > 0) {
                 btnToggleOk.classList.remove('hidden');
-                btnToggleOk.textContent = mostrarArquivosOk
-                    ? `Ocultar ${arquivosOk.length} OK`
-                    : `Mostrar ${arquivosOk.length} OK`;
+                // o ícone do rótulo vai junto do texto, que muda a cada clique
+                btnToggleOk.innerHTML = '<span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">visibility</span>'
+                    + (mostrarArquivosOk ? `Ocultar ${arquivosOk.length} OK` : `Mostrar ${arquivosOk.length} OK`);
             } else {
                 btnToggleOk.classList.add('hidden');
             }

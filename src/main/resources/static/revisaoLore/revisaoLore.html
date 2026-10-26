@@ -1,12 +1,12 @@
 <div class="glass-card">
-    <h2 data-tooltip="Padroniza nomes e termos da obra na legenda PT-BR comparando com o inglês. Exige escolher a obra e grava nos .ass da pasta traduzida, com backup.">Revisão de Lore</h2>
+    <h2 data-tooltip="Padroniza nomes e termos da obra na legenda PT-BR comparando com o inglês. Exige escolher a obra e grava nos .ass da pasta traduzida, com backup."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">menu_book</span> Revisão de Lore</h2>
     <p class="card-desc">Padroniza <strong>nomes de personagens, locais, facções, mechas e termos de mundo</strong> conforme a lore oficial da obra. Exige as legendas originais em inglês como referência.</p>
     <p class="card-hint">Selecione obrigatoriamente a obra no menu abaixo — isso carrega a lore canônica e exibe os metadados do anime/filme via API.</p>
 
     <div class="anime-meta-banner hidden" id="meta-banner-revisao-lore"></div>
 
     <div class="form-group">
-        <label for="revisao-lore-contexto">Obra / Contexto (obrigatório): <span class="help-icon" data-tooltip="Define a lore oficial usada para padronizar nomes e termos. Também exibe capa e sinopse do anime.">?</span></label>
+        <label for="revisao-lore-contexto"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">auto_stories</span> Obra / Contexto (obrigatório): <span class="help-icon" data-tooltip="Define a lore oficial usada para padronizar nomes e termos. Também exibe capa e sinopse do anime.">?</span></label>
         <select id="revisao-lore-contexto" required>
             <option value="" disabled selected>Carregando contextos...</option>
         </select>
@@ -15,14 +15,14 @@
     <form id="form-revisao-lore" class="standard-form">
         <p class="card-hint">Compara EN × PT-BR via LLM local: máxima precisão, inclusive nos homógrafos.</p>
         <div class="form-group">
-            <label for="revisao-lore-entrada-original">1º — Pasta com legendas ORIGINAIS em inglês: <span class="help-icon" data-tooltip="A REFERÊNCIA: os .ass em inglês, normalmente 'legendas_extraidas_ass'. É a fonte que diz qual é o nome canônico. Esta pasta é apenas LIDA.">?</span></label>
+            <label for="revisao-lore-entrada-original"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">folder_open</span> 1º — Pasta com legendas ORIGINAIS em inglês: <span class="help-icon" data-tooltip="A REFERÊNCIA: os .ass em inglês, normalmente 'legendas_extraidas_ass'. É a fonte que diz qual é o nome canônico. Esta pasta é apenas LIDA.">?</span></label>
             <div class="input-with-button">
                 <input type="text" id="revisao-lore-entrada-original" autocomplete="off" spellcheck="false" placeholder="Ex: E:\animes\Gundam\0083\legendas_eng" required>
                 <button type="button" class="btn-procurar" data-target="revisao-lore-entrada-original" data-type="pasta"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
             </div>
         </div>
         <div class="form-group">
-            <label for="revisao-lore-entrada-traduzida">2º — Pasta com legendas TRADUZIDAS (PT-BR) — <strong>é esta que será reescrita</strong>: <span class="help-icon" data-tooltip="ATENÇÃO: é aqui que a revisão GRAVA, sempre com backup em backups/revisao-lore/. Não aponte para a pasta de legendas em inglês.">?</span></label>
+            <label for="revisao-lore-entrada-traduzida"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">folder_open</span> 2º — Pasta com legendas TRADUZIDAS (PT-BR) — <strong>é esta que será reescrita</strong>: <span class="help-icon" data-tooltip="ATENÇÃO: é aqui que a revisão GRAVA, sempre com backup em backups/revisao-lore/. Não aponte para a pasta de legendas em inglês.">?</span></label>
             <div class="input-with-button">
                 <input type="text" id="revisao-lore-entrada-traduzida" autocomplete="off" spellcheck="false" placeholder="Ex: E:\animes\Gundam\0083\legendas_eng\traducao_ptbr" required>
                 <button type="button" class="btn-procurar" data-target="revisao-lore-entrada-traduzida" data-type="pasta"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -104,10 +104,10 @@
 
 <div class="glass-card console-card">
     <div class="console-header">
-        <h3 data-tooltip="Mostra ao vivo a revisão e, no fim, o resumo: arquivos alterados, falas corrigidas, descartadas e pendentes, falhas e onde ficou o relatório JSON.">Logs da Revisão de Lore</h3>
+        <h3 data-tooltip="Mostra ao vivo a revisão e, no fim, o resumo: arquivos alterados, falas corrigidas, descartadas e pendentes, falhas e onde ficou o relatório JSON."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">terminal</span> Logs da Revisão de Lore</h3>
         <div class="console-actions">
-            <button class="btn-toggle-console" data-target="console-revisao-lore" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
-            <button class="btn-copy-console" data-target="console-revisao-lore" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
+            <button class="btn-toggle-console" data-target="console-revisao-lore"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
+            <button class="btn-copy-console" data-target="console-revisao-lore"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
             <button class="btn-clear-console" data-target="console-revisao-lore"><span class="material-symbols-outlined console-action-icon">mop</span>Limpar</button>
         </div>
     </div>

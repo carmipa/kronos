@@ -23,10 +23,10 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+    border-radius: 0.375rem;
     background: rgba(45, 212, 191, 0.12);
     border: 1px solid rgba(45, 212, 191, 0.28);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(0.375rem);
     color: var(--text-primary);
     font-size: 0.82rem;
     font-weight: 600;
@@ -36,7 +36,7 @@
 
 .analise-card {
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0.5rem;
     background: rgba(0, 0, 0, 0.22);
     overflow: hidden;
 }
@@ -108,7 +108,7 @@
 .badge-trad {
     display: inline-block;
     padding: 0.125rem 0.5rem;
-    border-radius: 20px;
+    border-radius: 1.25rem;
     font-size: 0.68rem;
     font-weight: 600;
 }
@@ -118,7 +118,7 @@
 
 .analise-falhas {
     border: 1px solid rgba(244, 63, 94, 0.3);
-    border-radius: 8px;
+    border-radius: 0.5rem;
     background: rgba(244, 63, 94, 0.08);
     padding: 0.625rem 0.75rem;
 }

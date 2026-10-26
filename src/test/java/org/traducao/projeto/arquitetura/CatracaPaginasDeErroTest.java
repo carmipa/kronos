@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <h2>Comportamento em caso de falha</h2>
  * Nomeia a página e o defeito. Catálogo ou pasta ausentes reprovam como instrumento cego. O
- * comportamento no navegador (varredura da regra 6-A, axe, redirecionamento, idioma, celular) é
+ * comportamento no navegador (varredura das dicas e dos ícones, axe, redirecionamento, idioma, celular) é
  * provado por {@code ferramentas/navegador/verificar-paginas-de-erro.mjs}.
  */
 class CatracaPaginasDeErroTest {
@@ -174,13 +174,30 @@ class CatracaPaginasDeErroTest {
     void componenteCanonicoEMesmaOrigem() throws IOException {
         String css = Files.readString(ESTATICOS.resolve("dica").resolve("dica.css"), StandardCharsets.UTF_8);
         String js = Files.readString(ESTATICOS.resolve("dica").resolve("dica.js"), StandardCharsets.UTF_8);
-        assertTrue(css.startsWith("/* dica.css v1.0 (2026-10-05)") && js.startsWith("/* dica.js v1.0 (2026-10-05)"),
+        assertTrue(css.startsWith("/* dica.css v1.4 (2026-10-25)") && js.startsWith("/* dica.js v1.5 (2026-10-25)"),
             "o tooltip canônico tem de ser a cópia da fonte, com o cabeçalho de versão intacto");
+        // conteúdo travado (quebra de linha normalizada para LF): cópia editada no projeto reprova
+        assertEquals(SHA_DICA_CSS, sha256Lf(css), "dica.css difere da cópia da fonte 1.4 (editada no projeto?)");
+        assertEquals(SHA_DICA_JS, sha256Lf(js), "dica.js difere da cópia da fonte 1.5 (editada no projeto?)");
         String kit = Files.readString(JS_KIT, StandardCharsets.UTF_8);
         assertTrue(kit.contains("u.origin === location.origin"),
             "o retorno automático (retryTarget) tem de recusar outra origem: ?from=//outro-site é redirecionamento aberto");
         assertTrue(!kit.contains("data-tip") && !kit.contains("kc-tip"),
             "o tooltip próprio do kit voltou: o projeto usa o componente canônico (/dica/dica.js)");
+    }
+
+    /** SHA-256 das cópias do componente de dica (dica.css 1.4, dica.js 1.5), sobre o texto em LF. */
+    private static final String SHA_DICA_CSS = "fd2f92750aeff05e76c6c9b5a21fbe82cd7a10e25560942887315cf15941a309";
+    private static final String SHA_DICA_JS = "cf7265cea8b238bd398ee211077d268568f1dfff047ce530cd19e46981855872";
+
+    private static String sha256Lf(String texto) {
+        try {
+            byte[] h = java.security.MessageDigest.getInstance("SHA-256")
+                .digest(texto.replace("\r\n", "\n").getBytes(StandardCharsets.UTF_8));
+            return java.util.HexFormat.of().formatHex(h);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static JsonNode catalogo() throws IOException {

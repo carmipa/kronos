@@ -3,7 +3,7 @@
  *
  * PROPÓSITO DE NEGÓCIO: as páginas de erro são o que a pessoa vê quando algo deu errado — e é
  * justamente quando ela menos pode ser enganada. Este roteiro prova, num Chromium de verdade, que
- * cada página abre sem erro, cabe no celular, passa na varredura da regra 6-A (todo controle e
+ * cada página abre sem erro, cabe no celular, passa na varredura das dicas e dos ícones (todo controle e
  * título com tooltip acessível) e no axe WCAG 2.2 AA; que o servidor entrega a página 404 com o
  * Request ID; que o retorno automático NÃO leva para outro site; que "Ver telemetria" abre a
  * telemetria; que a página dinâmica monta o erro pedido sem executar o `?detail=`; e que o idioma
@@ -40,6 +40,7 @@ const PAGINAS = ['400', '401', '403', 'vitrine', '404', '405', '408', '409', '41
 const LARGURAS = [[1366, 900], [390, 844]];
 const AXE = readFileSync(join(AQUI, 'node_modules', 'axe-core', 'axe.min.js'), 'utf8');
 const VARREDURA = readFileSync(join(AQUI, 'dica-varredura.js'), 'utf8');
+const VARREDURA_ICONE = readFileSync(join(AQUI, 'icone-varredura.js'), 'utf8');
 
 const ok = [];
 const falhas = [];
@@ -103,7 +104,7 @@ try {
     process.exit(2);
   }
 
-  // 1. Cada página, no desktop e no celular: sem erro, sem estouro, varredura 6-A e axe limpos
+  // 1. Cada página, no desktop e no celular: sem erro, sem estouro, varreduras de dicas e ícones e axe limpos
   for (const [largura, altura] of LARGURAS) {
     const { ctx, page, erros } = await contexto({ largura, altura });
     for (const codigo of PAGINAS) {
@@ -111,7 +112,7 @@ try {
       const sufixo = codigo === 'error' ? '?code=502' : '';
       await page.goto(`${BASE}/errors/${codigo}.html${sufixo}`, { waitUntil: 'load' });
       await page.waitForTimeout(600);
-      await page.addScriptTag({ content: VARREDURA });
+      await page.addScriptTag({ content: VARREDURA }); await page.addScriptTag({ content: VARREDURA_ICONE });
       await page.addScriptTag({ content: AXE });
       const r = await page.evaluate(async () => {
         const doc = document.documentElement;
@@ -119,14 +120,14 @@ try {
         return {
           estouro: doc.scrollWidth - doc.clientWidth,
           lang: doc.getAttribute('lang'),
-          varredura: window.varreduraDica(),
+          varredura: window.varreduraDica().concat(window.varreduraIcone()),
           axe: axeR.violations.map((v) => v.id + ' (' + v.nodes.length + '): ' + v.nodes[0].target.join(' ')),
         };
       });
       const rotulo = `${codigo} @${largura}px`;
       confere(erros.length === antes, `1. ${rotulo}: sem erro de página` + (erros.length > antes ? ' — ' + erros[antes] : ''));
       confere(r.estouro <= 0, `1. ${rotulo}: cabe na largura (estouro ${r.estouro}px)`);
-      confere(r.varredura.length === 0, `1. ${rotulo}: varredura 6-A limpa` + (r.varredura.length ? ' — ' + JSON.stringify(r.varredura[0]) : ''));
+      confere(r.varredura.length === 0, `1. ${rotulo}: varredura de dicas e ícones limpa` + (r.varredura.length ? ' — ' + JSON.stringify(r.varredura[0]) : ''));
       confere(r.axe.length === 0, `1. ${rotulo}: axe WCAG 2.2 AA sem violação` + (r.axe.length ? ' — ' + r.axe.join(' | ') : ''));
       confere(r.lang === 'pt-BR', `1. ${rotulo}: <html lang> pt-BR (${r.lang})`);
     }
@@ -311,7 +312,8 @@ try {
   //    Com ela o item 3 TEM de vazar; se não vazar, o detector não discrimina.
   {
     const nosso = readFileSync(JS_NOSSO, 'utf8');
-    const doKit = nosso.replace(/if \(from && from\.charAt\(0\) === '\/'\) \{\n\s*var destino = mesmaOrigem\(from\);\n\s*if \(destino\) \{ return destino; \}\n\s*\}/,
+    // \r?\n: no Windows o checkout pode trazer o arquivo em CRLF, e o trecho tem de casar do mesmo jeito
+    const doKit = nosso.replace(/if \(from && from\.charAt\(0\) === '\/'\) \{\r?\n\s*var destino = mesmaOrigem\(from\);\r?\n\s*if \(destino\) \{ return destino; \}\r?\n\s*\}/,
       "if (from && from.charAt(0) === '/') { return from; }");
     if (doKit === nosso) {
       naoVerificado.push('0. calibração: o trecho do filtro de retorno mudou — atualize a injeção deste roteiro');

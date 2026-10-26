@@ -192,7 +192,6 @@ function registrarDicasRecorrentes() {
     registrarDicaPadrao('.seletor-idioma-botao', (b) => idiomas[b.getAttribute('data-idioma')] || '');
     registrarDicaPadrao('.nav-group-header', (b) =>
         `Abre ou fecha o grupo ${rotuloDe(b)} do menu; o menu lembra a escolha neste navegador.`);
-    registrarDicaPadrao('.doc-nav-item', (b) => `Abre a página "${rotuloDe(b)}" da documentação neste painel.`);
 }
 
 /**
@@ -251,6 +250,9 @@ function inicializarNavegacao() {
                 tituloPagina.textContent = CONFIG_SECOES[target].titulo;
                 subtituloPagina.textContent = CONFIG_SECOES[target].subtitulo;
             }
+            // o ícone do título é o mesmo do item do menu (desenhado por CSS, fora do texto do h1)
+            const glifo = botao.querySelector('.nav-icon')?.textContent.trim();
+            if (glifo) tituloPagina.parentElement.setAttribute('data-icone', glifo);
 
             // Ações extras ao abrir painéis específicos
             if (target === 'telemetria') {
@@ -922,30 +924,34 @@ function renderizarAnaliseMidia(consoleId, jsonText) {
         html += '<div class="system-message">Nenhum resultado.</div>';
     }
 
+    // ícone do rótulo de cada bloco e coluna (reforça o texto; aria-hidden e fora da tradução)
+    const ic = (g) => `<span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">${g}</span>`;
     for (const r of resultados) {
         const c = r.container || {};
         html += '<div class="analise-card">';
         html += `<div class="ac-titulo"><span class="material-symbols-outlined">movie</span>${esc(r.nomeArquivo)}</div>`;
         html += '<div class="ac-grid">';
-        html += '<div class="ac-bloco"><h5>Contêiner</h5><ul>'
+        html += `<div class="ac-bloco"><h5>${ic('video_file')}Contêiner</h5><ul>`
             + `<li>Formato: ${esc(c.formato)}</li><li>Tamanho: ${gib(c.tamanhoBytes)}</li>`
             + `<li>Duração: ${dur(c.duracaoSegundos)}</li><li>Bitrate: ${kbps(c.bitrateGeral)}</li>`
             + `<li>Escrito por: ${esc(c.aplicacaoEscrita)}</li></ul></div>`;
-        html += `<div class="ac-bloco"><h5>Vídeo (${(r.videos || []).length})</h5><ul>`
+        html += `<div class="ac-bloco"><h5>${ic('movie')}Vídeo (${(r.videos || []).length})</h5><ul>`
             + lista(r.videos, v => `<li>${esc(v.codecId)} · ${v.width}x${v.height} · ${v.bitDepth}bit · ${(v.fps || 0).toFixed(3)}fps · ${kbps(v.bitrate)}</li>`) + '</ul></div>';
-        html += `<div class="ac-bloco"><h5>Áudio (${(r.audios || []).length})</h5><ul>`
+        html += `<div class="ac-bloco"><h5>${ic('volume_up')}Áudio (${(r.audios || []).length})</h5><ul>`
             + lista(r.audios, a => `<li>${esc(a.idioma)} · ${esc(a.format)} · ${a.channels}ch · ${(a.sampleRateKHz || 0).toFixed(1)}kHz · ${kbps(a.bitrate)}</li>`) + '</ul></div>';
-        html += `<div class="ac-bloco"><h5>Capítulos (${(r.capitulos || []).length})</h5><ul>`
+        html += `<div class="ac-bloco"><h5>${ic('segment')}Capítulos (${(r.capitulos || []).length})</h5><ul>`
             + lista(r.capitulos, cap => `<li>${cap.numero}. ${esc(cap.titulo)} <span class="ac-dim">(${dur(cap.inicioSegundos)})</span></li>`) + '</ul></div>';
-        html += `<div class="ac-bloco"><h5>Anexos (${(r.anexos || []).length})</h5><ul>`
+        html += `<div class="ac-bloco"><h5>${ic('attach_file')}Anexos (${(r.anexos || []).length})</h5><ul>`
             + lista(r.anexos, an => `<li>${esc(an.nomeArquivo)} <span class="ac-dim">${esc(an.mimeType)}</span></li>`) + '</ul></div>';
         html += '</div>';
 
-        html += `<div class="ac-legendas"><h5>Legendas (${(r.legendas || []).length})</h5>`;
+        html += `<div class="ac-legendas"><h5>${ic('subtitles')}Legendas (${(r.legendas || []).length})</h5>`;
         if (!(r.legendas || []).length) {
             html += '<p class="ac-sem-legenda">Nenhuma faixa de legenda encontrada — pode ser RAW; hardsub não confirmado por esta análise.</p>';
         } else {
-            html += '<table class="ac-tabela"><thead><tr><th>#</th><th>Idioma</th><th>Formato</th><th>Tipo</th><th>Flags</th><th>Traduzível</th></tr></thead><tbody>';
+            html += `<table class="ac-tabela"><thead><tr><th>${ic('tag')}#</th><th>${ic('translate')}Idioma</th>`
+                + `<th>${ic('description')}Formato</th><th>${ic('category')}Tipo</th><th>${ic('flag')}Flags</th>`
+                + `<th>${ic('task_alt')}Traduzível</th></tr></thead><tbody>`;
             for (const leg of r.legendas) {
                 html += `<tr><td>${(leg.indexRelativo ?? 0) + 1}</td><td>${esc(leg.idioma)}</td><td>${esc(leg.formato)}</td>`
                     + `<td>${esc(leg.tipoCurto)} <span class="ac-dim">(${esc(leg.categoria)})</span></td>`
@@ -957,7 +963,7 @@ function renderizarAnaliseMidia(consoleId, jsonText) {
     }
 
     if (falhas.length) {
-        html += '<div class="analise-falhas"><h5>Falhas na análise (' + falhas.length + ')</h5><ul>'
+        html += '<div class="analise-falhas"><h5>' + ic('error') + 'Falhas na análise (' + falhas.length + ')</h5><ul>'
             + falhas.map(f => `<li><strong>${esc(f.arquivo)}</strong>: ${esc(f.erro)}</li>`).join('') + '</ul></div>';
     }
 

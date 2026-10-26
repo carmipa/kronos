@@ -21,20 +21,20 @@
 
     <form id="form-auditor-conteudo" class="standard-form">
         <div class="form-group">
-            <label for="auditor-conteudo-contexto">Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Selecione a obra no menu para exibir os dados e a capa corretos do anime via API.">?</span></label>
+            <label for="auditor-conteudo-contexto"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">auto_stories</span> Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Selecione a obra no menu para exibir os dados e a capa corretos do anime via API.">?</span></label>
             <select id="auditor-conteudo-contexto">
                 <option value="" disabled selected>Carregando contextos...</option>
             </select>
         </div>
         <div class="form-group auditor-campo-original">
-            <label for="auditor-original">Legenda Original — Inglês (EN) · ASS/SSA/SRT: <span class="help-icon" data-tooltip="O arquivo de legenda original (inglês) usado como referência. O formato detectado será exibido no relatório.">?</span></label>
+            <label for="auditor-original"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">subtitles</span> Legenda Original — Inglês (EN) · ASS/SSA/SRT: <span class="help-icon" data-tooltip="O arquivo de legenda original (inglês) usado como referência. O formato detectado será exibido no relatório.">?</span></label>
             <div class="input-with-button">
                 <input type="text" id="auditor-original" autocomplete="off" spellcheck="false" placeholder="Caminho da legenda em inglês">
                 <button type="button" class="btn-procurar" data-target="auditor-original" data-type="arquivo"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
             </div>
         </div>
         <div class="form-group auditor-campo-traduzido">
-            <label for="auditor-traduzido">Legenda Traduzida — PT-BR · ASS/SSA/SRT: <span class="help-icon" data-tooltip="O arquivo gerado pelo LLM (português). O relatório identifica seu formato e analisa possíveis danos estruturais.">?</span></label>
+            <label for="auditor-traduzido"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">subtitles</span> Legenda Traduzida — PT-BR · ASS/SSA/SRT: <span class="help-icon" data-tooltip="O arquivo gerado pelo LLM (português). O relatório identifica seu formato e analisa possíveis danos estruturais.">?</span></label>
             <div class="input-with-button">
                 <input type="text" id="auditor-traduzido" autocomplete="off" spellcheck="false" placeholder="Caminho da legenda em PT-BR">
                 <button type="button" class="btn-procurar" data-target="auditor-traduzido" data-type="arquivo"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -94,7 +94,7 @@
 <!-- Card 2 — Relatório de Anomalias: resumo, filtros por severidade e lista de cards -->
 <div class="glass-card auditor-relatorio-card">
     <div class="console-header">
-        <h3 data-tooltip="Resultado da auditoria: anomalias por severidade, com filtro e três visões (cards, tabela comparativa, gráfico). Exporta em .md ou JSON." class="auditor-relatorio-titulo">Relatório de Anomalias</h3>
+        <h3 data-tooltip="Resultado da auditoria: anomalias por severidade, com filtro e três visões (cards, tabela comparativa, gráfico). Exporta em .md ou JSON." class="auditor-relatorio-titulo"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">output</span> Relatório de Anomalias</h3>
         <div class="console-actions auditor-export-actions">
             <button type="button" class="btn btn-secondary btn-exportar-auditor" id="btn-exportar-auditor-md" aria-label="Exportar .md" data-tooltip="Exporta o relatório em Markdown (.md) — formato didático para revisão">
                 <span class="material-symbols-outlined btn-icon">download</span>
@@ -159,14 +159,14 @@
             <table class="auditor-tabela">
                 <thead>
                     <tr>
-                        <th scope="col">Origem</th>
-                        <th scope="col">Sev.</th>
-                        <th scope="col">Regra</th>
-                        <th scope="col">#</th>
-                        <th scope="col">Tempo</th>
-                        <th scope="col">Estilo</th>
-                        <th scope="col">Original</th>
-                        <th scope="col">Traduzido</th>
+                        <th scope="col"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">source</span> Origem</th>
+                        <th scope="col" data-tooltip="Severidade da anomalia: Crítico, Erro ou Aviso (o ícone da célula mostra qual)."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">priority_high</span> Sev.</th>
+                        <th scope="col"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">rule</span> Regra</th>
+                        <th scope="col" data-tooltip="Número da fala no arquivo de legenda (a ordem dos eventos Dialogue)."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">tag</span> #</th>
+                        <th scope="col" data-tooltip="Início → fim da fala na legenda, em h:mm:ss.cc (horas, minutos, segundos e centésimos)."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">schedule</span> Tempo</th>
+                        <th scope="col" data-tooltip="Nome do estilo ASS da fala (fonte, cor e posição definidas no cabeçalho da legenda)."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">style</span> Estilo</th>
+                        <th scope="col"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">notes</span> Original</th>
+                        <th scope="col"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">translate</span> Traduzido</th>
                     </tr>
                 </thead>
                 <tbody id="auditor-tabela-corpo"></tbody>
@@ -186,10 +186,10 @@
 <!-- Card 3 — Logs da Auditoria: console dark com ações -->
 <div class="glass-card console-card">
     <div class="console-header">
-        <h3 data-tooltip="Mostra o modo, os formatos detectados, cada anomalia com a severidade, o caminho do relatório JSON salvo e o tempo total. Some da tela ao recarregar.">Logs da Auditoria</h3>
+        <h3 data-tooltip="Mostra o modo, os formatos detectados, cada anomalia com a severidade, o caminho do relatório JSON salvo e o tempo total. Some da tela ao recarregar."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">terminal</span> Logs da Auditoria</h3>
         <div class="console-actions">
-            <button class="btn-toggle-console" data-target="console-auditor-conteudo" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
-            <button class="btn-copy-console" data-target="console-auditor-conteudo" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
+            <button class="btn-toggle-console" data-target="console-auditor-conteudo"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
+            <button class="btn-copy-console" data-target="console-auditor-conteudo"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
             <button class="btn-clear-console" data-target="console-auditor-conteudo"><span class="material-symbols-outlined console-action-icon">mop</span>Limpar</button>
         </div>
     </div>

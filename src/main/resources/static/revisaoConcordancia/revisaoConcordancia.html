@@ -1,5 +1,5 @@
 <div class="glass-card">
-    <h2 data-tooltip="Corrige gênero e acentos direto nos .ass em português, sem LLM, sem cache e sem inglês. Antes de gravar cada arquivo, guarda um backup dele.">Revisão de Concordância</h2>
+    <h2 data-tooltip="Corrige gênero e acentos direto nos .ass em português, sem LLM, sem cache e sem inglês. Antes de gravar cada arquivo, guarda um backup dele."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">match_word</span> Revisão de Concordância</h2>
     <p class="card-desc">Corrige <strong>erros de gênero</strong> inequívocos e <strong>acentos e caracteres trocados</strong> direto na legenda em português — <strong>sem inglês, sem cache e sem LLM</strong>. São cinco corretores em cadeia: caractere fora do português, gênero, acento pela análise gramatical, acento por padrão e acento por dicionário. Ex.: "o menina" → "a menina", "uma menino" → "um menino", "ela está cansado" → "cansada".</p>
     <p class="card-hint">Determinístico e conservador: só toca substantivos/adjetivos de gênero conhecido; o ambíguo fica intocado. Toda alteração faz backup automático.</p>
 
@@ -7,13 +7,13 @@
 
     <form id="form-revisao-concordancia" class="standard-form">
         <div class="form-group">
-            <label for="revisao-concordancia-contexto">Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Mostra a capa e os dados do anime e registra no console qual obra foi revisada. Não muda a correção: esta tela não usa lore.">?</span></label>
+            <label for="revisao-concordancia-contexto"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">auto_stories</span> Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Mostra a capa e os dados do anime e registra no console qual obra foi revisada. Não muda a correção: esta tela não usa lore.">?</span></label>
             <select id="revisao-concordancia-contexto">
                 <option value="" disabled selected>Carregando contextos...</option>
             </select>
         </div>
         <div class="form-group">
-            <label for="revisao-concordancia-entrada">Pasta com legendas TRADUZIDAS (PT-BR): <span class="help-icon" data-tooltip="Única pasta necessária: as legendas em português que serão revisadas e gravadas no lugar (com backup).">?</span></label>
+            <label for="revisao-concordancia-entrada"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">folder_open</span> Pasta com legendas TRADUZIDAS (PT-BR): <span class="help-icon" data-tooltip="Única pasta necessária: as legendas em português que serão revisadas e gravadas no lugar (com backup).">?</span></label>
             <div class="input-with-button">
                 <input type="text" id="revisao-concordancia-entrada" autocomplete="off" spellcheck="false" placeholder="Ex: E:\animes\Gundam\0083\legendas_ptbr" required>
                 <button type="button" class="btn-procurar" data-target="revisao-concordancia-entrada" data-type="pasta"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -27,7 +27,7 @@
                  separam simular de aplicar em BOTÕES distintos; esta era a exceção. -->
             <label data-tooltip="Marcado (como a tela abre), o console só mostra o que mudaria. Desmarcado, Iniciar reescreve os .ass, com backup em backup_revisao_concordancia." class="checkbox-label">
                 <input type="checkbox" id="revisao-concordancia-simular" checked>
-                Apenas simular (dry-run — mostra o que mudaria, sem gravar). <strong>Desmarque para
+                <span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">science</span> Apenas simular (dry-run — mostra o que mudaria, sem gravar). <strong>Desmarque para
                 gravar de verdade.</strong>
             </label>
         </div>
@@ -42,7 +42,7 @@
                 <span class="material-symbols-outlined btn-icon">spellcheck</span>
                 <span>Iniciar Revisão de Concordância</span>
             </button>
-            <button type="button" class="btn btn-secondary btn-clear-form" data-form="form-revisao-concordancia" data-tooltip="Limpa os campos">
+            <button type="button" class="btn btn-secondary btn-clear-form" data-form="form-revisao-concordancia">
                 <span class="material-symbols-outlined btn-icon">delete_sweep</span>
                 <span>Limpar Campos</span>
             </button>
@@ -110,10 +110,10 @@
 
 <div class="glass-card console-card">
     <div class="console-header">
-        <h3 data-tooltip="Resultado arquivo por arquivo: verde gravado, amarelo mudaria, cinza sem nada a corrigir, vermelho erro. Abaixo, cada fala antes -&gt; depois.">Logs da Revisão de Concordância</h3>
+        <h3 data-tooltip="Resultado arquivo por arquivo: verde gravado, amarelo mudaria, cinza sem nada a corrigir, vermelho erro. Abaixo, cada fala antes -&gt; depois."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">terminal</span> Logs da Revisão de Concordância</h3>
         <div class="console-actions">
-            <button class="btn-toggle-console" data-target="console-revisao-concordancia" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
-            <button class="btn-copy-console" data-target="console-revisao-concordancia" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
+            <button class="btn-toggle-console" data-target="console-revisao-concordancia"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
+            <button class="btn-copy-console" data-target="console-revisao-concordancia"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
             <button class="btn-clear-console" data-target="console-revisao-concordancia"><span class="material-symbols-outlined console-action-icon">mop</span>Limpar</button>
         </div>
     </div>

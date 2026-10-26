@@ -1,8 +1,8 @@
-/* KRONOS CORE — kronos-error-catalog.js v1.2.0 — DADOS das páginas de erro
+/* KRONOS CORE — kronos-error-catalog.js v1.3.0 — DADOS das páginas de erro
    Gerado por ferramentas/paginas-de-erro/gerar.py. Mude os textos no gerador e regere;
    nunca aqui nem nos HTMLs (eles são renderizações deste catálogo). */
 window.KC_CATALOG = {
- "version": "1.2.0",
+ "version": "1.3.0",
  "ui": {
   "brand.sub": "Pipeline Industrial",
   "aria.lang": "Idioma da página",
@@ -25,7 +25,6 @@ window.KC_CATALOG = {
   "btn.now": "Tentar agora",
   "btn.pause": "Pausar",
   "btn.resume": "Retomar",
-  "tip.home": "Ir para o Painel Inicial do pipeline",
   "tip.back": "Retornar à tela anterior do navegador",
   "tip.reload": "Recarregar esta página e tentar de novo",
   "tip.retry": "Verificar o backend e voltar à rota de origem se ele responder",
@@ -62,11 +61,10 @@ window.KC_CATALOG = {
   "retry.exhausted": "Tentativas automáticas esgotadas. Use “Tentar agora” ou volte ao painel.",
   "foot.by": "Desenvolvido por",
   "foot.repo": "Quarkus Repo",
-  "foot.page": "Página de erro v1.2.0",
+  "foot.page": "Página de erro v1.3.0",
   "tip.foot.repo": "Abrir o repositório do projeto no GitHub",
   "tip.foot.autor": "Abre carminati.dev.br, a página do autor, em uma nova aba",
   "tip.foot.ref": "Versão das páginas de erro e código de referência desta tela",
-  "tip.hint": "Sugestão de ação para resolver ou contornar o problema",
   "ajuda": "Ajuda sobre"
  },
  "family": {
@@ -96,6 +94,8 @@ window.KC_CATALOG = {
   "hourglass": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M6 3h12\"/><path d=\"M6 21h12\"/><path d=\"M8 3v3.5a4 4 0 0 0 1.6 3.2L12 12l-2.4 2.3A4 4 0 0 0 8 17.5V21\"/><path d=\"M16 3v3.5a4 4 0 0 1-1.6 3.2L12 12l2.4 2.3a4 4 0 0 1 1.6 3.2V21\"/></svg>",
   "wifi-off": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><line x1=\"2\" y1=\"2\" x2=\"22\" y2=\"22\"/><path d=\"M8.5 16.5a5 5 0 0 1 7 0\"/><path d=\"M5 12.5a10 10 0 0 1 5.2-2.7\"/><path d=\"M12 6a16 16 0 0 1 10 3.5\"/><path d=\"M2 9.5a16 16 0 0 1 4-2.4\"/><circle cx=\"12\" cy=\"20\" r=\".9\" fill=\"currentColor\"/></svg>",
   "bug": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M8 2l1.9 1.9M16 2l-1.9 1.9\"/><path d=\"M9 7.1V6a3 3 0 0 1 6 0v1.1\"/><rect x=\"6\" y=\"7\" width=\"12\" height=\"13\" rx=\"6\"/><path d=\"M12 12v8\"/><path d=\"M6 13H2M22 13h-4\"/><path d=\"M6 17l-3 2M18 17l3 2\"/><path d=\"M6 9L3 7M18 9l3-2\"/></svg>",
+  "alert": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><line x1=\"12\" y1=\"7.5\" x2=\"12\" y2=\"13\"/><circle cx=\"12\" cy=\"16.5\" r=\".9\" fill=\"currentColor\"/></svg>",
+  "diag": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><line x1=\"21\" y1=\"21\" x2=\"15.2\" y2=\"15.2\"/><polyline points=\"6.5 11 8.8 11 10 8.5 11.5 13 12.6 11 14.5 11\"/></svg>",
   "home": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M3 11l9-8 9 8\"/><path d=\"M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10\"/></svg>",
   "back": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><line x1=\"19\" y1=\"12\" x2=\"5\" y2=\"12\"/><polyline points=\"12 19 5 12 12 5\"/></svg>",
   "reload": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M21 12a9 9 0 1 1-2.6-6.4\"/><polyline points=\"21 3 21 9 15 9\"/></svg>",

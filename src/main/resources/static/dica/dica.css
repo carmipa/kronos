@@ -1,4 +1,19 @@
-/* dica.css v1.0 (2026-10-05) — tooltip explicativo acessível (regra 6-A). Fonte canônica: instrucoes/tooltip-canonico/. Não editar no projeto. */
+/* dica.css v1.4 (2026-10-25) — tooltip explicativo acessível. Componente compartilhado: não editar no projeto; mudança só na origem.
+   v1.1 (revisão de boa-fé, 18/10/2026): a dica que aparece sem estar sob o mouse — no toque, e a de um campo com o foco —
+   deixa o toque e o clique passarem para o que está embaixo. Ela cobria o campo de cima e os itens de menu seguintes, e
+   tocar neles caía na dica (3 de 3 toques num item de menu; 4 de 8 nas abas). Com o mouse sobre o "?", ela continua
+   alcançável pelo ponteiro (WCAG 1.4.13: dá para mover o mouse até o texto).
+   v1.2 (18/10/2026, menu em sanfona do site pessoal): o foco que veio de um CLIQUE de mouse num botão ou link não
+   prende mais a dica na tela depois que o mouse sai — ela cobria os itens de baixo até a pessoa clicar em outro
+   lugar. Pelo teclado (foco visível) a dica continua aparecendo; a de campo de texto, em qualquer foco.
+   v1.3 (24/10/2026): a largura máxima da dica deixa de usar 100vw e passa a ser relativa à janela (o elemento é
+   position:fixed, então 100% é a largura da janela, sem a barra de rolagem), descontando a margem e o padding: numa
+   tela de 320 px a dica tinha 328 px e a borda direita ia a 336 px. A ponte e o afastamento do contorno saem de px
+   para rem (px fica só em contorno fino).
+   v1.4 (25/10/2026, "o tooltip ficava no '?' e era melhor"): a dica de um botão, link ou item de menu com texto
+   ganha a marca "?" à vista logo depois do controle (.dica__marca). A marca não é botão: não entra no Tab nem no
+   nome acessível (o próprio controle já abre a dica pelo foco e já é descrito por ela), mas mostra que há dica, abre
+   no mouse e alterna no toque. Botão só com ícone continua sem marca: a dica dele é o nome. */
 :root {
   --dica-bg: #1f2937;
   --dica-fg: #ffffff;
@@ -16,13 +31,20 @@
   background: transparent; color: var(--dica-gatilho); cursor: help; border-radius: 50%;
 }
 .dica__gatilho svg { inline-size: 1rem; block-size: 1rem; }
+
+/* marca "?" ao lado de um controle com texto: avisa que há dica; o controle continua sendo quem recebe o foco */
+.dica__marca {
+  inline-size: var(--dica-alvo); block-size: var(--dica-alvo); flex: none;
+  display: inline-grid; place-items: center; color: var(--dica-gatilho); cursor: help;
+}
+.dica__marca svg { inline-size: 1rem; block-size: 1rem; }
 .dica__gatilho:focus-visible, .dica :is(a, button, input, select, textarea):focus-visible {
-  outline: 2px solid currentColor; outline-offset: 2px;
+  outline: 2px solid currentColor; outline-offset: .125rem;
 }
 
 .dica__texto {
   position: fixed; z-index: 1000; left: 0; top: 0;      /* x/y calculados pelo dica.js; escapa de overflow:hidden|auto */
-  inline-size: max-content; max-inline-size: min(var(--dica-largura), calc(100vw - 1rem));
+  inline-size: max-content; max-inline-size: min(var(--dica-largura), calc(100% - 2.5rem)); /* janela - 1rem de margem - 1.5rem de padding */
   padding: .5rem .75rem; border-radius: .375rem; outline: 1px solid transparent; /* forced-colors */
   background: var(--dica-bg); color: var(--dica-fg);
   font: 400 .875rem/1.4 system-ui, sans-serif; text-align: start; white-space: normal;
@@ -30,18 +52,24 @@
   visibility: hidden; opacity: 0;
 }
 /* ponte invisível: dá para passar o mouse do gatilho para o texto sem ele sumir (WCAG 1.4.13) */
-.dica__texto::before { content: ""; position: absolute; inset-inline: 0; inset-block-end: 100%; block-size: 8px; }
+.dica__texto::before { content: ""; position: absolute; inset-inline: 0; inset-block-end: 100%; block-size: .5rem; }
 .dica[data-lado="cima"] > .dica__texto::before { inset-block-end: auto; inset-block-start: 100%; }
 
 /* mostrar */
 .dica:hover > .dica__texto,
-.dica:focus-within > .dica__texto,
+.dica:has(:focus-visible) > .dica__texto,
 .dica[data-aberta] > .dica__texto,
 .campo:focus-within .dica__texto,
 .campo:has(> :is(input, select, textarea):hover) .dica__texto { visibility: visible; opacity: 1; }
+/* navegador sem :has — o foco de qualquer jeito mostra, como na v1.1 */
+@supports not selector(:has(*)) { .dica:focus-within > .dica__texto { visibility: visible; opacity: 1; } }
 /* dispensar com Esc (precisa vir DEPOIS) */
 .dica[data-fechada] > .dica__texto,
 .campo[data-fechada] .dica__texto { visibility: hidden; opacity: 0; }
+
+/* não engole o toque nem o clique de quem quer o que está embaixo (precisa vir DEPOIS do "mostrar") */
+@media (pointer: coarse) { .dica__texto { pointer-events: none; } }
+.campo:focus-within .dica__texto { pointer-events: none; }
 
 @media (prefers-reduced-motion: no-preference) { .dica__texto { transition: opacity .12s ease-out; } }
 @media (forced-colors: active) { .dica__texto { border: 1px solid CanvasText; } }

@@ -225,7 +225,7 @@ a { color: var(--accent); }
 
 .kc-lang {
   padding: .1875rem .25rem;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--panel);
 }
 
@@ -235,7 +235,7 @@ a { color: var(--accent); }
   gap: .5rem;
   padding: .4375rem .75rem;
   border: 1px solid var(--line-2);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--panel);
   font-size: .75rem;
   color: var(--text-2);
@@ -348,7 +348,7 @@ a { color: var(--accent); }
   color: var(--text-2);
 }
 
-.kc-hint svg { width: 1.125rem; height: 1.125rem; flex: none; color: var(--accent); margin-top: 1px; }
+.kc-hint svg { width: 1.125rem; height: 1.125rem; flex: none; color: var(--accent); margin-top: 0.0625rem; }
 .kc-hint .dica svg { color: var(--dica-gatilho); margin-top: 0; }
 
 .kc-actions {
@@ -375,7 +375,7 @@ a { color: var(--accent); }
 }
 
 .kc-btn svg { width: 1rem; height: 1rem; }
-.kc-btn:active { transform: translateY(1px); }
+.kc-btn:active { transform: translateY(0.0625rem); }
 
 .kc-btn--primary {
   background: var(--accent);
@@ -467,7 +467,7 @@ a { color: var(--accent); }
   align-items: center;
   gap: .375rem;
   padding: .1875rem .5625rem;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
   color: var(--accent);
@@ -489,7 +489,7 @@ a { color: var(--accent); }
 
 .kc-retry .kc-bar {
   height: .375rem;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--line);
   overflow: hidden;
 }
@@ -565,6 +565,15 @@ a { color: var(--accent); }
 .kc-hero, .kc-diag { animation: kc-rise .45s ease-out backwards; }
 .kc-diag { animation-delay: .12s; }
 
+/* Ícone do rótulo (título, diagnóstico, estado): reforça o texto, decorativo para o leitor de tela. */
+.kc-rotulo-icone { display: inline-flex; flex: none; vertical-align: -.12em; margin-inline-end: .35em; color: var(--accent); }
+.kc-rotulo-icone svg { width: .9em; height: .9em; }
+.kc-status .kc-rotulo-icone { margin-inline-end: 0; color: var(--text-2); }
+.kc-status .kc-rotulo-icone svg { width: .875rem; height: .875rem; }
+.kc-retry .kc-rotulo-icone svg { width: 1rem; height: 1rem; }
+/* a marca "?" ao lado de um botão ou link não espreme o rótulo dele */
+.kc-actions > .dica, .kc-by > .dica, .kc-top > .dica { gap: .125rem; }
+
 @media (max-width: 1100px) {
   .kc-main { grid-template-columns: minmax(0, 1fr) minmax(18.75rem, 23.75rem); gap: 2.5rem; }
 }
@@ -589,7 +598,7 @@ a { color: var(--accent); }
 }
 
 @media print {
-  .kc-bg, .kc-top .kc-tools, .kc-actions, .kc-retry, .dica__gatilho { display: none !important; }
+  .kc-bg, .kc-top .kc-tools, .kc-actions, .kc-retry, .dica__gatilho, .dica__marca { display: none !important; }
   body.kc-error { background: #fff; color: #000; }
   .kc-diag { box-shadow: none; }
 }

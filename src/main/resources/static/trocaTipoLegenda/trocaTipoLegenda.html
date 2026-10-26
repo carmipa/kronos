@@ -1,18 +1,18 @@
 <div class="glass-card">
-    <h2 data-tooltip="Duas ferramentas para os .ass/.ssa da pasta (subpastas não entram): trocar fonte vietnamita antiga por Arial e achatar estilos. Gravam com backup.">Menu Troca Tipo Legenda</h2>
+    <h2 data-tooltip="Duas ferramentas para os .ass/.ssa da pasta (subpastas não entram): trocar fonte vietnamita antiga por Arial e achatar estilos. Gravam com backup."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">font_download</span> Menu Troca Tipo Legenda</h2>
     <p class="card-desc">Duas ferramentas de <strong>preparo do arquivo .ass/.ssa</strong>, que atuam em momentos diferentes do fluxo: a <strong>troca de fontes legadas</strong> vem <em>antes</em> da tradução, e o <strong>achatamento de estilos</strong> vem <em>depois</em> dela. Escolha a pasta uma vez e use a aba correspondente.</p>
 
     <div class="anime-meta-banner hidden" id="meta-banner-troca-tipo-legenda"></div>
 
     <form id="form-troca-tipo-legenda" class="standard-form">
         <div class="form-group">
-            <label for="troca-tipo-legenda-contexto">Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Selecione a obra no menu para exibir os dados e a capa corretos do anime via API.">?</span></label>
+            <label for="troca-tipo-legenda-contexto"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">auto_stories</span> Obra / Contexto (Opcional): <span class="help-icon" data-tooltip="Selecione a obra no menu para exibir os dados e a capa corretos do anime via API.">?</span></label>
             <select id="troca-tipo-legenda-contexto">
                 <option value="" disabled selected>Carregando contextos...</option>
             </select>
         </div>
         <div class="form-group">
-            <label for="troca-tipo-legenda-entrada">Pasta com as legendas (.ass / .ssa): <span class="help-icon" data-tooltip="Caminho absoluto da pasta contendo as legendas ASS/SSA. Vale para as duas abas.">?</span></label>
+            <label for="troca-tipo-legenda-entrada"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">folder_open</span> Pasta com as legendas (.ass / .ssa): <span class="help-icon" data-tooltip="Caminho absoluto da pasta contendo as legendas ASS/SSA. Vale para as duas abas.">?</span></label>
             <div class="input-with-button">
                 <input type="text" id="troca-tipo-legenda-entrada" autocomplete="off" spellcheck="false" placeholder="Ex: E:\animes\Gundam\0083\legendas_ptbr" required>
                 <button type="button" class="btn-procurar" data-target="troca-tipo-legenda-entrada" data-type="pasta"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -117,11 +117,11 @@
 <!-- Área de Resultados da Auditoria (Exibida dinamicamente após o escaneamento) -->
 <div class="glass-card hidden" id="area-auditoria-resultado">
     <div class="card-header-com-stats">
-        <h3 data-tooltip="Tabela do escaneamento: cada .ass/.ssa da pasta com diagnóstico, fontes e ação sugerida. Começa mostrando só os arquivos com problema.">Resultado da Auditoria de Fontes</h3>
+        <h3 data-tooltip="Tabela do escaneamento: cada .ass/.ssa da pasta com diagnóstico, fontes e ação sugerida. Começa mostrando só os arquivos com problema."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">output</span> Resultado da Auditoria de Fontes</h3>
         <div class="stats-badges-container">
             <span class="meta-badge" id="badge-total-arquivos">0 arquivos</span>
             <span class="meta-badge" id="badge-arquivos-problemas">0 com problemas</span>
-            <button data-tooltip="Inclui na tabela os arquivos sem fonte antiga (OK), ocultos por padrão; clique de novo para ocultar. Não altera nenhum arquivo." type="button" class="meta-badge hidden" id="btn-toggle-arquivos-ok">Mostrar OK</button>
+            <button data-tooltip="Inclui na tabela os arquivos sem fonte antiga (OK), ocultos por padrão; clique de novo para ocultar. Não altera nenhum arquivo." type="button" class="meta-badge hidden" id="btn-toggle-arquivos-ok"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">visibility</span>Mostrar OK</button>
         </div>
     </div>
     <p id="aviso-subpastas-troca" class="modal-aviso hidden" role="status"></p>
@@ -130,12 +130,12 @@
         <table class="tabela-auditoria-fontes" id="tabela-fontes">
             <thead>
                 <tr>
-                    <th data-tooltip="Nome da legenda lida na pasta escaneada (subpastas não entram). Clicar no título não ordena a tabela.">Arquivo</th>
-                    <th data-tooltip="Formato pela extensão do arquivo: ASS estilizada ou SSA estilizada. Clicar no título não ordena a tabela.">Tipo</th>
-                    <th data-tooltip="Problema: fonte vietnamita antiga num estilo ou \fn das falas. OK: não há. Erro de leitura: o arquivo não abriu; o motivo sai em Fonte(s).">Diagnóstico</th>
-                    <th data-tooltip="Com problema: estilo: fonte antiga -&gt; Arial (\fn nas falas é fonte escrita dentro da fala). Sem problema: estilo e fonte atuais. Não ordena.">Fonte(s)</th>
-                    <th data-tooltip="O que a ferramenta recomenda: Substituir por Arial quando há fonte antiga; senão nada é obrigatório, mas Forçar Arial segue disponível. Não ordena.">Ação Sugerida</th>
-                    <th data-tooltip="Alterar se aplicar lote: muda em Aplicar Substituições. Operador decide: só muda se você usar Forçar Arial. Clicar no título não ordena.">Decisão</th>
+                    <th data-tooltip="Nome da legenda lida na pasta escaneada (subpastas não entram). Clicar no título não ordena a tabela."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">description</span> Arquivo</th>
+                    <th data-tooltip="Formato pela extensão do arquivo: ASS estilizada ou SSA estilizada. Clicar no título não ordena a tabela."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">category</span> Tipo</th>
+                    <th data-tooltip="Problema: fonte vietnamita antiga num estilo ou \fn das falas. OK: não há. Erro de leitura: o arquivo não abriu; o motivo sai em Fonte(s)."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">troubleshoot</span> Diagnóstico</th>
+                    <th data-tooltip="Com problema: estilo: fonte antiga -&gt; Arial (\fn nas falas é fonte escrita dentro da fala). Sem problema: estilo e fonte atuais. Não ordena."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">font_download</span> Fonte(s)</th>
+                    <th data-tooltip="O que a ferramenta recomenda: Substituir por Arial quando há fonte antiga; senão nada é obrigatório, mas Forçar Arial segue disponível. Não ordena."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">touch_app</span> Ação Sugerida</th>
+                    <th data-tooltip="Alterar se aplicar lote: muda em Aplicar Substituições. Operador decide: só muda se você usar Forçar Arial. Clicar no título não ordena."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">gavel</span> Decisão</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,7 +156,7 @@
     </div>
 
     <div class="mapeamentos-sugeridos-container">
-        <h5 data-tooltip="Amostra de fontes que viram Arial, não a lista completa. VNF-… (vietnamita moderna) e fontes comuns como Verdana não mudam.">Exemplos do que vira Arial (a regra cobre toda fonte <code>.Vn…</code>, <code>VNI-…</code> e <code>Vn</code> + maiúscula, nos estilos e no <code>\fn</code> das falas e comentários):</h5>
+        <h5 data-tooltip="Amostra de fontes que viram Arial, não a lista completa. VNF-… (vietnamita moderna) e fontes comuns como Verdana não mudam."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">lightbulb</span> Exemplos do que vira Arial (a regra cobre toda fonte <code>.Vn…</code>, <code>VNI-…</code> e <code>Vn</code> + maiúscula, nos estilos e no <code>\fn</code> das falas e comentários):</h5>
         <ul class="mapeamentos-lista">
             <li><span class="fonte-antiga">.VnBook-Antiqua</span> <span class="seta-subst">&rarr;</span> <span class="fonte-nova">Arial</span></li>
             <li><span class="fonte-antiga">.VnArial</span> <span class="seta-subst">&rarr;</span> <span class="fonte-nova">Arial</span></li>
@@ -180,10 +180,10 @@
 <!-- Console de Logs da Operação -->
 <div class="glass-card console-card">
     <div class="console-header">
-        <h3 data-tooltip="Mostra o escaneamento e, ao aplicar ou achatar, cada arquivo alterado, a pasta de backup e o resumo com o tempo total. Some da tela ao recarregar.">Logs da Operação</h3>
+        <h3 data-tooltip="Mostra o escaneamento e, ao aplicar ou achatar, cada arquivo alterado, a pasta de backup e o resumo com o tempo total. Some da tela ao recarregar."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">terminal</span> Logs da Operação</h3>
         <div class="console-actions">
-            <button class="btn-toggle-console" data-target="console-troca-tipo-legenda" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
-            <button class="btn-copy-console" data-target="console-troca-tipo-legenda" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
+            <button class="btn-toggle-console" data-target="console-troca-tipo-legenda"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
+            <button class="btn-copy-console" data-target="console-troca-tipo-legenda"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
             <button class="btn-clear-console" data-target="console-troca-tipo-legenda"><span class="material-symbols-outlined console-action-icon">mop</span>Limpar</button>
         </div>
     </div>

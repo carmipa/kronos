@@ -11,14 +11,14 @@
 #panel-inicio .welcome-hero {
     background: linear-gradient(135deg, rgba(20, 26, 41, 0.6) 0%, rgba(10, 13, 20, 0.8) 100%);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 0.75rem;
     padding: 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(0.625rem);
 }
 
 #panel-inicio .welcome-hero::before {
@@ -81,12 +81,12 @@
 
 #panel-inicio .shields-wrapper img {
     height: 1.5rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     transition: var(--transition-fast);
 }
 
 #panel-inicio .shields-wrapper img:hover {
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -113,7 +113,7 @@
 #panel-inicio .pipeline-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border-radius: 0.625rem;
     padding: 1.5rem;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -129,7 +129,7 @@
 #panel-inicio .pipeline-card:hover {
     border-color: var(--border-active);
     background-color: rgba(255, 255, 255, 0.015);
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -185,7 +185,7 @@
 #panel-inicio .stat-widget {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 1rem;
     padding: 1rem 1.25rem;
     display: flex;
     align-items: center;
@@ -197,7 +197,7 @@
 }
 
 #panel-inicio .stat-widget:hover {
-    transform: translateY(-2px);
+    transform: translateY(-0.125rem);
     border-color: var(--border-active);
 }
 
@@ -215,7 +215,7 @@
 #panel-inicio .widget-icon {
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 10px;
+    border-radius: 0.625rem;
     background-color: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
     display: flex;
@@ -266,7 +266,7 @@
     font-size: 0.65rem;
     font-weight: 600;
     padding: 0.1875rem 0.5rem;
-    border-radius: 20px;
+    border-radius: 1.25rem;
     text-transform: uppercase;
     letter-spacing: 0.01875rem;
 }
@@ -330,7 +330,7 @@
     background: linear-gradient(135deg, rgba(10, 13, 20, 0.85) 0%, rgba(10, 13, 20, 0.95) 100%), url('../img/antigravity_banner.png') no-repeat center center;
     background-size: cover;
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 1rem;
     padding: 2.5rem;
     margin-bottom: 2rem;
     display: flex;
@@ -528,14 +528,14 @@
     --card-rgb: 148, 163, 184;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 1rem;
     padding: 1.75rem 1.5rem;
     cursor: pointer;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 13.75rem;
+    min-height: 13.75rem; /* cresce com o texto (zoom de 200%) em vez de cortar */
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
@@ -554,7 +554,7 @@
 }
 
 #panel-inicio .pipeline-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-0.25rem);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
     z-index: 2;
 }
@@ -563,7 +563,7 @@
 #panel-inicio .card-icon-container {
     width: 2.625rem;
     height: 2.625rem;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;

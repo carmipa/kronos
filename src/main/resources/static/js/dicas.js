@@ -1,6 +1,6 @@
 /**
- * DICAS (tooltips) — transforma o atributo `data-tooltip` na marcação canônica da regra 6-A
- * (instrucoes/tooltip-canonico: dica.css e dica.js copiados SEM edição em static/dica/).
+ * DICAS (tooltips) — transforma o atributo `data-tooltip` na marcação do componente de dica
+ * (static/dica/dica.css e dica.js, cópias sem edição do componente compartilhado).
  *
  * PROPÓSITO DE NEGÓCIO: o painel tinha 170 dicas feitas só com CSS (`::after` no hover). Elas não
  * abriam pelo teclado nem pelo toque, o leitor de tela não as lia e o balão invisível ainda ocupava
@@ -13,6 +13,10 @@
  *  - controle (botão, link, campo com foco): envolvido por `span.dica` com a dica como IRMÃ — nunca
  *    filha do controle, senão herdaria `opacity`/`filter`/`transform` do botão desabilitado ou do
  *    hover e abriria translúcida ou fora do lugar;
+ *  - toda dica tem um "?" à vista, senão ninguém sabe que ela existe: controle com texto ganha a
+ *    marca `dica__marca` logo depois dele (fora do Tab e do nome acessível — o foco do controle já
+ *    abre a dica); campo ganha o gatilho `dica__gatilho`; controle só com ícone fica sem marca,
+ *    porque a dica dele é o nome;
  *  - o envoltório não pode mexer no layout: controle de nível bloco ganha `dica--bloco`, e o CSS do
  *    projeto faz o envoltório ocupar o lugar dele;
  *  - título e cabeçalho de coluna: o "?" (`dica__gatilho`) vai DENTRO, no fim (padrão 3); se o JS
@@ -36,6 +40,7 @@
 const CONTROLE = 'button, a[href], input:not([type=hidden]), select, textarea, summary, '
     + '[role=button], [role=tab], [role=menuitem], [role=switch], [tabindex]:not([tabindex="-1"])';
 const TEXTO = 'th, h1, h2, h3, h4, h5, h6, [role=columnheader]';
+const CAMPO = 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]), select, textarea';
 const SVG_AJUDA = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" '
     + 'fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 '
     + '1.7M12 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -126,7 +131,7 @@ export function converterDicas(raiz) {
 }
 
 /**
- * Regra 6, blindagem 3: ícone que acompanha um texto é decorativo e sai da leitura do leitor de tela
+ * Ícone que acompanha um texto é decorativo e sai da leitura do leitor de tela
  * (sem isso ele lê o nome do glifo: "content_copy Copiar"). Ícone que é o ÚNICO nome de um controle
  * fica — tirá-lo deixaria o botão sem nome.
  */
@@ -177,15 +182,40 @@ function converter(el) {
     if (el.matches(CONTROLE)) { envolverControle(el, texto); }
 }
 
-/** Controle com foco: `span.dica` em volta, dica como irmã do controle. */
+/**
+ * PROPÓSITO DE NEGÓCIO: dica de um controle focável — `span.dica` em volta, dica como irmã do
+ * controle e um "?" à vista para a pessoa saber que a dica existe.
+ *
+ * INVARIANTES DO DOMÍNIO: controle com texto ganha a marca (não focável, fora do nome acessível);
+ * campo ganha o gatilho focável (o campo não tem texto próprio que diga que há ajuda); controle só
+ * com ícone não ganha nada, porque a dica dele é o nome.
+ *
+ * COMPORTAMENTO EM CASO DE FALHA: controle sem texto nem nome é tratado como só ícone (sem marca).
+ */
 function envolverControle(el, texto) {
     const id = novoId(el);
     const envolve = document.createElement('span');
     envolve.className = ehBloco(el) ? 'dica dica--bloco' : 'dica';
     el.replaceWith(envolve);
-    envolve.append(el, criarTexto(id, texto));
+    envolve.append(el);
+    if (el.matches(CAMPO)) {
+        const nome = el.getAttribute('aria-label') || el.getAttribute('placeholder') || 'este campo';
+        envolve.append(criarGatilho(id, nome.replace(/[.…\s]+$/, '')));
+    } else if (rotuloDe(el)) {
+        envolve.append(criarMarca());
+    }
+    envolve.append(criarTexto(id, texto));
     descrever(el, id);
     el.setAttribute('data-dica', id);
+}
+
+/** A marca "?" de controle com texto: decorativa para o leitor de tela e fora do Tab. */
+function criarMarca() {
+    const marca = document.createElement('span');
+    marca.className = 'dica__marca';
+    marca.setAttribute('aria-hidden', 'true');
+    marca.innerHTML = SVG_AJUDA;
+    return marca;
 }
 
 /** O "?" antigo (`span.help-icon`): vira o gatilho canônico logo depois do rótulo que o continha. */
@@ -223,14 +253,18 @@ function colocarAposRotulo(rotulo, texto, nome) {
 function criarAjuda(id, nome, texto) {
     const envolve = document.createElement('span');
     envolve.className = 'dica';
+    envolve.append(criarGatilho(id, nome), criarTexto(id, texto));
+    return envolve;
+}
+
+function criarGatilho(id, nome) {
     const gatilho = document.createElement('button');
     gatilho.type = 'button';
     gatilho.className = 'dica__gatilho';
     gatilho.setAttribute('aria-label', `Ajuda sobre ${nome}`);
     gatilho.setAttribute('aria-describedby', id);
     gatilho.innerHTML = SVG_AJUDA;
-    envolve.append(gatilho, criarTexto(id, texto));
-    return envolve;
+    return gatilho;
 }
 
 function criarTexto(id, texto) {

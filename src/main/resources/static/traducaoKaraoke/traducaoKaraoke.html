@@ -1,5 +1,5 @@
                     <div class="glass-card">
-                        <h2 data-tooltip="Traduz as letras de música para PT-BR mantendo o romaji e depois remove a animação. A entrada nunca é alterada: cada passada grava em pasta nova.">Karaokê — Traduzir e Limpar (Romaji + PT-BR)</h2>
+                        <h2><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">lyrics</span> Karaokê — Traduzir e Limpar (Romaji + PT-BR)</h2>
                         <p class="card-desc">Uma tela, <strong>duas passadas na ordem</strong>: primeiro <strong>traduz</strong> as letras de música para PT-BR mantendo o japonês/romaji original; depois <strong>achata</strong> (limpa) a animação de karaokê e entrega uma linha limpa — romaji em cima, PT-BR embaixo. Escolha a obra (ou <em>sem lore</em>) para exibir a capa e a lore e liberar as opções. Os arquivos de entrada nunca são alterados; cada passada grava em pasta irmã com manifesto de auditoria.</p>
 
                         <div class="anime-meta-banner hidden" id="meta-banner-traducao-karaoke"></div>
@@ -14,13 +14,13 @@
 
                         <form id="form-traducao-karaoke" class="standard-form">
                             <div class="form-group">
-                                <label for="traducao-karaoke-contexto">Obra / Contexto: <span class="help-icon" data-tooltip="A obra define a lore usada pelo LLM e a capa, e libera os campos. &#x27;Sem lore&#x27; libera só o Passo 2 (achatar); traduzir exige a obra.">?</span></label>
+                                <label for="traducao-karaoke-contexto"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">auto_stories</span> Obra / Contexto: <span class="help-icon" data-tooltip="A obra define a lore usada pelo LLM e a capa, e libera os campos. &#x27;Sem lore&#x27; libera só o Passo 2 (achatar); traduzir exige a obra.">?</span></label>
                                 <select id="traducao-karaoke-contexto">
                                     <option value="" disabled selected>Carregando contextos...</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="traducao-karaoke-entrada">Pasta com as Legendas (.ass): <span class="help-icon" data-tooltip="Pasta das legendas cujas letras serão traduzidas. Ideal: a saída da tradução do diálogo (traducao_ptbr). A tradução grava ao lado, com o sufixo -karaoke-ptbr.">?</span></label>
+                                <label for="traducao-karaoke-entrada"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">folder_open</span> Pasta com as Legendas (.ass): <span class="help-icon" data-tooltip="Pasta das legendas cujas letras serão traduzidas. Ideal: a saída da tradução do diálogo (traducao_ptbr). A tradução grava ao lado, com o sufixo -karaoke-ptbr.">?</span></label>
                                 <div class="input-with-button">
                                     <input type="text" id="traducao-karaoke-entrada" placeholder="Ex: C:\animes\86\86 Part 1\traducao_ptbr" required>
                                     <button type="button" class="btn-procurar" data-target="traducao-karaoke-entrada" data-type="pasta"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -71,7 +71,7 @@
                     <span class="op-titulo">Achatar / limpar <span class="op-selo op-selo-seguro">sem LLM</span></span>
                     <span class="op-desc"><strong>Por que achatar:</strong> o karaokê animado (clip, posição por sílaba) é desenhado para os glifos originais. A tradução tem tamanho diferente e <strong>quebra nessa geometria</strong> — vira a "zona" de romaji + inglês + PT sobrepostos. Achatar remove a animação e deixa uma linha limpa: romaji em cima, PT-BR embaixo. Achata a <strong>saída do Passo 1</strong> (editável abaixo).</span>
                     <div class="form-group">
-                        <label for="traducao-karaoke-achatar-origem">Pasta a achatar: <span class="help-icon" data-tooltip="Preenchida automaticamente com a saída da tradução (-karaoke-ptbr). Pode editar para achatar outra pasta já traduzida.">?</span></label>
+                        <label for="traducao-karaoke-achatar-origem"><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">folder_open</span> Pasta a achatar: <span class="help-icon" data-tooltip="Preenchida automaticamente com a saída da tradução (-karaoke-ptbr). Pode editar para achatar outra pasta já traduzida.">?</span></label>
                         <div class="input-with-button">
                             <input type="text" id="traducao-karaoke-achatar-origem" placeholder="Preenche sozinho após escolher a pasta acima (…-karaoke-ptbr)">
                             <button type="button" class="btn-procurar" data-target="traducao-karaoke-achatar-origem" data-type="pasta"><span class="material-symbols-outlined btn-inline-icon">folder_open</span>Procurar...</button>
@@ -99,10 +99,10 @@
 
                     <div class="glass-card console-card">
                         <div class="console-header">
-                            <h3 data-tooltip="As duas passadas escrevem aqui: classificação e tradução de cada linha, limpeza da animação, avisos e o relatório final.">Log do Karaokê (tradução e limpeza, linha a linha)</h3>
+                            <h3 data-tooltip="As duas passadas escrevem aqui: classificação e tradução de cada linha, limpeza da animação, avisos e o relatório final."><span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">terminal</span> Log do Karaokê (tradução e limpeza, linha a linha)</h3>
                             <div class="console-actions">
-                                <button class="btn-toggle-console" data-target="console-traducao-karaoke" data-tooltip="Alternar altura expandida do console"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
-                                <button class="btn-copy-console" data-target="console-traducao-karaoke" data-tooltip="Copiar conteúdo do console"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
+                                <button class="btn-toggle-console" data-target="console-traducao-karaoke"><span class="material-symbols-outlined console-action-icon">unfold_more</span>Expandir</button>
+                                <button class="btn-copy-console" data-target="console-traducao-karaoke"><span class="material-symbols-outlined console-action-icon">content_copy</span>Copiar</button>
                                 <button class="btn-clear-console" data-target="console-traducao-karaoke"><span class="material-symbols-outlined console-action-icon">mop</span>Limpar</button>
                             </div>
                         </div>

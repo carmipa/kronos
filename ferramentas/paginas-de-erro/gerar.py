@@ -16,7 +16,10 @@ INVARIANTES DO DOMÍNIO:
     com a MESMA versão que o app.js importa (VERSAO_I18N, conferida pela catraca);
   - nenhum atributo de dicionário (a catraca de i18n reprova `data-i18n=`);
   - todo tooltip tem id único na página, `role="tooltip"` e o controle aponta para ele com
-    `aria-describedby`; texto não focável ganha o gatilho "?";
+    `aria-describedby`; texto não focável ganha o gatilho "?", controle com texto ganha a marca "?"
+    à vista (as bandeiras, só com ícone, não); dica que repete o rótulo ou o texto logo abaixo não entra;
+  - título e estado levam ícone (SVG local, `aria-hidden`); o número do erro em destaque é título
+    editorial (`data-titulo-editorial`), e o título logo abaixo nomeia o erro;
   - valores técnicos do diagnóstico, código e marca levam `translate="no"`.
 
 COMPORTAMENTO EM CASO DE FALHA: código sem ícone ou família conhecidos levanta KeyError ANTES de
@@ -26,10 +29,12 @@ gravar qualquer arquivo (tudo é montado em memória e só então escrito). Uso:
 import html
 import json
 import os
+import re
+import unicodedata
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SAIDA = os.path.join(RAIZ, "src", "main", "resources", "static", "errors")
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 VERSAO_I18N = "2.2"      # tem de ser a mesma do import em static/js/app.js
 VERSAO_CSS_I18N = "1.3"  # tem de ser a mesma do <link> em static/index.html
 AUTHOR = "Paulo André Carminati"
@@ -63,6 +68,8 @@ ICONS = {
     "wifi-off":  svg('<line x1="2" y1="2" x2="22" y2="22"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 12.5a10 10 0 0 1 5.2-2.7"/><path d="M12 6a16 16 0 0 1 10 3.5"/><path d="M2 9.5a16 16 0 0 1 4-2.4"/><circle cx="12" cy="20" r=".9" fill="currentColor"/>'),
     "bug":       svg('<path d="M8 2l1.9 1.9M16 2l-1.9 1.9"/><path d="M9 7.1V6a3 3 0 0 1 6 0v1.1"/><rect x="6" y="7" width="12" height="13" rx="6"/><path d="M12 12v8"/><path d="M6 13H2M22 13h-4"/><path d="M6 17l-3 2M18 17l3 2"/><path d="M6 9L3 7M18 9l3-2"/>'),
     # ícones de interface
+    "alert":     svg('<circle cx="12" cy="12" r="9"/><line x1="12" y1="7.5" x2="12" y2="13"/><circle cx="12" cy="16.5" r=".9" fill="currentColor"/>'),
+    "diag":      svg('<circle cx="10.5" cy="10.5" r="6.5"/><line x1="21" y1="21" x2="15.2" y2="15.2"/><polyline points="6.5 11 8.8 11 10 8.5 11.5 13 12.6 11 14.5 11"/>'),
     "home":      svg('<path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/>'),
     "back":      svg('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>'),
     "reload":    svg('<path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/>'),
@@ -101,7 +108,6 @@ UI = {
     "btn.home": "Painel Inicial", "btn.back": "Voltar", "btn.reload": "Recarregar", "btn.retry": "Tentar novamente",
     "btn.telemetry": "Ver telemetria", "btn.copy": "Copiar diagnóstico", "btn.copied": "Copiado!",
     "btn.now": "Tentar agora", "btn.pause": "Pausar", "btn.resume": "Retomar",
-    "tip.home": "Ir para o Painel Inicial do pipeline",
     "tip.back": "Retornar à tela anterior do navegador",
     "tip.reload": "Recarregar esta página e tentar de novo",
     "tip.retry": "Verificar o backend e voltar à rota de origem se ele responder",
@@ -129,7 +135,6 @@ UI = {
     "tip.foot.repo": "Abrir o repositório do projeto no GitHub",
     "tip.foot.autor": "Abre carminati.dev.br, a página do autor, em uma nova aba",
     "tip.foot.ref": "Versão das páginas de erro e código de referência desta tela",
-    "tip.hint": "Sugestão de ação para resolver ou contornar o problema",
     "ajuda": "Ajuda sobre",
 }
 
@@ -289,10 +294,32 @@ def esc(s):
 # ---------------------------------------------------------------------------
 # PEÇAS DO TOOLTIP CANÔNICO
 # ---------------------------------------------------------------------------
-def dica_controle(controle, ref, texto):
-    """Padrão 1 (elemento focável): o controle já traz aria-describedby="ref"."""
-    return '<span class="dica">%s<span id="%s" role="tooltip" class="dica__texto">%s</span></span>' % (
-        controle, ref, esc(texto))
+MARCA = '<span class="dica__marca" aria-hidden="true">%s</span>' % INTERROGACAO
+
+
+def dica_controle(controle, ref, texto, marca=True):
+    """Padrão 1 (elemento focável): o controle já traz aria-describedby="ref".
+
+    Controle com texto leva a marca "?" à vista logo depois dele (fora do Tab e do nome acessível),
+    para a pessoa saber que há dica; controle só com ícone (as bandeiras) passa marca=False, porque
+    a dica dele é o nome."""
+    return '<span class="dica">%s%s<span id="%s" role="tooltip" class="dica__texto">%s</span></span>' % (
+        controle, MARCA if marca else "", ref, esc(texto))
+
+
+def repete(dica, texto):
+    """A dica repete o texto visível logo abaixo (70% ou mais das palavras de 4+ letras)?"""
+    def palavras(s):
+        s = "".join(c for c in unicodedata.normalize("NFD", s.lower()) if unicodedata.category(c) != "Mn")
+        return re.findall(r"[a-z0-9]{4,}", s)
+    d = palavras(dica)
+    t = set(palavras(texto))
+    return bool(d) and sum(1 for p in d if p in t) / len(d) >= 0.7
+
+
+def icone_rotulo(nome):
+    """Ícone do rótulo (título, estado): reforça o texto e sai da leitura em voz."""
+    return '<span class="kc-rotulo-icone" aria-hidden="true">%s</span>' % ICONS[nome]
 
 
 def dica_ajuda(ref, rotulo, texto):
@@ -308,9 +335,14 @@ TODAS_ACOES = ("home", "back", "reload", "retry", "telemetry")
 
 
 def acao_html(a, classe, oculta=False):
-    controle = '<a class="kc-btn %s" href="%s" data-action="%s" aria-describedby="d-act-%s">%s<span>%s</span></a>' % (
-        classe, BTN_HREF[a], a, a, ICONS[BTN_ICON[a]], esc(UI["btn." + a]))
-    bloco = dica_controle(controle, "d-act-" + a, UI["tip." + a])
+    dica = UI.get("tip." + a)
+    controle = '<a class="kc-btn %s" href="%s" data-action="%s"%s>%s<span>%s</span></a>' % (
+        classe, BTN_HREF[a], a, ' aria-describedby="d-act-%s"' % a if dica else "", ICONS[BTN_ICON[a]],
+        esc(UI["btn." + a]))
+    if not dica:
+        # sem dica (o rótulo já diz tudo): o próprio link é o que se esconde na página dinâmica
+        return "      " + (controle.replace("<a ", "<a hidden ", 1) if oculta else controle)
+    bloco = dica_controle(controle, "d-act-" + a, dica)
     if oculta:
         bloco = bloco.replace('<span class="dica">', '<span class="dica" hidden>', 1)
     return "      " + bloco
@@ -336,6 +368,7 @@ def retry_html():
     pausa = '<button type="button" class="kc-icon-btn" data-action="retry-toggle" aria-describedby="d-retry-toggle">%s<span data-kc-rotulo>%s</span></button>' % (
         ICONS["pause"], esc(UI["btn.pause"]))
     return ('    <div class="kc-retry" hidden role="status" aria-live="polite">\n'
+            '      ' + icone_rotulo("clock") + '\n'
             '      <p data-retry="msg">—</p>\n'
             '      <div class="kc-bar" aria-hidden="true"><i></i></div>\n'
             '      <div class="kc-retry-actions">\n'
@@ -357,7 +390,7 @@ def bandeiras_html():
         controle = ('<button type="button" class="seletor-idioma-botao" data-idioma="%s" aria-label="%s" '
                     'aria-pressed="false" aria-describedby="d-lang-%s"><img src="/i18n/flags/%s.svg" width="26" '
                     'height="18" alt="" aria-hidden="true" draggable="false"></button>') % (idioma, esc(nome), pais, pais)
-        botoes.append("      " + dica_controle(controle, "d-lang-" + pais, dica))
+        botoes.append("      " + dica_controle(controle, "d-lang-" + pais, dica, marca=False))
     return "\n".join(botoes)
 
 
@@ -419,7 +452,7 @@ def pagina(e, dinamica=False):
     <div class="seletor-idioma kc-lang" role="group" aria-label="%(aria_lang)s" translate="no">
 %(bandeiras)s
     </div>
-    <div class="kc-status" data-state="wait" role="status" aria-live="polite"><i></i><span>%(status_wait)s</span></div>
+    <div class="kc-status" data-state="wait" role="status" aria-live="polite">%(ic_status)s<i></i><span>%(status_wait)s</span></div>
     %(dica_status)s
     <time class="kc-clock" translate="no">—</time>
     %(dica_relogio)s
@@ -432,10 +465,10 @@ def pagina(e, dinamica=False):
       <div class="kc-tile" aria-hidden="true">%(icone)s</div>
       <span data-kc-campo="eyebrow">%(eyebrow)s</span>
     </div>
-    <h1 class="kc-code"><span data-kc-campo="display" translate="no">%(display)s</span> %(dica_codigo)s</h1>
-    <h2 class="kc-title"><span data-kc-campo="title">%(h_title)s</span> %(dica_titulo)s</h2>
+    <h1 class="kc-code" data-titulo-editorial><span data-kc-campo="display" translate="no">%(display)s</span> %(dica_codigo)s</h1>
+    <h2 class="kc-title">%(ic_titulo)s<span data-kc-campo="title">%(h_title)s</span> %(dica_titulo)s</h2>
     <p class="kc-desc" data-kc-campo="desc">%(desc)s</p>
-    <p class="kc-hint">%(bulb)s<span data-kc-campo="hint">%(hint)s</span> %(dica_sugestao)s</p>
+    <p class="kc-hint">%(bulb)s<span data-kc-campo="hint">%(hint)s</span></p>
     <nav class="kc-actions" aria-label="%(aria_actions)s">
 %(acoes)s
     </nav>
@@ -443,7 +476,7 @@ def pagina(e, dinamica=False):
 
   <aside class="kc-diag" aria-labelledby="kc-diag-title">
     <header>
-      <h2><span id="kc-diag-title">%(diag_title)s</span> %(dica_diag)s</h2>
+      <h2>%(ic_diag)s<span id="kc-diag-title">%(diag_title)s</span> %(dica_diag)s</h2>
       %(copiar)s
     </header>
     <dl>
@@ -475,9 +508,11 @@ def pagina(e, dinamica=False):
         dica_relogio=dica_ajuda("d-clock", "o relógio", UI["tip.clock"]),
         icone=icone, eyebrow=esc(eyebrow), display=display,
         dica_codigo=dica_ajuda("d-code", "o código do erro", code_tip),
-        h_title=esc(h_title), dica_titulo=dica_ajuda("d-title", "o título", title_tip),
+        h_title=esc(h_title),
+        # dica do título só quando acrescenta: a que repete a descrição logo abaixo não entra
+        dica_titulo="" if (not dinamica and repete(title_tip, desc)) else dica_ajuda("d-title", "o título", title_tip),
+        ic_titulo=icone_rotulo("alert"), ic_diag=icone_rotulo("diag"), ic_status=icone_rotulo("server"),
         desc=esc(desc), bulb=ICONS["bulb"], hint=esc(hint),
-        dica_sugestao=dica_ajuda("d-hint", "a sugestão", UI["tip.hint"]),
         aria_actions=esc(UI["aria.actions"]), acoes=acoes,
         diag_title=esc(UI["diag.title"]), dica_diag=dica_ajuda("d-diag-title", UI["diag.title"], UI["tip.diag.title"]),
         copiar=dica_controle(copiar, "d-copy", UI["tip.copy"]), linhas=linhas, detalhe=detalhe, retry=retry,

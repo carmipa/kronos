@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -195,6 +196,127 @@ class CatracaResponsividadeTest {
             "app.js não importa o conversor de dicas (js/dicas.js) ou não o liga");
         assertTrue(app.contains("from './gaveta.js") && app.contains("inicializarGaveta()"),
             "app.js não liga a gaveta do menu (js/gaveta.js)");
+    }
+
+    /*
+     * Largura e unidade: o layout ocupa a tela toda e escala com a fonte. px só em borda fina,
+     * contorno, sombra, filtro e breakpoint de @media; nenhum contêiner em coluna no meio
+     * (max-width + margin automático), salvo texto corrido limitado em ch.
+     * Prejuízo que originou: em 26/10/2026 a medição achou 162 declarações (120 raios de canto em px,
+     * fonte e espaçamento em px no HTML, e a página de Documentação numa coluna de 900 px no meio de
+     * uma tela de 2560 px).
+     */
+    private static final Pattern DECLARACAO = Pattern.compile("([-\\w]+)\\s*:\\s*([^;{}]+)");
+    private static final Pattern PX = Pattern.compile("(?<![\\w.-])-?(\\d*\\.?\\d+)px\\b");
+    private static final Pattern PROP_EXCECAO = Pattern.compile(
+        "border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-width)?|outline(-width|-offset)?"
+            + "|box-shadow|text-shadow|filter|-webkit-text-stroke(-width)?|--[-\\w]*shadow[-\\w]*");
+    private static final Pattern ESTILO_INLINE = Pattern.compile("\\sstyle\\s*=\\s*\"([^\"]*)\"");
+    /** Cópia de outra fonte, não se edita aqui (o próprio teste das páginas de erro trava o conteúdo). */
+    private static final Set<String> COPIAS = Set.of("dica/dica.css");
+    /** Linha de base por identidade (arquivo | seletor | declaração): a dívida só desce. Vazia desde 26/10/2026. */
+    private static final Set<String> LINHA_DE_BASE = Set.of();
+
+    /** Declarações que travam a largura ou não escalam: identidade "seletor | propriedade: valor". */
+    static List<String> violacoesLargura(String css) {
+        List<String> out = new ArrayList<>();
+        String limpo = COMENTARIO_CSS.matcher(css).replaceAll(" ");
+        Matcher regra = Pattern.compile("([^{}@]+)\\{([^{}]*)\\}").matcher(limpo);
+        while (regra.find()) {
+            String seletor = regra.group(1).replaceAll("\\s+", " ").strip();
+            String corpo = regra.group(2);
+            String maxWidth = null;
+            boolean margemAuto = false;
+            Matcher d = DECLARACAO.matcher(corpo);
+            while (d.find()) {
+                String prop = d.group(1).toLowerCase();
+                String valor = d.group(2).strip();
+                if (prop.equals("max-width")) {
+                    maxWidth = valor;
+                }
+                if (prop.startsWith("margin") && valor.matches(".*\\bauto\\b.*")) {
+                    margemAuto = true;
+                }
+                if (PROP_EXCECAO.matcher(prop).matches()) {
+                    continue;
+                }
+                // a grade de fundo desenhada com linhas de 1px é fio, como a borda
+                String semFio = valor.replaceAll("linear-gradient\\((?:[^()]|\\([^()]*\\))*\\)", "");
+                Matcher px = PX.matcher(semFio);
+                while (px.find()) {
+                    if (Double.parseDouble(px.group(1)) != 0) {
+                        out.add(seletor + " | " + prop + ": " + valor + " (px fora das exceções)");
+                        break;
+                    }
+                }
+            }
+            if (margemAuto && maxWidth != null && !maxWidth.matches("none|100%|.*\\dch\\b.*")) {
+                out.add(seletor + " | max-width: " + maxWidth + " + margin auto (coluna no meio)");
+            }
+        }
+        return out;
+    }
+
+    /** O mesmo critério no style="" do HTML. */
+    static List<String> violacoesLarguraHtml(String html) {
+        List<String> out = new ArrayList<>();
+        Matcher m = ESTILO_INLINE.matcher(COMENTARIO_HTML.matcher(html).replaceAll(" "));
+        while (m.find()) {
+            for (String v : violacoesLargura("[style] {" + m.group(1) + "}")) {
+                out.add(v);
+            }
+        }
+        return out;
+    }
+
+    @Test
+    @DisplayName("instrumento de largura: reprova px, raio em px e coluna no meio; aceita borda, sombra, breakpoint e texto em ch")
+    void instrumentoDeLarguraDiscrimina() {
+        assertEquals(1, violacoesLargura(".c { margin-top: 12px; }").size());
+        assertEquals(1, violacoesLargura(".c { border-radius: 8px; }").size());
+        assertEquals(1, violacoesLargura(".c:hover { transform: translateY(-2px); }").size());
+        assertEquals(1, violacoesLargura(".d { max-width: 40rem; margin: 0 auto; }").size());
+        assertEquals(0, violacoesLargura(".a { border: 1px solid red; box-shadow: 0 2px 4px #000; margin: 0; }").size());
+        assertEquals(0, violacoesLargura("@media (max-width: 768px) { .b { padding: 1rem; } }").size());
+        assertEquals(1, violacoesLargura("@media (max-width: 768px) { .b { padding: 12px; } }").size());
+        assertEquals(0, violacoesLargura(".p { max-width: 60ch; margin: 0 auto 1.5rem; }").size());
+        assertEquals(0, violacoesLargura(":root { --shadow: 0 20px 60px #000; }").size());
+        assertEquals(0, violacoesLargura(".g { background-image: linear-gradient(var(--l) 1px, transparent 1px); }").size());
+        assertEquals(1, violacoesLargura(".g { background-size: 40px 40px; }").size());
+        assertEquals(0, violacoesLargura(".t { -webkit-text-stroke: 2px red; }").size());
+        assertEquals(0, violacoesLargura(".z { margin: 0px; outline-offset: 2px; }").size());
+        assertEquals(1, violacoesLarguraHtml("<div style=\"gap: 15px\">x</div>").size());
+        assertEquals(0, violacoesLarguraHtml("<div style=\"gap: .9375rem\">x</div>").size());
+    }
+
+    @Test
+    @DisplayName("CSS e style=\"\" do painel: nada de px fora das exceções nem coluna no meio (catraca por identidade)")
+    void larguraEUnidadeDoPainel() throws IOException {
+        List<String> novas = new ArrayList<>();
+        int lidos = 0;
+        for (Path p : arquivos(".css")) {
+            String rel = ESTATICOS.relativize(p).toString().replace('\\', '/');
+            if (COPIAS.contains(rel)) {
+                continue;
+            }
+            lidos++;
+            for (String v : violacoesLargura(Files.readString(p, StandardCharsets.UTF_8))) {
+                if (!LINHA_DE_BASE.contains(rel + " | " + v)) {
+                    novas.add(rel + " | " + v);
+                }
+            }
+        }
+        for (Path p : arquivos(".html")) {
+            String rel = ESTATICOS.relativize(p).toString().replace('\\', '/');
+            lidos++;
+            for (String v : violacoesLarguraHtml(Files.readString(p, StandardCharsets.UTF_8))) {
+                if (!LINHA_DE_BASE.contains(rel + " | " + v)) {
+                    novas.add(rel + " | " + v);
+                }
+            }
+        }
+        assertTrue(lidos >= 30, "NÃO VERIFICOU — só " + lidos + " arquivos lidos em " + ESTATICOS.toAbsolutePath());
+        assertTrue(novas.isEmpty(), "largura travada ou unidade que não escala:\n" + String.join("\n", novas));
     }
 
     private static List<Path> arquivos(String extensao) throws IOException {

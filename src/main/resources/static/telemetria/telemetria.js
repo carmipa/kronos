@@ -95,8 +95,10 @@ async function carregarFatias(selecionar) {
         b.setAttribute('role', 'tab');
         b.setAttribute('aria-selected', String(f.fatia === alvo));
         b.dataset.tooltip = `Mostra as operações da fatia ${f.fatia}; o número é quantas ela tem registradas.`;
-        b.innerHTML = '<span></span><span class="fatia-contagem"></span>';
-        b.firstElementChild.textContent = f.fatia;
+        // ícone da aba antes do nome da fatia (o nome vem do dado, por textContent)
+        b.innerHTML = '<span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">analytics</span>'
+            + '<span></span><span class="fatia-contagem"></span>';
+        b.children[1].textContent = f.fatia;
         b.lastElementChild.textContent = (f.total || 0).toLocaleString('pt-BR');
         b.onclick = () => carregarFatias(f.fatia);
         abas.appendChild(b);
@@ -129,15 +131,16 @@ async function mostrarFatia(fatia) {
 
     const tabela = document.createElement('table');
     tabela.className = 'tabela-fatia';
-    // data-tooltip: js/dicas.js põe o "?" canônico em cada cabeçalho (regra 6-A)
+    // data-tooltip: js/dicas.js põe o "?" em cada cabeçalho; o ícone vem antes do texto
+    const ic = (g) => `<span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">${g}</span>`;
     tabela.innerHTML = '<thead><tr>'
-        + '<th data-tooltip="Que tipo de operação a fatia registrou.">Tipo</th>'
-        + '<th data-tooltip="Descrição curta da operação, como veio no registro de telemetria.">Detalhe</th>'
-        + '<th data-tooltip="Duração total da operação, em milissegundos.">Tempo</th>'
-        + '<th data-tooltip="Quantos arquivos a operação processou.">Arquivos</th>'
-        + '<th data-tooltip="Quantos itens a operação encontrou para tratar; o que conta como item depende da fatia.">Detectados</th>'
-        + '<th data-tooltip="Quantos dos itens encontrados a operação de fato corrigiu.">Corrigidos</th>'
-        + '<th data-tooltip="Data e hora em que a operação foi registrada.">Quando</th>'
+        + `<th data-tooltip="Que tipo de operação a fatia registrou.">${ic('category')}Tipo</th>`
+        + `<th data-tooltip="Descrição curta da operação, como veio no registro de telemetria.">${ic('notes')}Detalhe</th>`
+        + `<th data-tooltip="Duração total da operação, em milissegundos.">${ic('timer')}Tempo</th>`
+        + `<th data-tooltip="Quantos arquivos a operação processou.">${ic('description')}Arquivos</th>`
+        + `<th data-tooltip="Quantos itens a operação encontrou para tratar; o que conta como item depende da fatia.">${ic('tag')}Detectados</th>`
+        + `<th data-tooltip="Quantos dos itens encontrados a operação de fato corrigiu.">${ic('build')}Corrigidos</th>`
+        + `<th data-tooltip="Data e hora em que a operação foi registrada.">${ic('schedule')}Quando</th>`
         + '</tr></thead>';
     const corpo = document.createElement('tbody');
     // Mais recentes primeiro, e teto de 300 linhas: a fatia de auditoria tem
@@ -609,6 +612,7 @@ function criarChip(valor, label, contagem, cor) {
         ? 'Mostra todas as operações do histórico; o número é o total.'
         : `Mostra só as operações "${label}" no histórico; o número é quantas há.`;
     btn.innerHTML = `
+        <span class="material-symbols-outlined icone-rotulo" aria-hidden="true" translate="no">filter_list</span>
         <span class="chip-dot" style="background:${cor}"></span>
         <span class="chip-label">${label}</span>
         <span class="chip-count">${formatarNumero(contagem)}</span>
