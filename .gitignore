@@ -70,7 +70,9 @@ backups/
 # Saida do quarkusDev: `iniciar-kronos-dev.cmd` redireciona stdout/stderr para ca, entao o
 # arquivo NASCE a cada vez que se sobe o modo dev e aparece como nao-rastreado no `git status`
 # de quem so quis rodar a aplicacao. Mesma familia de logs/ — runtime, nunca fonte.
-console-web.log
+# O curinga cobre a variante do jar (console-web-jar.log), que entrou no commit 6751f0e
+# levando caminhos locais da maquina para o repositorio publico.
+console-web*.log
 
 # Anotacoes locais das sessoes de trabalho com IA: ficam so na maquina do autor (repositorio publico).
 # Vale para qualquer assistente, nao so o que estava em uso quando a linha nasceu.

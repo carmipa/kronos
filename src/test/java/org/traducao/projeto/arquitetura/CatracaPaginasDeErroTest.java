@@ -55,7 +55,7 @@ class CatracaPaginasDeErroTest {
     private static final Path ERROS = ESTATICOS.resolve("errors");
     private static final Path CATALOGO = ERROS.resolve("assets").resolve("kronos-error-catalog.js");
     private static final Path JS_KIT = ERROS.resolve("assets").resolve("kronos-error.js");
-    private static final String REPO = "https://github.com/carmipa/traducao_animes_llm_local_quarkus";
+    private static final String REPO = "https://github.com/carmipa/kronos";
     /** Página do autor, no "Desenvolvido por" (Paulo, 14/10/2026). */
     private static final String SITE = "https://carminati.dev.br/";
 

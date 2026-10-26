@@ -1,6 +1,6 @@
-const PAINEL_HTML = 'sobre/sobre.html?v=3.2';
+const PAINEL_HTML = 'sobre/sobre.html?v=3.3';
 const GITHUB_USER = 'carmipa';
-const GITHUB_REPO = 'carmipa/traducao_animes_llm_local_quarkus';
+const GITHUB_REPO = 'carmipa/kronos';
 
 async function carregarPainelHtml() {
     const painel = document.getElementById('panel-sobre');

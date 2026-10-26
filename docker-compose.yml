@@ -11,6 +11,12 @@
 # Antes do primeiro `up`, copie `.env.example` para `.env` e confira o caminho
 # do acervo.
 
+# Nome do projeto FIXO. Sem ele o Compose deriva o nome da pasta, e o volume do
+# Redis se chama <pasta>_redis-dados: renomear a pasta (o repositório virou
+# carmipa/kronos em 26/10/2026) faria o Redis subir com um volume novo e vazio,
+# deixando o antigo órfão. Este é o nome que a pasta produzia até aqui.
+name: traducao_animes_llm_local_quarkus-1
+
 services:
   kronos:
     build:

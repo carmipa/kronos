@@ -26,8 +26,8 @@
 ### 1. Clonar o repositório
 
 ```bash
-git clone <url-do-repositorio>
-cd traducao_animes_llm_local_quarkus
+git clone https://github.com/carmipa/kronos.git
+cd kronos
 ```
 
 ### 2. Instalar as ferramentas externas

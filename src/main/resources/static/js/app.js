@@ -23,7 +23,7 @@ import { inicializarDicas, registrarDicaPadrao, rotuloDe } from './dicas.js?v=1.
 import { initMapa } from '../mapa/mapa.js?v=5.1';
 import { initTelemetria } from '../telemetria/telemetria.js?v=3.4';
 import { initDocumentacao } from '../documentacao/documentacao.js?v=3.1';
-import { initSobre } from '../sobre/sobre.js?v=3.2';
+import { initSobre } from '../sobre/sobre.js?v=3.3';
 import { initRenomearArquivos } from '../renomearArquivos/renomearArquivos.js?v=3.1';
 // 4.3 Karaokê Simples foi ABSORVIDO pela tela única 4.1 Karaokê em 21/09/2026: o achatamento virou
 // o Passo 2 da mesma tela (chama /api/novo-karaoke/* direto). O backend do achatador continua vivo;

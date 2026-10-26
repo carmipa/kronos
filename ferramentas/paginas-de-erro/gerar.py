@@ -34,7 +34,7 @@ VERSAO_I18N = "2.2"      # tem de ser a mesma do import em static/js/app.js
 VERSAO_CSS_I18N = "1.3"  # tem de ser a mesma do <link> em static/index.html
 AUTHOR = "Paulo André Carminati"
 SITE = "https://carminati.dev.br/"  # página do autor (Paulo, 14/10/2026)
-REPO = "https://github.com/carmipa/traducao_animes_llm_local_quarkus"
+REPO = "https://github.com/carmipa/kronos"
 
 # ---------------------------------------------------------------------------
 # ÍCONES (traço 1.8, viewBox 24) — do kit v1.0.0, sem alteração

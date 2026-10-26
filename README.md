@@ -16,7 +16,7 @@
 [![MKVToolNix](https://img.shields.io/badge/MKVToolNix-Remux-3B82F6?style=for-the-badge)](https://mkvtoolnix.download/)
 [![FFmpeg](https://img.shields.io/badge/FFmpeg-Analysis-007808?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
 
-[![Repository](https://img.shields.io/badge/GitHub-carmipa%2Ftraducao__animes__llm__local__quarkus-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/carmipa/traducao_animes_llm_local_quarkus)
+[![Repository](https://img.shields.io/badge/GitHub-carmipa%2Fkronos-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/carmipa/kronos)
 [![Autor](https://img.shields.io/badge/Autor-Paulo_André_Carminati-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/paulo-andr%C3%A9-carminati-47712340/)
 [![GitHub](https://img.shields.io/badge/GitHub-carmipa-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/carmipa?tab=repositories)
 
@@ -113,8 +113,8 @@ histórico justamente porque numeração que não acompanha a ordem vira mentira
 ### Executar em modo desenvolvimento
 
 ```shell
-git clone <url-do-repositorio>
-cd traducao_animes_llm_local_quarkus
+git clone https://github.com/carmipa/kronos.git
+cd kronos
 
 ./gradlew quarkusDev
 ```
@@ -262,7 +262,7 @@ Build:      Gradle com Quarkus Plugin
 ## Estrutura do Projeto
 
 ```
-traducao_animes_llm_local_quarkus/
+kronos/
 ├── src/main/java/org/traducao/projeto/
 │   │   ── Fatias funcionais (não importam umas às outras) ──
 │   ├── traducao/                ← NÚCLEO da Tradução Local
