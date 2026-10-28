@@ -161,13 +161,11 @@ class FronteiraTraducaoArchTest {
         RAIZ + ".core.util.ArquivoAtomicoUtil",
         RAIZ + ".core.io.DiretorioBaseKronos",
         RAIZ + ".core.execucao.FilaExecucaoPipeline",
-        RAIZ + ".core.util.DuracaoUtil",
         RAIZ + ".core.exception.BasePipelineException",
         RAIZ + ".core.presentation.web.PipelineWebSupport",
         RAIZ + ".core.presentation.web.OperacaoRequest",
         RAIZ + ".core.presentation.web.RespostaPadrao",
         RAIZ + ".core.presentation.web.LogStreamService",
-        RAIZ + ".core.presentation.ui.AnsiCores",
         RAIZ + ".core.presentation.ui.ConsoleEntrada",
         RAIZ + ".core.infrastructure.http.JsonHttpClient",
         // DECIMO TERCEIRO, homologado em 2026-08-04: mecanica de casamento de termo em legenda
@@ -224,12 +222,10 @@ class FronteiraTraducaoArchTest {
         //
         // Falha fechada com TRES estados: sem hunspell instalado, nada e corrigido E o corretor se
         // declara indisponivel. "Nao verifiquei" nunca vira "esta limpo".
-        RAIZ + ".core.texto.dicionarioOrtografia.DicionarioOrtograficoPort",
-        RAIZ + ".core.texto.dicionarioOrtografia.HunspellDicionarioAdapter",
-        RAIZ + ".core.texto.dicionarioOrtografia.CorretorAcentoPorDicionario",
-        RAIZ + ".core.texto.dicionarioOrtografia.ClassificadorQuatroIdiomas",
-        RAIZ + ".core.texto.dicionarioOrtografia.VeredictoPalavra",
         RAIZ + ".core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda",
+        // 28/10/2026: DuracaoUtil, AnsiCores e cinco tipos do dicionarioOrtografia sairam desta lista
+        // -- homologados e sem uso no bytecode da Traducao Local (so o CorretorOrtograficoLegenda e
+        // usado). A regra agora confere IGUALDADE: tipo sem uso reprova, e a lista so desce.
         // VIGESIMO PRIMEIRO, homologado em 2026-08-18: limpeza do token de template do LLM.
         //
         // Mesmo precedente de FronteiraTermoAss e do dicionarioOrtografia — e MECANICA de
@@ -595,6 +591,69 @@ class FronteiraTraducaoArchTest {
             "Esperado uso técnico dos tipos de core congelados pela Tradução Local");
         assertTrue(violacoes.isEmpty(),
             () -> "Tipo de core fora dos doze homologados:\n" + String.join("\n", new TreeSet<>(violacoes)));
+        // IGUALDADE, e não só subconjunto (auditoria de 28/10/2026): tipo homologado que ninguém
+        // usa é entrada morta, e entrada morta numa lista de permissão é permissão sobrando para a
+        // próxima aresta entrar sem revisão. A lista só desce.
+        Set<String> semUso = new TreeSet<>(CORE_TIPOS_CONGELADOS);
+        semUso.removeAll(tiposCoreUsados);
+        assertTrue(semUso.isEmpty(),
+            () -> "Tipo de core homologado e sem uso na Tradução Local — tire da lista:\n" + String.join("\n", semUso));
+    }
+
+    /**
+     * Arestas {@code traducao.application} → qualquer pacote {@code infrastructure} (da fatia ou
+     * de peer), congeladas por IDENTIDADE (A4). As fatias {@code legenda}, {@code lore} e
+     * {@code traducaoCorrige} já proíbem application → infrastructure; a {@code traducao} não tinha
+     * regra nenhuma (auditoria de 28/10/2026). As arestas abaixo são a linha de base medida no
+     * bytecode nessa data: tirar qualquer uma delas exige porta nova, que é trabalho próprio e não
+     * cabe numa catraca. A regra impede a PRÓXIMA — aresta nova reprova listando qual entrou, e
+     * aresta que sumiu também reprova, para a lista descer junto.
+     */
+    private static final Set<String> APLICACAO_PARA_INFRAESTRUTURA_CONGELADAS = Set.of(
+        "org.traducao.projeto.traducao.application.GuardaContextoObraTraducao -> org.traducao.projeto.lore.infrastructure.GerenciadorContexto",
+        "org.traducao.projeto.traducao.application.MontadorTelemetriaTraducao -> org.traducao.projeto.traducao.infrastructure.config.LlmProperties",
+        "org.traducao.projeto.traducao.application.PoliticaBackupTraducao -> org.traducao.projeto.cachetraducao.infrastructure.CacheTraducaoService",
+        "org.traducao.projeto.traducao.application.ProcessarArquivoUseCase -> org.traducao.projeto.cachetraducao.infrastructure.CacheTraducaoService",
+        "org.traducao.projeto.traducao.application.ProcessarArquivoUseCase -> org.traducao.projeto.legenda.infrastructure.EscritorLegendaAss",
+        "org.traducao.projeto.traducao.application.ProcessarArquivoUseCase -> org.traducao.projeto.legenda.infrastructure.EscritorLegendaSrt",
+        "org.traducao.projeto.traducao.application.ProcessarArquivoUseCase -> org.traducao.projeto.legenda.infrastructure.LeitorLegendaAss",
+        "org.traducao.projeto.traducao.application.ProcessarArquivoUseCase -> org.traducao.projeto.legenda.infrastructure.LeitorLegendaSrt",
+        "org.traducao.projeto.traducao.application.ProcessarArquivoUseCase -> org.traducao.projeto.traducao.infrastructure.config.TradutorProperties",
+        "org.traducao.projeto.traducao.application.PublicadorLegendaMescla -> org.traducao.projeto.legenda.infrastructure.EscritorLegendaAss",
+        "org.traducao.projeto.traducao.application.PublicadorLegendaMescla -> org.traducao.projeto.legenda.infrastructure.EscritorLegendaSrt",
+        "org.traducao.projeto.traducao.application.PublicadorLegendaMescla -> org.traducao.projeto.legenda.infrastructure.LeitorLegendaAss",
+        "org.traducao.projeto.traducao.application.PublicadorLegendaMescla -> org.traducao.projeto.legenda.infrastructure.LeitorLegendaSrt",
+        "org.traducao.projeto.traducao.application.RecuperarPendenciaFallbackService -> org.traducao.projeto.traducao.infrastructure.config.FallbackOnlineProperties",
+        "org.traducao.projeto.traducao.application.ResolvedorCacheTraducao -> org.traducao.projeto.traducao.infrastructure.config.LlmProperties",
+        "org.traducao.projeto.traducao.application.ResolvedorCacheTraducao -> org.traducao.projeto.traducao.infrastructure.config.TradutorProperties",
+        "org.traducao.projeto.traducao.application.TradutorLotesService -> org.traducao.projeto.traducao.infrastructure.config.TradutorProperties"
+    );
+
+    @Test
+    @DisplayName("traducao.application -> infrastructure: só as arestas da linha de base de 28/10/2026 (catraca por identidade)")
+    void aplicacaoParaInfraestruturaCongelada() {
+        Set<String> arestas = new TreeSet<>();
+        for (JavaClass classe : classesProducao) {
+            if (!classe.getPackageName().equals(PKG_TRADUCAO + ".application")) {
+                continue;
+            }
+            String origem = topo(classe.getName());
+            for (Dependency dependencia : classe.getDirectDependenciesFromSelf()) {
+                String pkgDestino = dependencia.getTargetClass().getPackageName();
+                if (pkgDestino.startsWith(PREFIXO) && (pkgDestino.contains(".infrastructure.")
+                        || pkgDestino.endsWith(".infrastructure"))) {
+                    arestas.add(aresta(origem, topo(dependencia.getTargetClass().getName())));
+                }
+            }
+        }
+        assertFalse(arestas.isEmpty(), "o instrumento tinha de enxergar as arestas da linha de base");
+        Set<String> novas = new TreeSet<>(arestas);
+        novas.removeAll(APLICACAO_PARA_INFRAESTRUTURA_CONGELADAS);
+        Set<String> sumiram = new TreeSet<>(APLICACAO_PARA_INFRAESTRUTURA_CONGELADAS);
+        sumiram.removeAll(arestas);
+        assertTrue(novas.isEmpty() && sumiram.isEmpty(),
+            () -> "Arestas application -> infrastructure mudaram.\nNOVAS (crie uma porta em vez disso):\n"
+                + String.join("\n", novas) + "\nSUMIRAM (tire da lista):\n" + String.join("\n", sumiram));
     }
 
     @Test
