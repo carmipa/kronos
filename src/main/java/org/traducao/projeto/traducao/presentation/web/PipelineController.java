@@ -100,16 +100,25 @@ public class PipelineController {
     }
 
     /**
-     * Status ao vivo do servidor LLM local (LM Studio) para o card do painel
-     * inicial: informa se está online, se há modelo carregado em memória e qual
-     * é ({@link LlmPort#verificarDisponibilidade()} já adota o modelo ativo
-     * em {@link LlmProperties#model()} quando o detecta).
+     * PROPÓSITO DE NEGÓCIO: status ao vivo do servidor LLM local (LM Studio) para o card do
+     * painel inicial — se está online, se há modelo carregado e QUAL.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o nome vem de {@link LlmPort#modeloAtivo()}, que é o modelo que
+     * a verificação resolveu. A cópia de {@link LlmProperties} injetada aqui NÃO recebe o modelo
+     * detectado (o adaptador documenta isso desde 23/07/2026, quando 155 registros de telemetria
+     * gravaram {@code "current"}), e o card mostrava a configuração crua. Ela fica só como último
+     * recurso, quando a porta não sabe informar (auditoria de 28/10/2026).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: erro na consulta devolve offline com a mensagem; nunca
+     * lança.
      */
     @GetMapping("/llm/status")
     public ResponseEntity<LlmStatusResponse> statusLlm() {
         try {
             StatusLlm status = llmPort.verificarDisponibilidade();
-            String modelo = status.modeloCarregado() ? llmProperties.model() : null;
+            String ativo = llmPort.modeloAtivo();
+            String modelo = !status.modeloCarregado() ? null
+                : ativo != null && !ativo.isBlank() ? ativo : llmProperties.model();
             return ResponseEntity.ok(new LlmStatusResponse(
                 status.servidorOnline(), status.modeloCarregado(), modelo, status.mensagem()));
         } catch (Exception e) {
