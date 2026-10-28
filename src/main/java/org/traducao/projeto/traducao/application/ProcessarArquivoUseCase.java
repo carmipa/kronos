@@ -912,7 +912,9 @@ public class ProcessarArquivoUseCase {
             String traduzido = traducao.getValue();
             if (traduzido != null && !traduzido.isBlank()) {
                 String normalizado = normalizadorAspas.normalizar(traducao.getKey(), traduzido);
-                normalizado = normalizadorAcentos.normalizar(normalizado);
+                // Os termos da lore também ficam fora do normalizador: o reforço de lore acabou de
+                // escrevê-los, e "Hestia Familia" virava "Família" logo depois (28/10/2026).
+                normalizado = normalizadorAcentos.normalizar(normalizado, contexto.termosProtegidos());
                 // DEPOIS do normalizador determinístico, e não antes: o que a lista e a regra de
                 // terminação já resolvem não chega a custar consulta ao dicionário. Sobra o que
                 // nenhuma regra alcança — fatidico, minimo, aereo, psicicas, medidos no Unicorn em
@@ -927,7 +929,7 @@ public class ProcessarArquivoUseCase {
                 // portugues impecavel, o que torna o defeito invisivel para quem nao confere
                 // contra o ingles.
                 normalizado = corretorOrtografico.corrigir(
-                    normalizado, contextoCongelado.atual().termosProtegidos());
+                    normalizado, contexto.termosProtegidos());
                 if (!normalizado.equals(antesDoDicionario)) {
                     corrigidasPeloDicionario++;
                 }

@@ -361,18 +361,89 @@ public class NormalizadorAcentosComuns {
      * <p>COMPORTAMENTO EM CASO DE FALHA: texto {@code null}/vazio devolve a si mesmo.
      */
     public String normalizar(String texto) {
+        return normalizar(texto, Set.of());
+    }
+
+    /**
+     * Formas do dicionário que TAMBÉM são verbo conjugado: {@code "eu inicio"}, {@code "me
+     * exercito"}, {@code "se distancia"}, {@code "ele experiencia"}. O invariante da classe é só
+     * tocar forma que sem acento nunca é palavra, e estas são; tirá-las da lista devolveria
+     * {@code "o inicio"} sem acento, que é o caso comum. O veto é pelo contexto: verbo vem depois
+     * de pronome, substantivo depois de artigo ou preposição (auditoria de 28/10/2026).
+     */
+    private static final Set<String> TAMBEM_VERBO = Set.of("exercito", "inicio", "distancia", "experiencia");
+
+    /** Pronome que antecede a forma VERBAL das palavras de {@link #TAMBEM_VERBO}. */
+    private static final Set<String> PRONOME_ANTES_DE_VERBO = Set.of(
+        "eu", "me", "te", "se", "nos", "ele", "ela", "você", "voce");
+
+    private static final Pattern PALAVRA_ANTERIOR = Pattern.compile("(\\p{L}+)(?:\\s|\\\\[Nnh])*$");
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: como {@link #normalizar(String)}, sem tocar os termos protegidos da
+     * lore da obra. Nome próprio de ficção não leva acento do português: {@code "Hestia Familia"}
+     * é termo do DanMachi, e o reforço de lore o escrevia certo para este método desfazê-lo logo
+     * depois ({@code "Família"}). O corretor ortográfico já recebia os termos; este não.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: um achado dentro de qualquer ocorrência de termo protegido (com a
+     * fronteira do ASS, sem distinguir caixa) fica como está; o resto segue a regra de sempre.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: {@code intocaveis} nulo vale como vazio; texto
+     * {@code null}/vazio devolve a si mesmo.
+     */
+    public String normalizar(String texto, Set<String> intocaveis) {
         if (texto == null || texto.isBlank()) {
             return texto;
         }
+        java.util.List<int[]> protegidos = trechosProtegidos(texto, intocaveis);
         Matcher m = PALAVRA.matcher(texto);
         StringBuilder sb = new StringBuilder(texto.length());
         while (m.find()) {
             String achado = m.group(1);
-            String base = CORRECOES.get(achado.toLowerCase(Locale.ROOT));
-            m.appendReplacement(sb, Matcher.quoteReplacement(aplicarCaixa(achado, base)));
+            String minusculo = achado.toLowerCase(Locale.ROOT);
+            boolean verbal = TAMBEM_VERBO.contains(minusculo) && depoisDePronome(texto, m.start(1));
+            if (verbal || dentroDe(protegidos, m.start(1), m.end(1))) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(achado));
+                continue;
+            }
+            m.appendReplacement(sb, Matcher.quoteReplacement(aplicarCaixa(achado, CORRECOES.get(minusculo))));
         }
         m.appendTail(sb);
-        return acentuarQueTonico(aplicarTerminacaoCao(sb.toString()));
+        String comDicionario = sb.toString();
+        String comTerminacao = protegidos.isEmpty() ? aplicarTerminacaoCao(comDicionario)
+            : aplicarTerminacaoCao(comDicionario, trechosProtegidos(comDicionario, intocaveis));
+        return acentuarQueTonico(comTerminacao);
+    }
+
+    private static boolean depoisDePronome(String texto, int inicio) {
+        Matcher m = PALAVRA_ANTERIOR.matcher(texto.substring(0, inicio));
+        return m.find() && PRONOME_ANTES_DE_VERBO.contains(m.group(1).toLowerCase(Locale.ROOT));
+    }
+
+    private static java.util.List<int[]> trechosProtegidos(String texto, Set<String> intocaveis) {
+        java.util.List<int[]> trechos = new java.util.ArrayList<>();
+        if (intocaveis == null) {
+            return trechos;
+        }
+        for (String termo : intocaveis) {
+            if (termo == null || termo.isBlank()) {
+                continue;
+            }
+            Matcher t = org.traducao.projeto.core.texto.FronteiraTermoAss.padraoIgnorandoCaixa(termo).matcher(texto);
+            while (t.find()) {
+                trechos.add(new int[] {t.start(), t.end()});
+            }
+        }
+        return trechos;
+    }
+
+    private static boolean dentroDe(java.util.List<int[]> trechos, int inicio, int fim) {
+        for (int[] t : trechos) {
+            if (inicio >= t[0] && fim <= t[1]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -442,9 +513,17 @@ public class NormalizadorAcentosComuns {
      * <p>COMPORTAMENTO EM CASO DE FALHA: texto sem a terminação volta byte a byte igual.
      */
     private static String aplicarTerminacaoCao(String texto) {
+        return aplicarTerminacaoCao(texto, java.util.List.of());
+    }
+
+    private static String aplicarTerminacaoCao(String texto, java.util.List<int[]> protegidos) {
         Matcher m = TERMINACAO_CAO.matcher(texto);
         StringBuilder sb = new StringBuilder(texto.length());
         while (m.find()) {
+            if (dentroDe(protegidos, m.start(), m.end())) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(m.group()));
+                continue;
+            }
             String inicio = m.group(1);
             // endsWith e não equals: o grupo agora pode vir com C ou Ç ("coes" ou "çoes").
             boolean plural = m.group(2).toLowerCase(Locale.ROOT).endsWith("oes");

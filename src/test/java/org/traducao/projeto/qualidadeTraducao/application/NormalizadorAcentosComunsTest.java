@@ -228,6 +228,36 @@ class NormalizadorAcentosComunsTest {
         assertEquals("Ele disse o\\Nquê?", norm.normalizar("Ele disse o\\Nque?"));
     }
 
+    /**
+     * 28/10/2026: "inicio", "exercito", "distancia" e "experiencia" também são verbo conjugado. O
+     * substantivo (o caso comum) continua acentuado; o verbo, depois de pronome, fica.
+     */
+    @Test
+    @DisplayName("forma que tambem e verbo: depois de pronome fica, depois de artigo acentua")
+    void formaQueTambemEVerbo() {
+        assertEquals("Eu inicio a operação.", norm.normalizar("Eu inicio a operação."));
+        assertEquals("Eu me exercito todo dia.", norm.normalizar("Eu me exercito todo dia."));
+        assertEquals("Ela se distancia dele.", norm.normalizar("Ela se distancia dele."));
+        assertEquals("Desde o início do exército, a distância e a experiência contam.",
+            norm.normalizar("Desde o inicio do exercito, a distancia e a experiencia contam."),
+            "CONTROLE: o substantivo continua sendo acentuado");
+    }
+
+    /** 28/10/2026: o termo de lore escrito pelo reforço era desfeito logo depois. */
+    @Test
+    @DisplayName("termo protegido da lore nao recebe acento")
+    void termoProtegidoNaoRecebeAcento() {
+        assertEquals("A Hestia Familia chegou.",
+            norm.normalizar("A Hestia Familia chegou.", java.util.Set.of("Hestia Familia")));
+        assertEquals("A Federacao Terrestre.",
+            norm.normalizar("A Federacao Terrestre.", java.util.Set.of("Federacao Terrestre")));
+        assertEquals("A minha família chegou.",
+            norm.normalizar("A minha familia chegou.", java.util.Set.of("Hestia Familia")),
+            "CONTROLE: a mesma palavra fora do termo continua acentuada");
+        assertEquals("A Hestia Família chegou.", norm.normalizar("A Hestia Familia chegou."),
+            "CONTROLE: sem os termos, o comportamento de sempre");
+    }
+
     @Test
     @DisplayName("NAO toca palavra que ja esta certa nem nome proprio")
     void naoTocaPalavraCorreta() {
