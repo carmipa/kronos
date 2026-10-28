@@ -64,6 +64,8 @@ public final class TipografiaDaLetraPortuguesa {
     private int linhasComFonteDoDialogo;
     private boolean dialogoDeCodificacaoAntiga;
     private final Set<String> familiasNaoEmbutidas = new LinkedHashSet<>();
+    /** Estilos (músicas) em que alguma linha portuguesa precisou da fonte do diálogo. */
+    private final Set<String> musicasComFonteDoDialogo = new LinkedHashSet<>();
 
     private TipografiaDaLetraPortuguesa(Map<String, EstiloAss> estilos, EstiloAss dialogo,
                                         Supplier<FontesDoVideo> leitorDeFontes) {
@@ -118,6 +120,9 @@ public final class TipografiaDaLetraPortuguesa {
                     tags.append("\\fs").append(dialogo.tamanho());
                 }
                 linhasComFonteDoDialogo++;
+                if (evento.estilo() != null) {
+                    musicasComFonteDoDialogo.add(evento.estilo().trim().toLowerCase(java.util.Locale.ROOT));
+                }
             }
         }
         if (soPortuguesNoLugarDoKfx) {
@@ -131,6 +136,47 @@ public final class TipografiaDaLetraPortuguesa {
             tags.append(EstiloAss.corEmTag(dialogo.corSombra(), 4));
         }
         return tags.isEmpty() ? traduzido : noPrimeiroBloco(traduzido, tags.toString());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: alguma linha portuguesa DESTA música (estilo) precisou da fonte do
+     * diálogo? Decisão de Paulo de 28/10/2026 ("Música inteira"): a troca vale para a música toda, e
+     * não linha a linha — no ED do Guilty Crown 02-22, linha a linha, 199 linhas saíram em Arial e o
+     * resto na fonte estilizada, dentro da mesma música.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: estilo nulo devolve {@code false}.
+     */
+    public boolean musicaPrecisouDaFonteDoDialogo(String estilo) {
+        return estilo != null && musicasComFonteDoDialogo.contains(estilo.trim().toLowerCase(java.util.Locale.ROOT));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: dá a fonte do diálogo à linha portuguesa de uma música em que OUTRA linha
+     * já precisou dela — para a música inteira sair numa fonte só.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a verificação de glifo já foi feita na música (outra linha dela não
+     * era desenhada pela fonte estilizada, conferido nas fontes do vídeo — A8); aqui só se confere que
+     * a fonte do diálogo desenha ESTA linha e que ela ainda não tem a troca. Fonte do diálogo de
+     * codificação vietnamita antiga nunca entra.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: sem diálogo utilizável, ou linha já com a fonte do diálogo,
+     * devolve o texto como veio.
+     */
+    public String comFonteDoDialogo(EventoLegenda evento, String vestido) {
+        if (evento == null || vestido == null || vestido.isBlank() || dialogo == null || dialogo.fonte() == null) {
+            return vestido;
+        }
+        EstiloAss musica = EstiloAss.procurar(estilos, evento.estilo());
+        String fonteEfetiva = fonteEfetiva(vestido, musica);
+        if (fonteEfetiva == null || mesmaFonte(fonteEfetiva, dialogo.fonte()) || !dialogoDesenha(visivel(vestido))) {
+            return vestido;
+        }
+        StringBuilder tags = new StringBuilder("\\fn").append(dialogo.fonte());
+        if (dialogo.tamanho() != null) {
+            tags.append("\\fs").append(dialogo.tamanho());
+        }
+        linhasComFonteDoDialogo++;
+        return noPrimeiroBloco(vestido, tags.toString());
     }
 
     /** Linhas portuguesas que receberam a fonte do diálogo neste arquivo. */

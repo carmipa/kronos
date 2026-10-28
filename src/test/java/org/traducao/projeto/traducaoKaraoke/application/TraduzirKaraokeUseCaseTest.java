@@ -892,4 +892,56 @@ class TraduzirKaraokeUseCaseTest {
             StandardCharsets.UTF_8);
         assertTrue(saida.contains("Pausa"), "sem retraducao, vale a traducao do cache, nao o ingles: " + saida);
     }
+
+    /**
+     * B2, decisão de Paulo (28/10/2026, "Música inteira"): quando UMA linha portuguesa da música
+     * precisa da fonte do diálogo (a fonte estilizada não desenha o acento), a música INTEIRA troca —
+     * inclusive a linha SEM acento que veio antes. Antes, linha a linha, a mesma música saía metade
+     * em Arial e metade na fonte estilizada (ED do Guilty Crown 02-22: 199 linhas).
+     */
+    @Test
+    void fonteDoDialogoValeParaAMusicaInteira() throws IOException {
+        Files.writeString(pastaEntrada.resolve(NOME_ARQUIVO), String.join("\r\n",
+            "[Script Info]", "Title: Teste", "",
+            "[V4+ Styles]",
+            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, "
+                + "Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, "
+                + "MarginR, MarginV, Encoding",
+            "Style: Default,Gandhi Sans,70,&H00FFFFFF,&H000000FF,&H00141414,&H96000000,0,0,0,0,100,100,0,0,1,3,1,2,150,150,55,1",
+            "Style: OP - English,Dash Horizon,80,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,10,10,10,1",
+            "",
+            "[Events]",
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+            "Dialogue: 0,0:00:01.00,0:00:30.00,Default,,0,0,0,,Fala de diálogo longa o bastante.",
+            "Dialogue: 0,0:01:00.00,0:01:04.00,OP - English,,0,0,0,,Fly away now",
+            "Dialogue: 0,0:01:05.00,0:01:09.00,OP - English,,0,0,0,,Even if the world ends tomorrow",
+            ""), StandardCharsets.UTF_8);
+        Files.writeString(tempDir.resolve("Anime Teste - S01E01.mkv"), "", StandardCharsets.UTF_8);
+        org.traducao.projeto.traducaoKaraoke.domain.CoberturaDeFontes cobertura = (familia, texto) -> {
+            String faltam = "Dash Horizon".equals(familia) ? "ãáéêíóôõúç" : "Gandhi Sans".equals(familia) ? "" : null;
+            if (faltam == null) {
+                return Optional.empty();
+            }
+            StringBuilder sem = new StringBuilder();
+            texto.codePoints().distinct().filter(cp -> faltam.indexOf(cp) >= 0).forEach(sem::appendCodePoint);
+            return Optional.of(sem.toString());
+        };
+        useCase.fontesEmbutidas = video -> new org.traducao.projeto.traducaoKaraoke.domain.FontesDoVideo(cobertura, "x.mkv", null);
+        usarLlm(new LlmPortFake() {
+            @Override
+            public TraducaoLote traduzir(Lote lote) {
+                chamadasTraduzir++;
+                String e = lote.linhasOriginais().getFirst();
+                return new TraducaoLote(lote.idLote(), List.of(e.startsWith("Fly") ? "Voe longe agora" : "Mesmo que o mundo acabe amanhã"), true, null);
+            }
+        });
+
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+
+        String saida = Files.readString(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO), StandardCharsets.UTF_8);
+        assertTrue(saida.lines().anyMatch(l -> l.contains("Mesmo que o mundo acabe amanhã") && l.contains("\\fnGandhi Sans")),
+            "contra-caso: a linha com acento troca, como ja trocava:\n" + saida);
+        assertTrue(saida.lines().anyMatch(l -> l.contains("Voe longe agora") && l.contains("\\fnGandhi Sans")),
+            "a linha SEM acento da mesma musica tambem troca (musica inteira):\n" + saida);
+    }
 }

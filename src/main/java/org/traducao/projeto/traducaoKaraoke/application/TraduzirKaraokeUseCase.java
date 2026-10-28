@@ -507,6 +507,9 @@ public class TraduzirKaraokeUseCase {
         List<Integer> frasesKfxSoPortugues = new ArrayList<>();
         // Linhas que deixaram de empilhar o inglês porque o romaji está na tela em sílabas (86, 12/10).
         int inglesNaoEmpilhado = 0;
+        // Linha portuguesa vestida, por posição — para a fonte do diálogo valer para a MÚSICA inteira
+        // depois do laço (decisão de Paulo, 28/10/2026), inclusive nas linhas que vieram antes.
+        Map<Integer, String> vestidoPorPosicao = new java.util.LinkedHashMap<>();
 
         List<EventoLegenda> eventos = documento.eventos();
         for (int posicao = 0; posicao < eventos.size(); posicao++) {
@@ -620,6 +623,7 @@ public class TraduzirKaraokeUseCase {
                         inglesNaoEmpilhado++;
                     }
                     String vestido = tipografia.vestir(evento, comAcento, kfxSoPortugues);
+                    vestidoPorPosicao.put(posicao, vestido);
                     eventosFinais.add(evento.comTexto(
                         montador.comOriginalPreservada(evento, vestido, plano, posicao)));
                     if (kfxSoPortugues) {
@@ -646,6 +650,23 @@ public class TraduzirKaraokeUseCase {
         // em Dialogue escrevia o inglês EM CIMA do português (TV, MPC-HC e libass, 336 frases).
         // A posição em eventosFinais é a mesma do documento: todo ramo do laço acima acrescenta
         // exatamente um evento por evento lido.
+        // Fonte do diálogo na música INTEIRA: a linha que não precisou dela sozinha, numa música em que
+        // outra precisou, ganha a mesma troca (decisão de Paulo, 28/10/2026 — linha a linha, o ED do
+        // Guilty Crown 02-22 saía metade em Arial e metade na fonte estilizada).
+        if (eventosFinais.size() == eventos.size()) {
+            for (Map.Entry<Integer, String> v : vestidoPorPosicao.entrySet()) {
+                EventoLegenda evento = eventos.get(v.getKey());
+                if (!tipografia.musicaPrecisouDaFonteDoDialogo(evento.estilo())) {
+                    continue;
+                }
+                String uniforme = tipografia.comFonteDoDialogo(evento, v.getValue());
+                if (!uniforme.equals(v.getValue())) {
+                    eventosFinais.set(v.getKey(), evento.comTexto(
+                        montador.comOriginalPreservada(evento, uniforme, plano, v.getKey())));
+                }
+            }
+        }
+
         int silabasSilenciadas = 0;
         if (eventosFinais.size() == eventos.size()) {
             for (int frase : frasesKfxSoPortugues) {
