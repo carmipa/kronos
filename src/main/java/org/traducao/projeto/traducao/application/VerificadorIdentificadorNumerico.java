@@ -85,9 +85,6 @@ public class VerificadorIdentificadorNumerico {
     private static final Pattern MARCA_DE_ORDINAL =
         Pattern.compile("(?<![0-9])(\\d+)(?:st|nd|rd|th|[ºª°])", Pattern.CASE_INSENSITIVE);
 
-    /** Marca do relogio de 12 horas, que autoriza a conta +12 na conversao para 24h. */
-    private static final Pattern MARCA_PM = Pattern.compile("(?i)\\bp\\.?\\s?m\\.?");
-
     /**
      * PROPÓSITO DE NEGÓCIO: aponta qual identificador numérico do original não sobreviveu à
      * tradução, para que a fala fique pendente com diagnóstico em vez de publicar um número
@@ -151,9 +148,10 @@ public class VerificadorIdentificadorNumerico {
         // de estar no original. 3 só é explicado por 15 porque 3+12 == 15 e havia "pm". O
         // caso que originou esta classe — "04th Team!" publicado como "Equipe 08!" — não casa
         // nenhuma das duas contas e continua reprovando.
+        Set<String> explicadosPorHorario = explicadosPorHorario(original, traduzido);
         List<String> perdidosReais = new ArrayList<>();
         for (String valor : perdidos) {
-            if (!explicadoPorHorario(valor, original, naTraducao)
+            if (!explicadosPorHorario.contains(valor)
                 && !explicadoPorZeroDeOrdinal(valor, original, traduzido)
                 && !explicadoPorMultiplicadorPorExtenso(valor, traduzido)) {
                 perdidosReais.add(valor);
@@ -210,7 +208,21 @@ public class VerificadorIdentificadorNumerico {
                 atual.append(c);
                 continue;
             }
-            boolean separadorEntreDigitos = ehSeparador(c)
+            if (ehEspaco(c) && atual.length() > 0) {
+                // ESPAÇO SÓ AGRUPA MILHAR. Antes ele colava quaisquer dígitos vizinhos: "3 2 1"
+                // virava 321 e "12\N3" virava 123, e "3, 2, 1" na tradução reprovava. E "1 ,000"
+                // (o fansub do filme de Sidonia, 09/10/2026) cortava o número em [1, 000].
+                // Agora o espaço some só diante de um grupo de três dígitos, direto ou depois de
+                // um ponto/vírgula de milhar.
+                int prox = i + 1;
+                boolean pontuacaoDeMilhar = prox < limpo.length()
+                    && (limpo.charAt(prox) == '.' || limpo.charAt(prox) == ',')
+                    && grupoDeTresDigitos(limpo, prox + 1);
+                if (pontuacaoDeMilhar || grupoDeTresDigitos(limpo, prox)) {
+                    continue;
+                }
+            }
+            boolean separadorEntreDigitos = (c == '.' || c == ',')
                 && atual.length() > 0
                 && i + 1 < limpo.length() && Character.isDigit(limpo.charAt(i + 1));
             if (separadorEntreDigitos) {
@@ -224,55 +236,144 @@ public class VerificadorIdentificadorNumerico {
                 continue; // 9.500 e 9500 são o mesmo valor
             }
             if (atual.length() > 0) {
-                encontrados.add(atual.toString());
+                encontrados.add(canonico(atual.toString()));
                 atual.setLength(0);
             }
         }
         if (atual.length() > 0) {
-            encontrados.add(atual.toString());
+            encontrados.add(canonico(atual.toString()));
         }
         return encontrados;
     }
 
     /**
-     * PROPÓSITO DE NEGÓCIO: decide se um número que sumiu da tradução foi apenas ESCRITO em
-     * outro formato de hora, e não substituído.
+     * Zero à direita da FRAÇÃO não muda o valor: {@code 1.50} e {@code 1,5} são o mesmo número, e
+     * a guarda reprovava a tradução que só tirou o zero. Inteiro fica intacto ({@code 08} é nome).
+     */
+    private static String canonico(String valor) {
+        if (valor.indexOf('.') < 0) {
+            return valor;
+        }
+        String semZeros = valor.replaceFirst("0+$", "");
+        return semZeros.endsWith(".") ? semZeros.substring(0, semZeros.length() - 1) : semZeros;
+    }
+
+    private static boolean ehEspaco(char c) {
+        return Character.isWhitespace(c) || Character.isSpaceChar(c);
+    }
+
+    /** Há exatamente três dígitos a partir de {@code inicio}, seguidos de não-dígito ou do fim? */
+    private static boolean grupoDeTresDigitos(String texto, int inicio) {
+        int fim = inicio;
+        while (fim < texto.length() && Character.isDigit(texto.charAt(fim))) {
+            fim++;
+        }
+        return fim - inicio == 3;
+    }
+
+    /** Militar: {@code 1500 hours}, {@code 0800 hrs}. */
+    private static final Pattern HORA_MILITAR = Pattern.compile(
+        "(?<![\\d.,:])(\\d{3,4})\\s*(?i:hours?|hrs?)(?!\\p{L})");
+    /** Com separador: {@code 16.20 hours}, {@code 16:20 hours}. */
+    private static final Pattern HORA_SEPARADA = Pattern.compile(
+        "(?<![\\d.,:])(\\d{1,2})[.:](\\d{2})\\s*(?i:hours?|hrs?)(?!\\p{L})");
+    /** Relógio de 12 horas: {@code 3:40 pm}, {@code 1:00PM}, {@code 3 p.m.}. */
+    private static final Pattern HORA_AM_PM = Pattern.compile(
+        "(?<![\\d.,:])(\\d{1,2})(?::(\\d{2}))?\\s*(?i:([ap])\\.?\\s?m\\.?)(?!\\p{L})");
+    /** Na tradução: {@code 15h}, {@code 8h00}, {@code 16h20}, {@code 15 h}. */
+    private static final Pattern HORA_H_BR = Pattern.compile(
+        "(?<![\\d.,:])(\\d{1,2})\\s?h\\s?(\\d{2})?(?![\\p{L}\\d])");
+    /** Na tradução: {@code 15:40}. */
+    private static final Pattern HORA_DOIS_PONTOS = Pattern.compile("(?<![\\d.,:])(\\d{1,2}):(\\d{2})(?!\\d)");
+    /** Na tradução: {@code 15 horas}. */
+    private static final Pattern HORA_POR_EXTENSO = Pattern.compile(
+        "(?<![\\d.,:])(\\d{1,2})\\s+horas?(?!\\p{L})", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: os valores do original que pertencem a uma HORA que a tradução
+     * reescreveu no formato brasileiro — e só esses.
+     *
+     * <h2>O prejuízo medido</h2>
+     * 21/08/2026: dez de doze recusas desta guarda eram horário certo ({@code "1500 hours"} →
+     * {@code "15h00"}). A regra de então conferia DÍGITOS: exigia {@code 15} e {@code 00} na
+     * tradução, e recusava {@code "15h"}, {@code "8h00"} para {@code "0800 hours"} e {@code "13h"}
+     * para {@code "1:00 pm"}. E {@code "16.20 hours"} era lido como o decimal 16,2 — a fala do
+     * 0083 ({@code "Passengers of the Colloid... at 16.20 hours,"}) ficou em inglês em 18/09 e
+     * 09/10. Do outro lado, qualquer {@code pm} na fala absolvia QUALQUER número: {@code "Unit 5
+     * at 3pm"} → {@code "Unidade 17 às 15h"} passava.
      *
      * <h2>Invariantes do domínio</h2>
      * <ul>
-     *   <li>A equivalência é aritmética e conferida contra os valores que a tradução realmente
-     *       contém — nunca "parece hora, deixa passar".</li>
-     *   <li>Militar exige a palavra {@code hours} no original; 12h exige {@code am}/{@code pm}.
-     *       Sem a marca textual, {@code 1500} continua sendo um identificador comum.</li>
+     *   <li>A equivalência é o INSTANTE (minuto do dia), não a grafia: as duas pontas são
+     *       convertidas e comparadas.</li>
+     *   <li>Só o original marca hora: militar e {@code HH.MM} exigem {@code hours}/{@code hrs};
+     *       12h exige {@code am}/{@code pm} COLADO ao número. Sem a marca, {@code 1500} continua
+     *       identificador comum.</li>
+     *   <li>Só os valores DA expressão de hora são explicados — o resto da fala continua sob a
+     *       guarda.</li>
      * </ul>
      *
-     * <p>COMPORTAMENTO EM CASO DE FALHA: qualquer dúvida devolve {@code false}, e o valor volta
-     * a contar como perdido — a guarda erra para o lado de reprovar, não de liberar.
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nenhuma hora casando devolve conjunto vazio, e todo
+     * valor sumido continua contando como perdido. Não lança.
      */
-    private static boolean explicadoPorHorario(String perdido, String original, Set<String> naTraducao) {
-        // 1) militar: "1500 hours" -> a tradução tem 15 e 00
-        if (perdido.length() == 4 && perdido.chars().allMatch(Character::isDigit)
-            && Pattern.compile("(?<![0-9])" + Pattern.quote(perdido) + "\\s*(?i:hours?)").matcher(original).find()) {
-            int hh = Integer.parseInt(perdido.substring(0, 2));
-            int mm = Integer.parseInt(perdido.substring(2));
-            if (hh <= 23 && mm <= 59
-                && naTraducao.contains(perdido.substring(0, 2))
-                && naTraducao.contains(perdido.substring(2))) {
-                return true;
-            }
+    private Set<String> explicadosPorHorario(String original, String traduzido) {
+        Set<String> explicados = new LinkedHashSet<>();
+        String origem = PADRAO_TAG.matcher(original).replaceAll(" ");
+        Set<Integer> instantesNaTraducao = instantesNaTraducao(PADRAO_TAG.matcher(traduzido).replaceAll(" "));
+        if (instantesNaTraducao.isEmpty()) {
+            return explicados;
         }
-        // 2) 12h -> 24h: "3:40 pm" -> a tradução tem 15
-        if (MARCA_PM.matcher(original).find()) {
-            try {
-                int h = Integer.parseInt(perdido);
-                if (h >= 1 && h <= 12 && naTraducao.contains(String.valueOf(h + 12))) {
-                    return true;
+        java.util.regex.Matcher m = HORA_MILITAR.matcher(origem);
+        while (m.find()) {
+            int v = Integer.parseInt(m.group(1));
+            explicarSe(instante(v / 100, v % 100), instantesNaTraducao, m.group(1), explicados);
+        }
+        m = HORA_SEPARADA.matcher(origem);
+        while (m.find()) {
+            explicarSe(instante(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))),
+                instantesNaTraducao, m.group(1) + "." + m.group(2), explicados);
+            explicarSe(instante(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))),
+                instantesNaTraducao, m.group(1) + " " + m.group(2), explicados);
+        }
+        m = HORA_AM_PM.matcher(origem);
+        while (m.find()) {
+            int h = Integer.parseInt(m.group(1));
+            int min = m.group(2) == null ? 0 : Integer.parseInt(m.group(2));
+            if (h < 1 || h > 12) {
+                continue;
+            }
+            int h24 = (h % 12) + (Character.toLowerCase(m.group(3).charAt(0)) == 'p' ? 12 : 0);
+            explicarSe(instante(h24, min), instantesNaTraducao,
+                m.group(1) + (m.group(2) == null ? "" : " " + m.group(2)), explicados);
+        }
+        return explicados;
+    }
+
+    /** Se o instante está na tradução, os valores do trecho da hora ficam explicados. */
+    private void explicarSe(int instante, Set<Integer> naTraducao, String trecho, Set<String> explicados) {
+        if (instante >= 0 && naTraducao.contains(instante)) {
+            explicados.addAll(valores(trecho));
+        }
+    }
+
+    /** Minuto do dia, ou {@code -1} para hora impossível. */
+    private static int instante(int hora, int minuto) {
+        return hora >= 0 && hora <= 24 && minuto >= 0 && minuto <= 59 ? (hora % 24) * 60 + minuto : -1;
+    }
+
+    private static Set<Integer> instantesNaTraducao(String traduzido) {
+        Set<Integer> instantes = new LinkedHashSet<>();
+        for (Pattern p : List.of(HORA_H_BR, HORA_DOIS_PONTOS, HORA_POR_EXTENSO)) {
+            java.util.regex.Matcher m = p.matcher(traduzido);
+            while (m.find()) {
+                int min = m.groupCount() >= 2 && m.group(2) != null ? Integer.parseInt(m.group(2)) : 0;
+                int i = instante(Integer.parseInt(m.group(1)), min);
+                if (i >= 0) {
+                    instantes.add(i);
                 }
-            } catch (NumberFormatException fora) {
-                return false;
             }
         }
-        return false;
+        return instantes;
     }
 
     /**
@@ -432,12 +533,6 @@ public class VerificadorIdentificadorNumerico {
 
     private static String semZerosAEsquerda(String digitos) {
         return digitos.replaceFirst("^0+(?=\\d)", "");
-    }
-
-    private static boolean ehSeparador(char c) {
-        // isSpaceChar cobre o espaço NÃO SEPARÁVEL (U+00A0), que isWhitespace ignora e que
-        // aparece como separador de milhar em várias saídas de tradução.
-        return c == '.' || c == ',' || Character.isWhitespace(c) || Character.isSpaceChar(c);
     }
 
     /**

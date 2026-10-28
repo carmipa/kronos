@@ -131,6 +131,28 @@ class VerificadorIdentificadorNumericoTest {
             "CONTROLE: sem o multiplicador, 2 continua sendo outro valor");
     }
 
+    /**
+     * 28/10/2026: o espaço colava quaisquer dígitos vizinhos ("3 2 1" → 321, "12\N3" → 123) e o
+     * espaço antes da vírgula de milhar cortava o número ("1 ,000" → [1, 000], fansub do filme de
+     * Sidonia). E o zero à direita da fração reprovava o mesmo valor ("1.50" → "1,5").
+     */
+    @Test
+    @DisplayName("espaco so agrupa milhar; '1 ,000' e '1.50' sao o mesmo valor")
+    void espacoSoAgrupaMilhar() {
+        assertNull(verificador.divergencia("3 2 1... Fire!", "3, 2, 1... Fogo!"));
+        assertNull(verificador.divergencia("Gate 12\\N3 is open.", "Portão 12\\N3 aberto."));
+        assertNull(verificador.divergencia("We have 1 ,000 men.", "Temos 1.000 homens."));
+        assertNull(verificador.divergencia("Pressure 1.50.", "Pressão 1,5."));
+        assertNull(verificador.divergencia("Population 12 500.", "População 12.500."),
+            "CONTROLE: espaco de milhar continua agrupando");
+        assertNotNull(verificador.divergencia("We have 1 ,000 men.", "Temos 2.000 homens."),
+            "CONTROLE: o valor trocado continua reprovando");
+        assertNotNull(verificador.divergencia("Pressure 1.50.", "Pressão 1,6."),
+            "CONTROLE: decimal trocado continua reprovando");
+        assertNotNull(verificador.divergencia("3 2 1... Fire!", "3, 2, 7... Fogo!"),
+            "CONTROLE: algarismo trocado na contagem continua reprovando");
+    }
+
     @Test
     @DisplayName("sobrevive(): 500 não pode ser dado como presente dentro de 12500")
     void fronteiraDeDigitoValeNasDuasPontas() {

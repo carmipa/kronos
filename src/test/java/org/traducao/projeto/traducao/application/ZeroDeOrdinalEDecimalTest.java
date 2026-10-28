@@ -135,11 +135,18 @@ class ZeroDeOrdinalEDecimalTest {
     }
 
     @Test
-    @DisplayName("espaço agrupa milhar e nunca marca decimal")
+    @DisplayName("espaço agrupa milhar (grupo de três) e nunca marca decimal")
     void espacoNaoEhDecimal() {
-        // Preserva o comportamento medido em 2026-08-21: "Altitude 15 00" e "1500" são o mesmo
-        // valor, porque espaço entre dígitos é separador de milhar em várias saídas de tradução.
-        assertNull(verificador.divergencia("Altitude 15 00", "Altitude 1500"));
+        // O espaço é separador de milhar, e milhar agrupa TRÊS dígitos: "12 500" e "12500" são o
+        // mesmo valor. Até 28/10/2026 o espaço colava quaisquer dígitos — "15 00" virava 1500,
+        // mas "3 2 1" virava 321 e a contagem "3, 2, 1" na tradução reprovava. Medido com a
+        // classe de produção nas 22.952 falas com número do cache: nenhuma dependia de grupo com
+        // menos de três dígitos (0 vereditos mudaram).
+        assertNull(verificador.divergencia("Altitude 12 500", "Altitude 12500"));
+        assertNull(verificador.divergencia("Altitude 12 500", "Altitude 12.500"),
+            "espaço não separável também agrupa milhar");
+        assertNotNull(verificador.divergencia("Altitude 15 00", "Altitude 1500"),
+            "'15 00' são dois números; colá-los é o que fazia '3 2 1' valer 321");
     }
 
     @Test

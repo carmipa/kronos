@@ -94,4 +94,37 @@ class HorarioLocalizadoNaoEhNumeroTrocadoTest {
         assertNotNull(verificador.divergencia("Altitude 1500, holding.", "Altitude 15h00, mantendo."),
             "sem 'hours' no original a guarda nao pode descontar nada");
     }
+
+    /**
+     * 28/10/2026: a regra conferia DÍGITOS, não o instante. Recusava o horário brasileiro sem os
+     * minutos e o de um dígito, e lia {@code 16.20 hours} como decimal — a fala do 0083 ficou em
+     * inglês em 18/09 e 09/10.
+     */
+    @Test
+    @DisplayName("CASO DOENTE (28/10): 15h, 8h00, 13h e 16.20 hours passam a ser aceitos")
+    void horaSemMinutoUmDigitoEPonto() {
+        assertNull(verificador.divergencia("We'll land at 1500 hours.", "Vamos pousar às 15h."));
+        assertNull(verificador.divergencia("We'll land at 1500 hours.", "Vamos pousar às 15 horas."));
+        assertNull(verificador.divergencia("Launch at 0800 hours.", "Lançamento às 8h00."));
+        assertNull(verificador.divergencia("From 1:00PM today, the hangar is closed.",
+            "A partir das 13h de hoje, o hangar fica fechado."));
+        assertNull(verificador.divergencia(
+            "Passengers of the Colloid, departing for Hong Kong at 16.20 hours,",
+            "Passageiros do Colloid, partindo para Hong Kong às 16h20,"));
+    }
+
+    /** As mesmas formas, com o INSTANTE trocado: tem de continuar reprovando. */
+    @Test
+    @DisplayName("CASO SÃO (28/10): hora trocada e número fora da hora continuam reprovando")
+    void horaTrocadaContinuaReprovando() {
+        assertNotNull(verificador.divergencia("We'll land at 1500 hours.", "Vamos pousar às 16h."));
+        assertNotNull(verificador.divergencia("Launch at 0800 hours.", "Lançamento às 18h00."));
+        assertNotNull(verificador.divergencia("at 16.20 hours,", "às 16h02,"));
+        assertNotNull(verificador.divergencia("The tank holds 16.20 liters.", "O tanque tem 16h20 litros."),
+            "sem 'hours', 16.20 é decimal e nao pode ser absolvido como hora");
+        assertNotNull(verificador.divergencia("Unit 5, move out at 3 pm.", "Unidade 17, saiam às 15h."),
+            "o pm absolve so o numero colado nele; o 5 da unidade continua sob a guarda");
+        assertNull(verificador.divergencia("Unit 5, move out at 3 pm.", "Unidade 5, saiam às 15h."),
+            "CONTROLE: com o 5 preservado, a hora convertida passa");
+    }
 }
