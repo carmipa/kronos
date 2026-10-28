@@ -171,6 +171,14 @@ public class TraduzirKaraokeUseCase {
     @ConfigProperty(name = "tradutor.idioma-traduzido")
     Optional<String> idiomaTraduzido;
 
+    /**
+     * Obras e estilos ({@code contextoId:estilo}) em que a música de camada ÚNICA é a tradução
+     * inglesa do fansub de uma música japonesa — ali o inglês não empilha. Decisão de Paulo de
+     * 28/10/2026: lista fora da lore, para não mudar o hash nem invalidar cache.
+     */
+    @ConfigProperty(name = "traducao-karaoke.camada-unica-traducao-do-fansub")
+    Optional<List<String>> camadaUnicaTraducaoDoFansub;
+
 
     public List<ResultadoTraducaoKaraoke> simular(Path pastaOrigem, String contextoId) {
         return executar(pastaOrigem, contextoId, false);
@@ -510,6 +518,9 @@ public class TraduzirKaraokeUseCase {
         // Linha portuguesa vestida, por posição — para a fonte do diálogo valer para a MÚSICA inteira
         // depois do laço (decisão de Paulo, 28/10/2026), inclusive nas linhas que vieram antes.
         Map<Integer, String> vestidoPorPosicao = new java.util.LinkedHashMap<>();
+        // Linhas em que o inglês NÃO empilhou porque a obra e o estilo estão na lista da camada única
+        // que é tradução do fansub (decisão de Paulo, 28/10/2026).
+        int soPortuguesPelaLista = 0;
 
         List<EventoLegenda> eventos = documento.eventos();
         for (int posicao = 0; posicao < eventos.size(); posicao++) {
@@ -624,8 +635,13 @@ public class TraduzirKaraokeUseCase {
                     }
                     String vestido = tipografia.vestir(evento, comAcento, kfxSoPortugues);
                     vestidoPorPosicao.put(posicao, vestido);
-                    eventosFinais.add(evento.comTexto(
-                        montador.comOriginalPreservada(evento, vestido, plano, posicao)));
+                    boolean traducaoDoFansub = camadaUnicaEhTraducaoDoFansub(contextoJob, evento.estilo());
+                    if (traducaoDoFansub && !kfxSoPortugues && !plano.temOriginalPreservadaNoInstante(evento)
+                            && !plano.temOriginalEmSilabasNaPosicao(posicao)) {
+                        soPortuguesPelaLista++;
+                    }
+                    eventosFinais.add(evento.comTexto(traducaoDoFansub ? vestido
+                        : montador.comOriginalPreservada(evento, vestido, plano, posicao)));
                     if (kfxSoPortugues) {
                         frasesKfxSoPortugues.add(posicao);
                         logStream.publicarLog(CANAL_LOG, "   [KFX → SÓ PT] "
@@ -661,8 +677,8 @@ public class TraduzirKaraokeUseCase {
                 }
                 String uniforme = tipografia.comFonteDoDialogo(evento, v.getValue());
                 if (!uniforme.equals(v.getValue())) {
-                    eventosFinais.set(v.getKey(), evento.comTexto(
-                        montador.comOriginalPreservada(evento, uniforme, plano, v.getKey())));
+                    eventosFinais.set(v.getKey(), evento.comTexto(camadaUnicaEhTraducaoDoFansub(contextoJob, evento.estilo())
+                        ? uniforme : montador.comOriginalPreservada(evento, uniforme, plano, v.getKey())));
                 }
             }
         }
@@ -711,6 +727,14 @@ public class TraduzirKaraokeUseCase {
             logStream.publicarLog(CANAL_LOG, "   [GRAVADO] " + destino);
         }
 
+        if (soPortuguesPelaLista > 0) {
+            logStream.publicarLog(CANAL_LOG, "   [CAMADA ÚNICA] " + soPortuguesPelaLista + " linha(s) sem o inglês empilhado: "
+                + "esta obra/estilo está na lista traducao-karaoke.camada-unica-traducao-do-fansub (a camada é "
+                + "a tradução do fansub, não a letra cantada).");
+            avisos.add(soPortuguesPelaLista + " linha(s) de camada única sem o inglês empilhado, pela lista "
+                + "traducao-karaoke.camada-unica-traducao-do-fansub.");
+        }
+
         String estadoFontes = tipografia.estadoDasFontes();
         logStream.publicarLog(CANAL_LOG, String.format(Locale.ROOT,
             "   Resumo: %d evento(s) | KFX preservado: %d | letra original: %d | já PT: %d | traduzível: %d (LLM %d, cache %d, sem tradução %d) | acento reposto: %s | fora do dicionário: %s | KFX só PT: %d frase(s), %d palavra(s) do efeito fora da tela | romaji em sílabas: %d linha(s) sem o inglês | fonte do diálogo: %d linha(s) (fontes da música: %s)",
@@ -754,6 +778,34 @@ public class TraduzirKaraokeUseCase {
             paraTraduzir, doCache, traduzidas, semTraducao, acentosRepostos,
             entradasCacheDescartadas, frasesKfxSoPortugues.size(), silabasSilenciadas,
             tipografia.linhasComFonteDoDialogo(), estadoFontes, List.copyOf(avisos));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: a música de camada única desta obra/estilo é a TRADUÇÃO inglesa do fansub
+     * de uma música japonesa (a letra japonesa está queimada no vídeo) — então o inglês não empilha
+     * sobre o português. Pelo texto não dá para distinguir esse caso da letra CANTADA em inglês
+     * (Unicorn E13-22, que precisa empilhar); a diferença é a língua em que a música é cantada, que
+     * não está na legenda. Decisão de Paulo (28/10/2026): lista por obra FORA da lore, para não mudar
+     * o hash de proveniência nem invalidar cache. Medidos em 14/10/2026: ZZ OP2 (460 eventos
+     * empilhados), 0080 OP (103) e Zeta E13 Song ENG (4).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: casa {@code contextoId:estilo} inteiros, sem distinguir caixa; sem a
+     * lista, ou sem contexto (simulação), nada muda.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: entrada malformada na lista é ignorada; nunca lança.
+     */
+    boolean camadaUnicaEhTraducaoDoFansub(SnapshotContexto contexto, String estilo) {
+        if (contexto == null || estilo == null || camadaUnicaTraducaoDoFansub == null
+                || camadaUnicaTraducaoDoFansub.isEmpty()) {
+            return false;
+        }
+        String chave = (contexto.id() + ":" + estilo.trim()).toLowerCase(Locale.ROOT);
+        for (String entrada : camadaUnicaTraducaoDoFansub.get()) {
+            if (entrada != null && entrada.trim().toLowerCase(Locale.ROOT).equals(chave)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

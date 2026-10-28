@@ -261,6 +261,14 @@ revisao-lore:
     # Stink Bomb). A relacao e congelada por ConsoleDaRevisaoLoreNaoCegaOPortaoTest.
     read-timeout: 30s
 
+traducao-karaoke:
+  # Camada UNICA de musica que e a TRADUCAO inglesa do fansub de uma musica japonesa (a letra
+  # japonesa esta queimada no video): ali a 4.1 NAO empilha "ingles\Nportugues" - sai so o PT.
+  # Formato contextoId:estilo. Fora da lore de proposito (decisao de Paulo, 28/10/2026): nao muda o
+  # hash de proveniencia nem invalida cache. NAO acrescentar obra cuja musica e cantada em ingles
+  # (Unicorn E13-22 precisa empilhar). Medidos em 14/10/2026: ZZ OP2, 0080 OP, Zeta E13 Song ENG.
+  camada-unica-traducao-do-fansub: gundam_zz:OP2,gundam_0080:OP,gundam_zeta:Song ENG
+
 remuxer:
   mkvmerge-path: mkvmerge
 

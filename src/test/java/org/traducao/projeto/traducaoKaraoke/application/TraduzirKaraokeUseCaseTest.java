@@ -944,4 +944,28 @@ class TraduzirKaraokeUseCaseTest {
         assertTrue(saida.lines().anyMatch(l -> l.contains("Voe longe agora") && l.contains("\\fnGandhi Sans")),
             "a linha SEM acento da mesma musica tambem troca (musica inteira):\n" + saida);
     }
+
+    /**
+     * Camada única, decisão de Paulo (28/10/2026, "Lista por obra fora da lore"): na obra e estilo em
+     * que a camada única inglesa é a TRADUÇÃO do fansub de música japonesa (ZZ OP2), o inglês não
+     * empilha — sai só o português. Na mesma legenda com outra obra (contra-caso: o Unicorn E13-22,
+     * letra cantada em inglês), continua empilhando "inglês\Nportuguês".
+     */
+    @Test
+    void camadaUnicaDaListaDeObrasSaiSoEmPortugues() throws IOException {
+        escreverLegendaCom("Dialogue: 0,0:01:00.00,0:01:05.00,OP2,,0,0,0,,Even if the world ends tomorrow");
+        useCase.camadaUnicaTraducaoDoFansub = Optional.of(List.of("gundam_zz:OP2"));
+
+        useCase.aplicar(pastaEntrada, "gundam_zz");
+        String zz = Files.readString(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO),
+            StandardCharsets.UTF_8);
+        assertTrue(zz.contains(",OP2,,0,0,0,,Mesmo que o mundo acabe amanhã") && !zz.contains("tomorrow\\N"),
+            "na obra da lista, so o portugues:\n" + zz);
+
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+        String outra = Files.readString(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO),
+            StandardCharsets.UTF_8);
+        assertTrue(outra.contains("Even if the world ends tomorrow\\N"),
+            "contra-caso: obra fora da lista continua empilhando o ingles:\n" + outra);
+    }
 }
