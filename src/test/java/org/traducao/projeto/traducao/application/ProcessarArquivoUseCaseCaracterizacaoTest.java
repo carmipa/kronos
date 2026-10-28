@@ -2192,6 +2192,9 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         TelemetriaTraducao tel = telemetriaCaptor.ultima;
         assertEquals("CONCLUIDO", tel.statusFinal());
         assertTrue(tel.pendenciasPorCausa().isEmpty(), "não deve sobrar pendência após recuperação");
+        // 28/10/2026: a fala do fallback entrava em "falas traduzidas pelo LLM".
+        assertEquals(1, tel.falasTraduzidas(),
+            "so 'Hello there' saiu do LLM; a do fallback nao conta como traducao do modelo");
     }
 
     /**

@@ -666,6 +666,9 @@ public class ProcessarArquivoUseCase {
         // Ainda NÃO emite aviso/KPI: o fallback online (opt-in) pode recuperar algumas
         // pendências antes de a lista final de pendentes ser consolidada.
         Map<String, String> traducoesValidadas = new HashMap<>();
+        // Falas cujo texto publicado NAO veio do LLM desta execucao (recuo para a traducao antiga
+        // do cache, fallback online): ficam fora da contagem "pelo LLM" (auditoria de 28/10/2026).
+        Set<String> publicadasSemOModelo = new HashSet<>();
         LinkedHashSet<String> falhasDistintas = new LinkedHashSet<>();
         Map<String, String> motivoPorFalha = new HashMap<>();
         // Itera na ordem ESTÁVEL do documento (textosTraduziveisDistintos é LinkedHashSet), não
@@ -715,6 +718,7 @@ public class ProcessarArquivoUseCase {
             String antigaDoCache = recuoDoCache.get(original);
             if (antigaDoCache != null) {
                 traducoesValidadas.put(original, antigaDoCache);
+                publicadasSemOModelo.add(original);
                 String causaDaRefacao = desfecho.causaDoOriginalMantido().getOrDefault(original, motivoFalha);
                 String aviso = "Refacao por locutor nao fechou (" + causaDaRefacao + "); mantida a traducao"
                     + " anterior do cache, com a separacao dos locutores torta: \"" + antigaDoCache
@@ -760,6 +764,7 @@ public class ProcessarArquivoUseCase {
                     continue;
                 }
                 traducoesValidadas.put(original, traducaoMaquina);
+                publicadasSemOModelo.add(original);
                 falhasDistintas.remove(original);
                 motivoPorFalha.remove(original);
                 telemetriaTraducao.registrarFalhaTraducaoRecuperada();
@@ -1212,6 +1217,7 @@ public class ProcessarArquivoUseCase {
         String animeNome = resolvedorCache.animeAPartirDoArquivo(arquivoEntrada);
         String loreNome = contexto.nomeExibicao();
         int traducoesNovasValidas = (int) traducoesNovas.entrySet().stream()
+            .filter(e -> !publicadasSemOModelo.contains(e.getKey()))
             .filter(e -> {
                 String validada = traducoesValidadas.get(e.getKey());
                 return validada != null && !validada.isBlank();
