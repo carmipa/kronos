@@ -58,8 +58,12 @@ public final class FronteiraTermoAss {
      * quebra, lia {@code "Nao"} e o normalizador escrevia {@code "\Não controle"}: a tela mostra
      * a quebra e depois {@code "ão controle"}. A 2.1 fez isso em falas revisadas à mão da
      * Reconguista I (3 no filme, pela saída relida) — a revisão dizia "ao", a legenda saía "ão".
+     * <p>E a terceira, de 28/10/2026: {@code \N} não é a única quebra. {@code \n} (quebra suave)
+     * e {@code \h} (espaço fixo) também separam palavras, e com só o {@code \N} na alternativa o
+     * {@code "\hRoger."} não casava — o glossário decidia agir pela chave e a reescrita não
+     * achava o termo.
      */
-    public static final String INICIO = "(?:(?<=\\\\N)|(?<![\\p{L}\\p{N}\\\\]))";
+    public static final String INICIO = "(?:(?<=\\\\[Nnh])|(?<![\\p{L}\\p{N}\\\\]))";
 
     /** Fronteira de FIM do termo. Sem alternativa: à direita a quebra começa por contrabarra. */
     public static final String FIM = "(?![\\p{L}\\p{N}])";

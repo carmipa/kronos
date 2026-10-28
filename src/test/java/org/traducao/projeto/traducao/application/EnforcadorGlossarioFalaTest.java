@@ -65,6 +65,32 @@ class EnforcadorGlossarioFalaTest {
             enforcador.reforcar("Tell Roger I understood.", "Diga ao Roger que entendi."));
     }
 
+    /**
+     * 28/10/2026, medido pela chave de produção: das 165 falas que são só "No", 49 ficaram em
+     * inglês, 9 com conteúdo inventado, 4 "Nenhum" e 3 "Número".
+     */
+    @Test
+    void noViraNaoQuandoAFalaInteiraEhNo() {
+        assertEquals("Não.", enforcador.reforcar("No.", "Número."));
+        assertEquals("Não...", enforcador.reforcar("No...", "Não há escolha..."));
+        assertEquals("{\\i1}Não!{\\i0}", enforcador.reforcar("{\\i1}No!{\\i0}", "{\\i1}Nenhum!{\\i0}"));
+        assertEquals("Não.", enforcador.traduzirSemModelo("No.").orElseThrow());
+
+        assertEquals("Não há como.", enforcador.reforcar("No way.", "Não há como."),
+            "CONTROLE: fala em que 'no' e so uma parte nao e tocada");
+        assertEquals("Nº 5.", enforcador.reforcar("No. 5.", "Nº 5."), "CONTROLE: 'No. 5' nao e a fala 'No'");
+        assertEquals(java.util.Optional.empty(), enforcador.traduzirSemModelo("Hello there"),
+            "CONTROLE: fala fora do glossario vai ao modelo");
+    }
+
+    /** Aspas curvas, espaço não separável e o espaço fixo {@code \h} do ASS também são ornamento. */
+    @Test
+    void ornamentoUnicodeEEspacoFixoNaoEscondemOTermo() {
+        assertEquals("“Entendido.”", enforcador.reforcar("“Roger.”", "“Rogério.”"));
+        assertEquals("Entendido. ", enforcador.reforcar("Roger. ", "Rogério. "));
+        assertEquals("\\hEntendido.", enforcador.reforcar("\\hRoger.", "\\hRogério."));
+    }
+
     @Test
     void falaForaDoGlossarioEDadosAusentesNaoMudamNada() {
         assertEquals("Bom dia.", enforcador.reforcar("Good morning.", "Bom dia."));

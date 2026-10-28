@@ -499,6 +499,7 @@ public class ProcessarArquivoUseCase {
         // portugues, torta) e nao o ingles. Medido no Reconguista I: 63 entradas recusadas, 1 com o
         // trecho "G..." alucinado ("Bellri Zenam: Vamos la, G-Self!") ia virar ingles na tela.
         Map<String, String> recuoDoCache = new HashMap<>();
+        Map<String, String> resolvidasSemModelo = new HashMap<>();
         int cacheSuspeito = 0;
         int cacheReparado = 0;
         for (String textoOriginal : textosTraduziveisDistintos) {
@@ -527,8 +528,20 @@ public class ProcessarArquivoUseCase {
                         recuoDoCache.put(textoOriginal, cacheado);
                     }
                 }
+                // A fala que É um termo do glossário tem resposta sabida: não vai ao modelo. Antes,
+                // "No." ia, o modelo era recusado nas três temperaturas e a fala saía em INGLÊS —
+                // 49 de 165 no acervo de 28/10/2026, com a tradução certa escrita no glossário.
+                java.util.Optional<String> doGlossario = enforcadorGlossarioFala.traduzirSemModelo(textoOriginal);
+                if (doGlossario.isPresent()) {
+                    resolvidasSemModelo.put(textoOriginal, doGlossario.get());
+                    continue;
+                }
                 textosPendentes.add(textoOriginal);
             }
+        }
+        if (!resolvidasSemModelo.isEmpty()) {
+            uiLogger.log("[ GLOSSARIO ] " + resolvidasSemModelo.size()
+                + " fala(s) traduzida(s) pelo glossário de fala completa, sem chamar o modelo.");
         }
         log.info("{} fala(s) distinta(s) reaproveitada(s) do cache ({} reparada(s)), {} suspeita(s), {} pendente(s) de tradução",
             cacheReaproveitavel.size(), cacheReparado, cacheSuspeito, textosPendentes.size());
@@ -594,6 +607,7 @@ public class ProcessarArquivoUseCase {
             if (traducoesParciais != null && !traducoesParciais.isEmpty()) {
                 log.info("Salvando {} traducoes parciais no cache antes de abortar o episodio", traducoesParciais.size());
                 Map<String, String> combinadasParciais = new HashMap<>(cacheReaproveitavel);
+                combinadasParciais.putAll(resolvidasSemModelo);
                 combinadasParciais.putAll(traducoesParciais);
                 // O recuo vale tambem aqui: a fala de locutores sem refacao fica com a do cache.
                 recuoDoCache.forEach((original, antiga) -> {
@@ -635,6 +649,7 @@ public class ProcessarArquivoUseCase {
         }
 
         Map<String, String> traducoesCombinadas = new HashMap<>(cacheReaproveitavel);
+        traducoesCombinadas.putAll(resolvidasSemModelo);
         traducoesCombinadas.putAll(traducoesNovas);
 
         // KPI de pendência (schemaVersion 1.1): usa o estiloPorTexto já construído

@@ -53,16 +53,25 @@ public class EnforcadorGlossarioFala {
 
     private static final Pattern TAGS_ASS = Pattern.compile("\\{[^}]*}");
     private static final Pattern QUEBRAS = Pattern.compile("\\\\[Nnh]");
-    /** Pontuação e espaços que envolvem a fala sem alterar o termo. */
-    private static final Pattern ORNAMENTO = Pattern.compile("[\\p{Punct}\\s¿¡…—–]+");
+    /**
+     * Pontuação e espaços que envolvem a fala sem alterar o termo. {@code \p{P}} e {@code \p{Z}}
+     * são as categorias UNICODE: {@code \p{Punct}} é só ASCII, e {@code "“Roger.”"} (aspas curvas)
+     * ou o espaço não separável deixavam a chave com um caractere a mais e o termo não casava.
+     */
+    private static final Pattern ORNAMENTO = Pattern.compile("[\\p{P}\\p{Z}\\s]+");
 
     /**
      * Glossário de fala completa. Chave em minúsculas e sem pontuação; valor na forma canônica
      * PT-BR. CRESCE POR MEDIÇÃO: cada entrada precisa de ocorrências contadas no acervo, senão
      * vira palpite embutido no caminho quente.
+     *
+     * <p>{@code no}, medido em 28/10/2026 pela chave de produção nos caches da 2.1: 165 falas que
+     * são só "No", 100 traduzidas "Não", <b>49 pendentes</b> (inglês na tela), 9 com conteúdo
+     * inventado ("Não há escolha"), 4 "Nenhum" e 3 "Número".
      */
     private static final Map<String, String> GLOSSARIO = Map.of(
-        "roger", "Entendido"
+        "roger", "Entendido",
+        "no", "Não"
     );
 
     private static final List<String> TERMOS_POR_TAMANHO = GLOSSARIO.keySet().stream()
@@ -109,6 +118,22 @@ public class EnforcadorGlossarioFala {
      * @param traduzido tradução candidata
      * @return a fala canônica, ou {@code traduzido} quando o glossário não se aplica
      */
+    /**
+     * PROPÓSITO DE NEGÓCIO: traduz SEM o modelo a fala que é inteiramente um termo do glossário.
+     * A {@link #reforcar} só age sobre tradução que existe; quando o modelo é recusado em todas as
+     * tentativas, a fala ficava pendente e saía em INGLÊS, embora a resposta certa fosse sabida de
+     * antemão — 49 falas "No." no acervo de 28/10/2026.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a mesma decisão e a mesma reescrita de {@link #reforcar}; só
+     * vale para fala-termo completa.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: fala que não é termo, ou original nulo/vazio, devolve
+     * {@link java.util.Optional#empty()}. Não lança.
+     */
+    public java.util.Optional<String> traduzirSemModelo(String original) {
+        return java.util.Optional.ofNullable(reforcar(original, null));
+    }
+
     public String reforcar(String original, String traduzido) {
         if (original == null || original.isBlank()) {
             return traduzido;

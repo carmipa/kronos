@@ -114,6 +114,18 @@ class FronteiraTermoAssTest {
     }
 
     @Test
+    @DisplayName("\\h e \\n tambem separam: o termo casa logo depois deles (28/10/2026)")
+    void espacoFixoEQuebraSuaveSeparam() {
+        assertTrue(FronteiraTermoAss.padrao("Roger").matcher("\\hRoger.").find(), "\\h e espaco fixo");
+        assertTrue(FronteiraTermoAss.padrao("Roger").matcher("certo\\nRoger").find(), "\\n e quebra suave");
+        assertTrue(FronteiraTermoAss.padrao("Argama").matcher("the\\NArgama").find(), "CONTROLE: \\N continua");
+        assertFalse(FronteiraTermoAss.padrao("Roger").matcher("XRoger").find(),
+            "CONTROLE: letra colada continua impedindo o casamento");
+        assertFalse(FronteiraTermoAss.padrao("ger").matcher("\\hRoger").find(),
+            "CONTROLE: o sufixo de uma palavra depois do \\h nao casa");
+    }
+
+    @Test
     @DisplayName("termo nulo ou em branco nao casa com nada")
     void degradaSemLancar() {
         assertEquals("", FronteiraTermoAss.corpo(null));

@@ -1366,6 +1366,30 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             "a linha de ortografia precisa dizer o estado, nao so existir: " + ortografia);
     }
 
+    /**
+     * 28/10/2026: "No." ia ao modelo, era recusado nas três temperaturas e saía EM INGLÊS — 49 de
+     * 165 falas assim no acervo, embora a resposta estivesse escrita no glossário. A fala que é
+     * inteiramente um termo do glossário agora é traduzida sem o modelo; as outras continuam indo.
+     */
+    @Test
+    @DisplayName("fala que e termo do glossario sai traduzida SEM chamar o modelo")
+    void falaDoGlossarioNaoVaiAoModelo() throws Exception {
+        FakeLlmPort llm = new FakeLlmPort();
+        ProcessarArquivoUseCase uc = montar(llm);
+        Path entrada = escreverAss("ep.ass", "No...", "Hello there", "{\\i1}No!{\\i0}");
+
+        ResultadoTraducaoArquivo r = uc.processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertEquals(StatusArquivoTraducao.CONCLUIDO, r.status());
+        String conteudo = Files.readString(raiz.resolve("saida").resolve("ep_PT-BR.ass"), StandardCharsets.UTF_8);
+        assertTrue(conteudo.contains(",Não..."), "o glossario traduz a fala inteira: " + conteudo);
+        assertTrue(conteudo.contains(",Não!"),
+            "pontuacao do original sobrevive (o italico do dialogo sai por politica da 2.1): " + conteudo);
+        assertTrue(conteudo.contains("fala traduzida"), "CONTROLE: a fala comum continua indo ao modelo");
+        assertEquals(1, llm.tamanhosDeLote.stream().mapToInt(Integer::intValue).sum(),
+            "so 'Hello there' chega ao modelo; lotes: " + llm.tamanhosDeLote);
+    }
+
     @Test
     void assFluxoCompletoCacheMissConcluido() throws Exception {
         FakeLlmPort llm = new FakeLlmPort();
