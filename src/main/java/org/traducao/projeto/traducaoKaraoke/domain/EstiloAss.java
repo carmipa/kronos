@@ -113,7 +113,18 @@ public record EstiloAss(String nome, String fonte, String tamanho, String corCon
         if (corEstilo == null) {
             return "";
         }
-        String hex = corEstilo.trim().replaceFirst("(?i)^&H", "").replace("&", "");
+        String bruto = corEstilo.trim();
+        // SSA v4 ([V4 Styles]) grava a cor em DECIMAL (16777215 = branco). Até 28/10/2026 os 6 a 8
+        // dígitos decimais eram lidos como hexadecimal — "16777215" virava &H777215 (auditoria, A8).
+        if (bruto.matches("-?\\d+") && !bruto.regionMatches(true, 0, "&H", 0, 2)) {
+            try {
+                long valor = Long.parseLong(bruto) & 0xFFFFFFFFL;
+                bruto = String.format(Locale.ROOT, "%08X", valor);
+            } catch (NumberFormatException e) {
+                return "";
+            }
+        }
+        String hex = bruto.replaceFirst("(?i)^&H", "").replace("&", "");
         if (!hex.matches("[0-9A-Fa-f]{6,8}")) {
             return "";
         }

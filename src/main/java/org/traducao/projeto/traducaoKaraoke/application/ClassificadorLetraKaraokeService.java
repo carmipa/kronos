@@ -41,6 +41,7 @@ public class ClassificadorLetraKaraokeService {
     // Mesma decomposição silábica Hepburn do DetectorEfeitoKaraokeService.
     private static final Pattern PALAVRA_ROMAJI_PATTERN = Pattern.compile(
         "^(?:n|(?:([kgsztdnhbpmyrwfjv])\\1?|sh|ch|ts|ky|gy|ny|hy|my|ry|by|py)?[aeiou])+$");
+    private static final Pattern MARCADOR_DE_SECAO = Pattern.compile("(?:OP|ED|IN|INSERT)\\d?");
     private static final Pattern ACENTO_PORTUGUES_PATTERN = Pattern.compile("[ãõçáéíóúâêôà]");
     /**
      * O nome do estilo declara PAPEL DE CAMADA de karaokê, e não o nome de uma música. Fronteira
@@ -275,6 +276,11 @@ public class ClassificadorLetraKaraokeService {
         if (ehComandoDeDesenho(visivel)) {
             return ClasseLinhaKaraoke.EFEITO_KFX;
         }
+        // Linha-MARCADOR do fansub ("\NOP", "ED", "IN2" sozinhos): rótulo de seção, não letra.
+        // Medido no DanMachi S05E14: "OP" ia ao LLM e virava um quadro na tela (auditoria, A9).
+        if (MARCADOR_DE_SECAO.matcher(visivel).matches()) {
+            return ClasseLinhaKaraoke.EFEITO_KFX;
+        }
         if (ESCRITA_JAPONESA_PATTERN.matcher(visivel).find()) {
             return ClasseLinhaKaraoke.ORIGINAL_JAPONES;
         }
@@ -367,8 +373,21 @@ public class ClassificadorLetraKaraokeService {
         return parecerOriginal ? ClasseLinhaKaraoke.ORIGINAL_JAPONES : ClasseLinhaKaraoke.TRADUZIVEL_INGLES;
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: a letra já está em português? Acento decide sozinho — mas só o acento
+     * que o romaji e o inglês não têm. Até 28/10/2026 qualquer â/ê/ô/é/à decidia: "kyô mo ashita
+     * mo" (romaji com circunflexo) e "Déjà vu, I've just been here before" saíam JA_PORTUGUES — o
+     * romaji empilhava com a tradução e o inglês nunca era traduzido (auditoria, A5).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o acento vale quando a palavra acentuada, sem o acento, NÃO é
+     * romaji silabável ("você" → "voce" não é; "kyô" → "kyo" é; "déjà" → "deja" é) e a linha não
+     * tem gramática inglesa. Sem acento, decide a lista de palavras como antes.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nunca lança.
+     */
     private boolean pareceJaPortugues(String visivel, String[] palavrasNormalizadas) {
-        if (ACENTO_PORTUGUES_PATTERN.matcher(visivel.toLowerCase(Locale.ROOT)).find()) {
+        if (acentoPortuguesQueNaoEhRomaji(visivel) && java.util.Arrays.stream(palavrasNormalizadas)
+                .noneMatch(INGLES_FORTE::contains)) {
             return true;
         }
         int sinaisPt = 0;
@@ -378,6 +397,26 @@ public class ClassificadorLetraKaraokeService {
             }
         }
         return sinaisPt >= 2;
+    }
+
+    private static boolean acentoPortuguesQueNaoEhRomaji(String visivel) {
+        for (String palavra : visivel.toLowerCase(Locale.ROOT).split("[^\\p{L}]+")) {
+            if (!ACENTO_PORTUGUES_PATTERN.matcher(palavra).find()) {
+                continue;
+            }
+            // Til, cedilha, agudo e grave o romaji não usa: decidem sozinhos ("não", "amanhã" sem o
+            // acento SÃO silabáveis — na-o, a-ma-n-ha — e esse português não pode deixar de contar).
+            // Só o circunflexo, que o romaji usa para vogal longa (kyô, tôku), pede a prova abaixo.
+            if (palavra.matches(".*[ãõçáéíóúà].*")) {
+                return true;
+            }
+            String semAcento = java.text.Normalizer.normalize(palavra, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+            if (!PALAVRA_ROMAJI_PATTERN.matcher(semAcento).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String normalizar(String visivel) {

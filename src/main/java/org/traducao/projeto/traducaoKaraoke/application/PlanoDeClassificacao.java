@@ -180,7 +180,11 @@ public final class PlanoDeClassificacao {
             }
             ClasseLinhaKaraoke previa = classificador.classificar(
                 ev.estilo(), ev.texto(), new SinaisDeKaraoke(campoEfeitoDe(ev), false));
-            if (previa != ClasseLinhaKaraoke.ORIGINAL_JAPONES) {
+            // Crédito ("OP Credits", "Staff") em kanji é japonês e casa "op", mas não é a LETRA: se
+            // contasse como original preservada, a camada única inglesa trocaria no lugar e a letra
+            // sumiria da tela — a classe do Unicorn 22/23 (auditoria de 28/10/2026, A7).
+            if (previa != ClasseLinhaKaraoke.ORIGINAL_JAPONES || ESTILO_DE_CREDITOS.matcher(
+                    ev.estilo() == null ? "" : ev.estilo()).find()) {
                 continue;
             }
             instantesExatosComRomaji.add(instanteExato(ev));
@@ -517,6 +521,10 @@ public final class PlanoDeClassificacao {
         }
         return todaInglesa;
     }
+
+    /** Estilo de créditos da música (não é camada de letra). */
+    private static final java.util.regex.Pattern ESTILO_DE_CREDITOS =
+        java.util.regex.Pattern.compile("(?i)(?<!\\p{L})(credits?|cr[eé]ditos?|staff)(?!\\p{L})");
 
     /** Mínimo de palavras para reconhecer letra já em português pelo dicionário. */
     static final int MINIMO_PALAVRAS_PORTUGUESAS = 2;
