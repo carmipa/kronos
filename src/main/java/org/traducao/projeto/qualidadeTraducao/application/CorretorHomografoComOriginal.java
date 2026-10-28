@@ -176,13 +176,226 @@ public class CorretorHomografoComOriginal {
         if (!VERBO_SER_INGLES.matcher(originalIngles).find()) {
             return saida;
         }
+        // O REPARO vem ANTES das trocas, e cada um mora na mesma regra da troca que o desfaz: a
+        // 2.1 reaplica este corretor sobre o cache a cada execucao, e o cache guarda o que as
+        // versoes anteriores escreveram. Sem o reparo, "Oitenta é Seis" ficava para sempre.
+        saida = repararCem(repararNumeralComposto(saida));
         if (podeTrocarE(originalIngles)) {
-            saida = trocar(saida, E_SOLTO, "é", preservaAbertura(saida));
+            saida = trocar(saida, E_SOLTO, "é", preservaAbertura(saida), this::eDeNumeralComposto);
         }
-        if (!DEMONSTRATIVO_INGLES.matcher(originalIngles).find()) {
-            saida = trocar(saida, ESTA_SOLTO, "está", 0);
+        if (DEMONSTRATIVO_INGLES.matcher(originalIngles).find()) {
+            saida = repararDemonstrativoAcentuado(saida);
+        } else {
+            saida = trocar(saida, ESTA_SOLTO, "está", 0, this::estaSeguidaDeVerbo);
         }
         return saida;
+    }
+
+    /**
+     * Numerais por extenso que compõem um número com {@code e}: {@code "oitenta e seis"},
+     * {@code "cento e vinte"}, {@code "duas e meia"}, {@code "mil e quinhentos"}.
+     *
+     * <p>O inglês não coordena número com {@code and} ({@code "Eighty-Six"}, {@code "one hundred
+     * twenty"}, {@code "two thirty"}), então a prova da regra — "sem coordenador no inglês, todo
+     * {@code e} solto é verbo" — não vale entre dois numerais. Foi assim que a 2.1 publicou
+     * {@code "Setor Oitenta é Seis"} no 86 E01 e {@code "Cem é vinte Gardes"} no filme de Sidonia
+     * (medido em 28/10/2026 no cache, 4 falas).
+     */
+    private static final java.util.Set<String> NUMERAL_EXTENSO = java.util.Set.of(
+        "um", "uma", "dois", "duas", "três", "tres", "quatro", "cinco", "seis", "sete", "oito",
+        "nove", "dez", "onze", "doze", "treze", "catorze", "quatorze", "quinze", "dezesseis",
+        "dezessete", "dezoito", "dezenove", "vinte", "trinta", "quarenta", "cinquenta",
+        "sessenta", "setenta", "oitenta", "noventa", "cem", "cento", "duzentos", "duzentas",
+        "trezentos", "trezentas", "quatrocentos", "quatrocentas", "quinhentos", "quinhentas",
+        "seiscentos", "seiscentas", "setecentos", "setecentas", "oitocentos", "oitocentas",
+        "novecentos", "novecentas", "mil", "meia");
+
+    private static final java.util.Set<String> DEZENA = java.util.Set.of(
+        "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa");
+
+    private static final java.util.Set<String> UNIDADE = java.util.Set.of(
+        "um", "uma", "dois", "duas", "três", "tres", "quatro", "cinco", "seis", "sete", "oito",
+        "nove");
+
+    private static final java.util.Set<String> CENTENA = java.util.Set.of(
+        "cento", "duzentos", "duzentas", "trezentos", "trezentas", "quatrocentos", "quatrocentas",
+        "quinhentos", "quinhentas", "seiscentos", "seiscentas", "setecentos", "setecentas",
+        "oitocentos", "oitocentas", "novecentos", "novecentas", "cem", "mil");
+
+    /** Horas por extenso que admitem {@code "e meia"}. */
+    private static final java.util.Set<String> HORA = java.util.Set.of(
+        "uma", "duas", "três", "tres", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez",
+        "onze", "doze", "meio-dia", "meia-noite");
+
+    /**
+     * Verbos que só cabem DEPOIS de um sujeito. {@code "Esta será uma missão perigosa"} traduz
+     * {@code "It'll be a dangerous mission"}: o {@code esta} é o pronome que faz as vezes do
+     * {@code it}, e {@code "Está será"} não é português em lugar nenhum. A regra antiga trocava
+     * porque o inglês não tinha demonstrativo — e {@code it} não é demonstrativo, mas o
+     * português o traduz por um (Zeta E25, Guilty Crown 21; medido em 28/10/2026).
+     */
+    private static final Pattern VERBO_FINITO_SEGUINTE = Pattern.compile(
+        "(?:é|era|foi|será|seria|vai|ia|pode|podia|poderia|deve|devia|deveria|tem|tinha|fica|"
+            + "ficou|parece|parecia|vem|veio|faz|fez|precisa|está|estava|estará)",
+        Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
+    /** {@code "Está é"} / {@code "Está será"} no começo de oração: o pronome escrito como verbo. */
+    private static final Pattern ESTA_ACENTUADA_ABRINDO_ORACAO = Pattern.compile(
+        "(^|[.!?…][\"'”»]?\\s*(?:\\\\N)?\\s*|" + FronteiraTermoAss.INICIO + "que\\s+)"
+            + "(Está|está)(\\s+(?:é|era|foi|será|seria)"
+            + FronteiraTermoAss.FIM + ")");
+
+    /**
+     * O que vem DEPOIS de um {@code é} verbal nunca é gerúndio nem pretérito na 3ª do plural:
+     * {@code "é manipulando"} e {@code "é passaram"} não são português. Medido em 28/10/2026 no
+     * Unicorn: a fala inglesa da 2.1 é um PEDAÇO da frase ({@code "\Nis conspiring with General
+     * Staff HQ"}), o {@code and} ficou no evento seguinte, e a regra concluiu que todo {@code e}
+     * era verbo.
+     */
+    private static final Pattern NAO_SEGUE_VERBO_SER = Pattern.compile(
+        "[\\p{L}-]*(?:ando|endo|indo|ondo|aram|eram|iram)", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Binômios fixos: o inglês os diz numa palavra ({@code "Gentlemen!"}), o português com
+     * {@code e}. Lista FECHADA, tirada do acervo (0083, {@code "Senhoras é senhores!"}).
+     */
+    private static final java.util.Set<String> BINOMIO_FIXO = java.util.Set.of(
+        "senhoras|senhores", "damas|cavalheiros", "meninas|meninos", "meninos|meninas");
+
+    /**
+     * Substantivos de tempo que só o DEMONSTRATIVO precede: {@code "esta noite"} traduz
+     * {@code "tonight"}, que não tem {@code this}. Lista fechada; {@code tarde} fica fora porque
+     * {@code "Está tarde"} ({@code "It's late"}) é o verbo. Medido em 28/10/2026: 17 versos de
+     * karaokê virariam {@code "está noite"}.
+     */
+    private static final java.util.Set<String> TEMPO_DEMONSTRATIVO = java.util.Set.of(
+        "noite", "manhã", "semana", "vez", "madrugada", "época");
+
+    /** {@code "Cem e vinte"} → {@code "Cento e vinte"}: com {@code e} depois, só existe {@code cento}. */
+    private static final Pattern CEM_COMPOSTO = Pattern.compile(
+        FronteiraTermoAss.INICIO + "([Cc]em)(?=\\s+e\\s+([\\p{L}]+))");
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: diz se o {@code e} solto em {@code [inicio, fim)} NÃO pode ser o
+     * verbo — numeral composto, binômio fixo ou o que vem depois não admite {@code é}.
+     */
+    private boolean eDeNumeralComposto(String texto, int inicio, int fim) {
+        String antes = palavraAntes(texto, inicio);
+        String depois = palavraDepois(texto, fim);
+        return (NUMERAL_EXTENSO.contains(antes) && NUMERAL_EXTENSO.contains(depois))
+            || BINOMIO_FIXO.contains(antes + "|" + depois)
+            || NAO_SEGUE_VERBO_SER.matcher(depois).matches();
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: diz se o {@code esta} em {@code [inicio, fim)} é pronome — sujeito
+     * de um verbo, ou demonstrativo de um substantivo de tempo.
+     */
+    private boolean estaSeguidaDeVerbo(String texto, int inicio, int fim) {
+        String depois = palavraDepois(texto, fim);
+        return VERBO_FINITO_SEGUINTE.matcher(depois).matches() || TEMPO_DEMONSTRATIVO.contains(depois);
+    }
+
+    /** PROPÓSITO DE NEGÓCIO: {@code cem} seguido de {@code e} + numeral vira {@code cento}. */
+    private String repararCem(String texto) {
+        Matcher m = CEM_COMPOSTO.matcher(texto);
+        StringBuilder saida = null;
+        int ultimo = 0;
+        while (m.find()) {
+            if (!NUMERAL_EXTENSO.contains(m.group(2).toLowerCase(java.util.Locale.ROOT))) {
+                continue;
+            }
+            if (saida == null) {
+                saida = new StringBuilder(texto.length());
+            }
+            saida.append(texto, ultimo, m.start(1)).append(m.group(1).charAt(0) == 'C' ? "Cento" : "cento");
+            ultimo = m.end(1);
+        }
+        return saida == null ? texto : saida.append(texto, ultimo, texto.length()).toString();
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: desfaz o {@code é} que versões anteriores deste corretor puseram
+     * dentro de um numeral composto ({@code "Oitenta é Seis"} → {@code "Oitenta e Seis"}).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só a ESTRUTURA do numeral autoriza — dezena seguida de unidade,
+     * centena ou {@code mil} seguidos de numeral, hora seguida de {@code meia}. {@code "três é
+     * seis"} ({@code "three is six"}) não tem essa estrutura e fica como está.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nada casando devolve a mesma instância.
+     */
+    private String repararNumeralComposto(String texto) {
+        Matcher m = E_ACENTUADO_SOLTO.matcher(texto);
+        StringBuilder saida = null;
+        int ultimo = 0;
+        while (m.find()) {
+            String antes = palavraAntes(texto, m.start(1));
+            String depois = palavraDepois(texto, m.end(1));
+            boolean composto = (DEZENA.contains(antes) && UNIDADE.contains(depois))
+                || (CENTENA.contains(antes) && NUMERAL_EXTENSO.contains(depois)
+                    && !"meia".equals(depois))
+                || (HORA.contains(antes) && "meia".equals(depois));
+            if (!composto) {
+                continue;
+            }
+            if (saida == null) {
+                saida = new StringBuilder(texto.length());
+            }
+            saida.append(texto, ultimo, m.start(1)).append(m.group(1).equals("É") ? "E" : "e");
+            ultimo = m.end(1);
+        }
+        return saida == null ? texto : saida.append(texto, ultimo, texto.length()).toString();
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: desfaz {@code "Está é a Argama!"} quando o inglês PROVA o
+     * demonstrativo ({@code "This is the Argama!"}). É o resíduo de antes de 14/10/2026, quando o
+     * {@code \N} colado no {@code This} cegava a prova e a troca acontecia; o cache guardou.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só no começo de oração (ou logo depois de {@code que}) e só
+     * antes de forma de {@code ser}. {@code "o núcleo que você está é parte"} tem sujeito antes do
+     * {@code está} e não casa.
+     */
+    private String repararDemonstrativoAcentuado(String texto) {
+        Matcher m = ESTA_ACENTUADA_ABRINDO_ORACAO.matcher(texto);
+        StringBuilder saida = null;
+        int ultimo = 0;
+        while (m.find()) {
+            if (saida == null) {
+                saida = new StringBuilder(texto.length());
+            }
+            saida.append(texto, ultimo, m.start(2)).append(m.group(2).charAt(0) == 'E' ? "Esta" : "esta");
+            ultimo = m.end(2);
+        }
+        return saida == null ? texto : saida.append(texto, ultimo, texto.length()).toString();
+    }
+
+    private static final Pattern E_ACENTUADO_SOLTO = Pattern.compile(
+        FronteiraTermoAss.INICIO + "([éÉ])" + FronteiraTermoAss.FIM);
+
+    private static final Pattern PALAVRA_FINAL = Pattern.compile("([\\p{L}-]+)$");
+    private static final Pattern PALAVRA_INICIAL = Pattern.compile("^([\\p{L}-]+)");
+    private static final Pattern SEPARADOR_FINAL = Pattern.compile("(?:\\s|\\\\[Nnh]|\\{[^{}]*})+$");
+    private static final Pattern SEPARADOR_INICIAL = Pattern.compile("^(?:\\s|\\\\[Nnh]|\\{[^{}]*})+");
+
+    /** A palavra imediatamente antes de {@code pos}, em minúsculas, saltando espaço, quebra e tag. */
+    private static String palavraAntes(String texto, int pos) {
+        String antes = SEPARADOR_FINAL.matcher(texto.substring(0, pos)).replaceFirst("");
+        Matcher m = PALAVRA_FINAL.matcher(antes);
+        return m.find() ? m.group(1).toLowerCase(java.util.Locale.ROOT) : "";
+    }
+
+    /** A palavra imediatamente depois de {@code pos}, em minúsculas, saltando espaço, quebra e tag. */
+    private static String palavraDepois(String texto, int pos) {
+        String depois = SEPARADOR_INICIAL.matcher(texto.substring(pos)).replaceFirst("");
+        Matcher m = PALAVRA_INICIAL.matcher(depois);
+        return m.find() ? m.group(1).toLowerCase(java.util.Locale.ROOT) : "";
+    }
+
+    /** Veto de uma troca, olhando o texto ao redor do achado {@code [inicio, fim)}. */
+    @FunctionalInterface
+    private interface VetoDeTroca {
+        boolean veta(String texto, int inicio, int fim);
     }
 
     /**
@@ -267,14 +480,17 @@ public class CorretorHomografoComOriginal {
         return m.lookingAt() ? m.end() : 0;
     }
 
-    /** Troca as ocorrências a partir de {@code desde}, preservando a caixa do achado. */
-    private String trocar(String texto, Pattern padrao, String acentuado, int desde) {
+    /**
+     * Troca as ocorrências a partir de {@code desde}, preservando a caixa do achado, exceto as que
+     * o {@code veto} recusa pelo contexto.
+     */
+    private String trocar(String texto, Pattern padrao, String acentuado, int desde, VetoDeTroca veto) {
         Matcher m = padrao.matcher(texto);
         StringBuilder saida = new StringBuilder(texto.length());
         int ultimo = 0;
         boolean achou = false;
         while (m.find()) {
-            if (m.start(1) < desde) {
+            if (m.start(1) < desde || veto.veta(texto, m.start(1), m.end(1))) {
                 continue;
             }
             achou = true;

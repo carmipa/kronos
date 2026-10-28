@@ -215,4 +215,169 @@ class CorretorHomografoComOriginalTest {
             assertEquals("", corretor.corrigir("It is.", ""));
         }
     }
+
+    /**
+     * O {@code e} que liga numerais por extenso é conjunção do NÚMERO. O inglês não coordena
+     * número ({@code "Eighty-Six"}, {@code "one hundred twenty"}), então a ausência de
+     * {@code and} no original não prova verbo ali. Falas do cache de 28/10/2026.
+     */
+    @Nested
+    @DisplayName("numeral por extenso (28/10/2026)")
+    class NumeralPorExtenso {
+
+        @Test
+        @DisplayName("`Oitenta e Seis` nao vira `Oitenta é Seis` (86 E01)")
+        void oitentaESeis() {
+            String pt = "Por que temos que\\Nsuportar esses porcos do Setor Oitenta e Seis?";
+            assertSame(pt, corretor.corrigir(
+                "We're from the First Sector. Why do we have to put up \\Nwith those pigs from "
+                    + "the Eighty-Sixth Sector?!", pt));
+        }
+
+        @Test
+        @DisplayName("`cento e vinte` e `duas e meia` ficam")
+        void centoEVinteEDuasEMeia() {
+            assertEquals("Cento e vinte Gardes foram destruídos!",
+                corretor.corrigir("One hundred twenty Gardes were destroyed!",
+                    "Cento e vinte Gardes foram destruídos!"));
+            assertEquals("São duas e meia.", corretor.corrigir("It's two thirty.", "São duas e meia."));
+        }
+
+        @Test
+        @DisplayName("REPARA o que o cache guardou: `Oitenta é Seis`, `Cem é vinte`")
+        void reparaOCache() {
+            assertEquals("pela\\NLegion do que permitir que os Oitenta e Seis entrem no Gran Mur.",
+                corretor.corrigir("The people of the Republic would \\Nrather be destroyed by the Legion",
+                    "pela\\NLegion do que permitir que os Oitenta é Seis entrem no Gran Mur."));
+            assertEquals("Cento e vinte Gardes foram destruídos!",
+                corretor.corrigir("One hundred twenty Gardes were destroyed!",
+                    "Cem é vinte Gardes foram destruídos!"));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `um` depois do `e` nao veta o verbo (`Ele e um piloto`)")
+        void umComoArtigoNaoVeta() {
+            assertEquals("Ele é um piloto.", corretor.corrigir("He is a pilot.", "Ele e um piloto."));
+        }
+
+        @Test
+        @DisplayName("`Cem e vinte` vira `Cento e vinte` (Sidonia S00E02)")
+        void cemViraCento() {
+            assertEquals("Cento e vinte Gardes foram destruídos!",
+                corretor.corrigir("One hundred twenty Gardes were destroyed!",
+                    "Cem é vinte Gardes foram destruídos!"));
+            String sozinho = "Cem soldados chegaram.";
+            assertSame(sozinho, corretor.corrigir("A hundred soldiers are here.", sozinho));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `três é seis` nao tem estrutura de numeral e o `é` fica")
+        void verboEntreNumeraisFica() {
+            String pt = "Duas vezes três é seis.";
+            assertSame(pt, corretor.corrigir("Two times three is six.", pt));
+        }
+    }
+
+    /**
+     * {@code "Esta será uma missão"} traduz {@code "It'll be a mission"}: o {@code esta} faz as
+     * vezes do {@code it}, que não é demonstrativo em inglês. {@code "Está será"} não é português.
+     */
+    @Nested
+    @DisplayName("`esta` sujeito de verbo (28/10/2026)")
+    class EstaSujeito {
+
+        @Test
+        @DisplayName("`Esta será uma missão` fica (Zeta E25)")
+        void estaSeraFica() {
+            String pt = "Certo. Esta será uma\\Nmissão perigosa para você.";
+            assertSame(pt, corretor.corrigir("R-Right.\\NIt'll be a dangerous mission for you.", pt));
+        }
+
+        @Test
+        @DisplayName("`Esta é a porta` fica (Guilty Crown 21)")
+        void estaEFica() {
+            String pt = "Aqui está! Esta é a porta dos fundos de Haruka.";
+            assertSame(pt, corretor.corrigir("There it is! Haruka's back door.", pt));
+        }
+
+        @Test
+        @DisplayName("REPARA `Está é` quando o ingles prova o demonstrativo (ZZ E10, Zeta E17)")
+        void reparaEstaEComDemonstrativo() {
+            assertEquals("Certo. \"Novo modelo\\Nchegando.\" Esta é a Argama!",
+                corretor.corrigir("Right. \"New model coming.\"\\NThis is the Argama!",
+                    "Certo. \"Novo modelo\\Nchegando.\" Está é a Argama!"));
+            assertEquals("Mirai, deixe-me apresentá-la.\\NEsta é Beltorchika Irma.",
+                corretor.corrigir("Mirai, let me introduce you.\\NThis is Beltorchika Irma.",
+                    "Mirai, deixe-me apresentá-la.\\NEstá é Beltorchika Irma."));
+            assertEquals("aposto\\Nque esta é sua primeira batalha na Lua!",
+                corretor.corrigir("Even if you are a Newtype, I bet\\Nthis is your first battle on the Moon!",
+                    "aposto\\Nque está é sua primeira batalha na Lua!"));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `você está é parte` tem sujeito antes e fica (ZZ E11)")
+        void estaComSujeitoFica() {
+            String pt = "O núcleo de combate que você\\Nestá é parte do novo traje!";
+            assertSame(pt, corretor.corrigir("The core fighter you're in is part\\Nof the new suit!", pt));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `Esta tudo bem?` continua virando `Está`")
+        void estaSemVerboContinuaVirando() {
+            assertEquals("Está tudo bem?", corretor.corrigir("Is everything all right?", "Esta tudo bem?"));
+        }
+
+        @Test
+        @DisplayName("`esta noite` fica: `tonight` e demonstrativo sem `this` (karaoke)")
+        void estaNoiteFica() {
+            String pt = "Não venha até mim só porque está sozinho esta noite...";
+            assertSame(pt, corretor.corrigir("Don't come to me just 'cause you're lonely tonight...", pt));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `Esta tarde` vira `Está tarde` (`It's late`)")
+        void estaTardeVira() {
+            assertEquals("Está tarde.", corretor.corrigir("It's late.", "Esta tarde."));
+        }
+    }
+
+    /**
+     * O que vem depois decide quando o inglês não decide: fala inglesa da 2.1 pode ser só um
+     * PEDAÇO da frase, e o {@code and} mora no evento seguinte. Falas do cache de 28/10/2026, que
+     * a regra antiga estragava toda vez que a 2.1 republicava.
+     */
+    @Nested
+    @DisplayName("o que vem depois do `e` nao admite verbo (28/10/2026)")
+    class NaoAdmiteVerbo {
+
+        @Test
+        @DisplayName("`e manipulando` fica (Unicorn)")
+        void gerundio() {
+            String pt = "a Vist Foundation está conspirando com o Quartel-General\\Ndo Estado-Maior "
+                + "e manipulando as forças militares ao seu bel-prazer.";
+            assertSame(pt, corretor.corrigir(
+                "We don't like how the Vist Foundation\\Nis conspiring with General Staff HQ", pt));
+        }
+
+        @Test
+        @DisplayName("`e passaram` fica (Unicorn)")
+        void preteritoPlural() {
+            String pt = "Mas apenas aqueles que esvaziaram a si mesmos\\Ne passaram pela loucura.";
+            assertSame(pt, corretor.corrigir(
+                "But the only ones who can become vessels\\Nare those who have emptied themselves", pt));
+        }
+
+        @Test
+        @DisplayName("`Senhoras e senhores` fica (0083)")
+        void binomio() {
+            String pt = "Senhoras e senhores! Esta revisão\\Nnaval é uma excelente oportunidade...";
+            assertSame(pt, corretor.corrigir("Gentlemen! This naval review\\Nis an excellent opportunity...", pt));
+        }
+
+        @Test
+        @DisplayName("FRONTEIRA: `Ele e alto` continua virando `é` (adjetivo nao veta)")
+        void adjetivoNaoVeta() {
+            assertEquals("Ele é alto.", corretor.corrigir("He is tall.", "Ele e alto."));
+        }
+    }
 }
