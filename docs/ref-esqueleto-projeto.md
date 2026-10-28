@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **514** |
-| classes em `src/test` | **491** |
+| classes em `src/main` | **515** |
+| classes em `src/test` | **492** |
 
 ---
 
@@ -36,7 +36,7 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 ```mermaid
 graph TB
     G0["<b>Preparação</b><br/>analisadorMidia (21)<br/>legendasExtracao (25)<br/>trocaTipoLegenda (25)<br/>auditorConteudoLegendas (25)"]:::fatia
-    G1["<b>Tradução</b><br/>traducao (77)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
+    G1["<b>Tradução</b><br/>traducao (78)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
@@ -217,7 +217,7 @@ auditorConteudoLegendas/
 
 ### Tradução
 
-#### `traducao` — 77 classes
+#### `traducao` — 78 classes
 
 ```text
 traducao/
@@ -239,6 +239,7 @@ traducao/
 │   ├── PoliticaBackupTraducao.java
 │   ├── ProcessarArquivoUseCase.java
 │   ├── ProcessarEpisodioUseCase.java
+│   ├── PublicadorLegendaMescla.java
 │   ├── RecuperarPendenciaFallbackService.java
 │   ├── ResolvedorCacheTraducao.java
 │   ├── ResolvedorSaidaLegenda.java
@@ -934,7 +935,7 @@ core/
 
 ---
 
-## Testes — 491 classes
+## Testes — 492 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1543,7 +1544,7 @@ telemetria/
 └── TelemetriaServiceRevisaoLoreTest.java
 ```
 
-#### `traducao` — 69 classes
+#### `traducao` — 70 classes
 
 ```text
 traducao/
@@ -1576,6 +1577,7 @@ traducao/
 │   ├── ProcessarEpisodioUseCaseAlucinacaoCaracterizacaoTest.java
 │   ├── ProcessarEpisodioUseCaseRecusaDoLlmTest.java
 │   ├── ProvenienciaNuncaGravaCurrentTest.java
+│   ├── PublicadorLegendaMesclaTest.java
 │   ├── RecuperarPendenciaFallbackServiceTest.java
 │   ├── ResolvedorCacheTraducaoProvenienciaTest.java
 │   ├── RestauradorFalaIdenticaSemItalicoTest.java

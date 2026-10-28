@@ -1242,7 +1242,7 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
     void traducaoSemLoreNaoDespejaCacheNemBaseDaTraducaoComLore() throws Exception {
         Path entrada = escreverAss("ep.ass", "Hello there", "Where is Captain Bright?");
         Path cacheComLore = raiz.resolve("cache").resolve("AnimeTeste").resolve("ep.cache.json");
-        Path baseComLore = ProcessarArquivoUseCase.basePorPastaDeSaida(cacheComLore, raiz.resolve("saida").resolve("ep_PT-BR.ass"));
+        Path baseComLore = PublicadorLegendaMescla.basePorPastaDeSaida(cacheComLore, raiz.resolve("saida").resolve("ep_PT-BR.ass"));
 
         montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
         String cacheEditado = Files.readString(cacheComLore, StandardCharsets.UTF_8)
