@@ -28,7 +28,7 @@ public class NovoKaraokePersistencia {
 
     private static final Path PASTA_MANIFESTOS =
         TelemetriaService.resolverPastaArtefatosOperacionais("novo-karaoke").resolve("manifestos");
-    private static final DateTimeFormatter FORMATO_CARIMBO = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+    private static final DateTimeFormatter FORMATO_CARIMBO = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS");
 
     @Inject
     ObjectMapper objectMapper;
@@ -55,6 +55,7 @@ public class NovoKaraokePersistencia {
             item.put("eventosDialogoPreservados", r.getEventosDialogoPreservados());
             item.put("eventosKaraokeRemovidos", r.getEventosKaraokeRemovidos());
             item.put("eventosPreservadosPorSeguranca", r.getEventosPreservadosPorSeguranca());
+            item.put("eventosTipografiaColapsados", r.getEventosTipografiaColapsados());
             item.put("tamanhoOriginalBytes", r.getTamanhoOriginalBytes());
             item.put("tamanhoNovoBytes", r.getTamanhoNovoBytes());
             item.put("percentualReducao", r.getPercentualReducao());

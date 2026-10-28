@@ -30,7 +30,11 @@ public record EventoAss(
 ) {
 
     private static final Pattern PADRAO_REMOVE_TAGS = Pattern.compile("\\{[^}]*\\}");
-    private static final Pattern PADRAO_TEMPO = Pattern.compile("(\\d+):(\\d{2}):(\\d{2})[.,](\\d{2})");
+    /**
+     * Centésimos (2 casas, o ASS) ou milésimos (3 casas, que alguns editores gravam): até 28/10/2026
+     * só 2 casas casavam, o tempo virava -1 e a saída ganhava {@code 0:00:00.-1}.
+     */
+    private static final Pattern PADRAO_TEMPO = Pattern.compile("(\\d+):(\\d{2}):(\\d{2})[.,](\\d{2,3})");
 
     /** Interpreta uma linha "Dialogue: ..." ou retorna {@code null} se não for evento. */
     public static EventoAss interpretar(String linha) {
@@ -104,7 +108,8 @@ public record EventoAss(
         long horas = Long.parseLong(m.group(1));
         long minutos = Long.parseLong(m.group(2));
         long segundos = Long.parseLong(m.group(3));
-        long centesimos = Long.parseLong(m.group(4));
+        String fracao = m.group(4);
+        long centesimos = fracao.length() == 3 ? Long.parseLong(fracao) / 10 : Long.parseLong(fracao);
         return ((horas * 60 + minutos) * 60 + segundos) * 100 + centesimos;
     }
 

@@ -15,6 +15,8 @@ public class ResultadoConversaoKaraoke {
     private int eventosDialogoPreservados;
     private int eventosKaraokeRemovidos;
     private int eventosPreservadosPorSeguranca;
+    /** Camadas de tipografia empilhada achatadas fora da música (cartão de data, letreiro). */
+    private int eventosTipografiaColapsados;
     private final List<LinhaSimplesKaraoke> linhasCriadas = new ArrayList<>();
     private final List<String> avisos = new ArrayList<>();
     private long tamanhoOriginalBytes;
@@ -50,6 +52,34 @@ public class ResultadoConversaoKaraoke {
 
     public void incrementarDialogoPreservado() {
         this.eventosDialogoPreservados++;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: registra as camadas de tipografia empilhada removidas pelo colapso. Elas
+     * tinham sido contadas como diálogo preservado ANTES do colapso, e o manifesto dizia que saíram
+     * mais falas do que saíram (auditoria da 4.1, 28/10/2026).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: desconta do diálogo preservado o mesmo número que soma aqui.
+     */
+    public void registrarTipografiaColapsada(int quantidade) {
+        eventosTipografiaColapsados += quantidade;
+        eventosDialogoPreservados -= quantidade;
+    }
+
+    public int getEventosTipografiaColapsados() {
+        return eventosTipografiaColapsados;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: o arquivo que FALHOU entra no manifesto com o motivo — até 28/10/2026 ele
+     * virava só um contador, e se todos falhassem não havia manifesto nenhum.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: motivo nulo vira o nome da exceção ausente ("sem motivo").
+     */
+    public static ResultadoConversaoKaraoke falhou(String arquivo, String motivo) {
+        ResultadoConversaoKaraoke r = new ResultadoConversaoKaraoke(arquivo);
+        r.adicionarAviso("FALHOU: " + (motivo == null || motivo.isBlank() ? "sem motivo" : motivo));
+        return r;
     }
 
     public int getEventosKaraokeRemovidos() {

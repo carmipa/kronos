@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **515** |
-| classes em `src/test` | **492** |
+| classes em `src/main` | **516** |
+| classes em `src/test` | **500** |
 
 ---
 
@@ -38,7 +38,7 @@ graph TB
     G0["<b>Preparação</b><br/>analisadorMidia (21)<br/>legendasExtracao (25)<br/>trocaTipoLegenda (25)<br/>auditorConteudoLegendas (25)"]:::fatia
     G1["<b>Tradução</b><br/>traducao (78)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
-    G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
+    G3["<b>Karaokê</b><br/>traducaoKaraoke (33)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
     G5["<b>Sistema</b><br/>telemetria (22)<br/>mapaProjeto (6)<br/>apiDadosAnime (9)<br/>mcp (1)<br/>sistema (3)<br/>vitrine (5)"]:::fatia
     PEERS["<b>🧱 peers</b><br/><i>importáveis por qualquer fatia</i><br/>cachetraducao (5)<br/>legenda (15)<br/>llm (4)<br/>lore (24)<br/>qualidadeTraducao (17)"]:::peer
@@ -523,7 +523,7 @@ revisaoConcordancia/
 
 ### Karaokê
 
-#### `traducaoKaraoke` — 32 classes
+#### `traducaoKaraoke` — 33 classes
 
 ```text
 traducaoKaraoke/
@@ -550,6 +550,7 @@ traducaoKaraoke/
 │   ├── FontesDoVideo.java
 │   ├── GradienteKaraoke.java
 │   ├── ResultadoTraducaoKaraoke.java
+│   ├── ServidorLlmIndisponivelException.java
 │   ├── SinaisDeKaraoke.java
 │   ├── StatusExecucaoKaraoke.java
 │   ├── TagsNoMeioDaLetra.java
@@ -935,7 +936,7 @@ core/
 
 ---
 
-## Testes — 492 classes
+## Testes — 500 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1311,16 +1312,19 @@ medicao/
 └── SpikeLanguageToolContraGoldSetIT.java
 ```
 
-#### `novoKaraoke` — 5 classes
+#### `novoKaraoke` — 8 classes
 
 ```text
 novoKaraoke/
 ├── application/
 │   ├── AchatadorAcervoSemLinhaVaziaIT.java
+│   ├── AchatadorAuditoria41Test.java
 │   ├── ConversorKaraokeUseCaseTest.java
+│   ├── DestinoPorJuncaoNaoRegravaEntradaTest.java
 │   └── MedicaoParBilingueAchatadorIT.java
 └── presentation/
     ├── AchatarEntraNaFilaTest.java
+    ├── CaminhoDaTelaNoAchatarTest.java
     └── DestinoPadraoKaraokeSimplesTest.java
 ```
 
@@ -1643,7 +1647,7 @@ traducaoCorrige/
     └── ResultadoManutencaoCacheTest.java
 ```
 
-#### `traducaoKaraoke` — 29 classes
+#### `traducaoKaraoke` — 34 classes
 
 ```text
 traducaoKaraoke/
@@ -1654,8 +1658,11 @@ traducaoKaraoke/
 │   ├── CorretorNaoAlcancaRomajiDoKaraokeTest.java
 │   ├── CriterioDeMusicaCaracterizacaoTest.java
 │   ├── EnsaioSegundoTiroPalavraInventadaIT.java
+│   ├── EstiloRomajiPeloDonoTest.java
 │   ├── JamaisMexerNoJaponesTest.java
 │   ├── KfxSoPortuguesNoLugarTest.java
+│   ├── LatentesDaAuditoria41Test.java
+│   ├── LetraJaEmPortuguesNaoVaiAoLlmTest.java
 │   ├── LocalizadorDoVideoDeOrigemTest.java
 │   ├── PalavrasForaDoDicionarioTest.java
 │   ├── PlanoDeClassificacaoTest.java
@@ -1665,6 +1672,7 @@ traducaoKaraoke/
 │   ├── SilabaDeFraseIrmaTest.java
 │   ├── TemperaturaDeterministicaKaraokeTest.java
 │   ├── TipografiaDaLetraPortuguesaTest.java
+│   ├── TradutorDeLetraDesfechoHonestoTest.java
 │   ├── TradutorDeLetraPerdeVersoTest.java
 │   ├── TradutorDeLetraSemMarcadorTest.java
 │   └── TraduzirKaraokeUseCaseTest.java
@@ -1674,11 +1682,13 @@ traducaoKaraoke/
 │   ├── GradienteKaraokeTest.java
 │   ├── TagsNoMeioDaLetraTest.java
 │   └── VersosDaLetraTest.java
-└── infrastructure/
-    ├── CoberturaAwtGlifoVazioTest.java
-    ├── FontesEmbutidasMkvAdapterTest.java
-    ├── ImportadorManifestoKaraokeTest.java
-    └── TelemetriaKaraokeDatasetTest.java
+├── infrastructure/
+│   ├── CoberturaAwtGlifoVazioTest.java
+│   ├── FontesEmbutidasMkvAdapterTest.java
+│   ├── ImportadorManifestoKaraokeTest.java
+│   └── TelemetriaKaraokeDatasetTest.java
+└── presentation/
+    └── CaminhoDaTelaNoKaraokeTest.java
 ```
 
 #### `trocaTipoLegenda` — 7 classes

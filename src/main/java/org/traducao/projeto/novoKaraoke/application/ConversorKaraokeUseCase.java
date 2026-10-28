@@ -102,6 +102,8 @@ public class ConversorKaraokeUseCase {
     private static final Pattern PALAVRA_ROMAJI_PATTERN = Pattern.compile(
         "^(?:n|(?:([kgsztdnhbpmyrwfjv])\\1?|sh|ch|ts|ky|gy|ny|hy|my|ry|by|py)?[aeiou])+$");
     private static final Pattern NAO_ASCII_PATTERN = Pattern.compile("[^\\x00-\\x7F]");
+    /** Modo de desenho do ASS ligado num bloco de override: {@code \p1}, {@code \p2}... */
+    private static final Pattern PADRAO_DESENHO = Pattern.compile("\\{[^}]*\\\\p[1-9]");
 
     @Inject
     DetectorEfeitoKaraokeService detectorKaraoke;
@@ -156,6 +158,7 @@ public class ConversorKaraokeUseCase {
         logStream.publicarLog(CANAL_LOG, "Arquivos .ass encontrados: " + arquivos.size());
 
         List<ResultadoConversaoKaraoke> resultados = new ArrayList<>();
+        List<ResultadoConversaoKaraoke> falhados = new ArrayList<>();
         int falhas = 0;
         String carimboDaExecucao = carimboAgora();
         for (Path arquivo : arquivos) {
@@ -167,6 +170,7 @@ public class ConversorKaraokeUseCase {
                 resultados.add(converterArquivo(arquivo, pastaDestino, gravar, carimboDaExecucao));
             } catch (Exception e) {
                 falhas++;
+                falhados.add(ResultadoConversaoKaraoke.falhou(arquivo.getFileName().toString(), e.getMessage()));
                 log.error("Falha ao converter {}", arquivo, e);
                 logStream.publicarLog(CANAL_LOG, "[ERRO] " + arquivo.getFileName() + ": " + e.getMessage());
             }
@@ -175,8 +179,10 @@ public class ConversorKaraokeUseCase {
         long duracaoMs = System.currentTimeMillis() - inicioMs;
         publicarResumo(resultados, falhas, duracaoMs, gravar);
 
-        if (gravar && !resultados.isEmpty()) {
-            registrarTelemetriaEManifesto(pastaOrigem, pastaDestino, resultados, duracaoMs);
+        if (gravar && (!resultados.isEmpty() || !falhados.isEmpty())) {
+            List<ResultadoConversaoKaraoke> paraOManifesto = new ArrayList<>(resultados);
+            paraOManifesto.addAll(falhados);
+            registrarTelemetriaEManifesto(pastaOrigem, pastaDestino, paraOManifesto, duracaoMs);
         }
         // A medição por porta fecha SEMPRE, inclusive em ensaio e inclusive com zero resultado:
         // execução que não produziu nada é justamente o sintoma que precisa aparecer. O registro
@@ -275,12 +281,35 @@ public class ConversorKaraokeUseCase {
         byte[] bytesOriginais = Files.readAllBytes(arquivo);
         boolean temBom = bytesOriginais.length >= 3
             && (bytesOriginais[0] & 0xFF) == 0xEF && (bytesOriginais[1] & 0xFF) == 0xBB && (bytesOriginais[2] & 0xFF) == 0xBF;
-        String conteudo = new String(bytesOriginais, temBom ? 3 : 0, bytesOriginais.length - (temBom ? 3 : 0), StandardCharsets.UTF_8);
+        // Decodificação ESTRITA: com substituição, um .ass em Latin-1 virava "�" e era regravado
+        // corrompido se tivesse música (auditoria de 28/10/2026). Agora o arquivo falha e fica intacto.
+        String conteudo;
+        try {
+            conteudo = StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                .decode(java.nio.ByteBuffer.wrap(bytesOriginais, temBom ? 3 : 0, bytesOriginais.length - (temBom ? 3 : 0)))
+                .toString();
+        } catch (java.nio.charset.CharacterCodingException e) {
+            throw new IOException("A legenda não está em UTF-8 — nada foi convertido para não corromper o texto: " + nome, e);
+        }
         boolean crlf = conteudo.contains("\r\n");
         List<String> linhas = conteudo.lines().toList();
 
         ResultadoConversaoKaraoke resultado = new ResultadoConversaoKaraoke(nome);
         resultado.setTamanhoOriginalBytes(bytesOriginais.length);
+
+        // Colunas de [Events] fora da ordem padrão: o leitor usa posições fixas e leria estilo no
+        // lugar do tempo. Sem mapa de colunas, o arquivo sai INTACTO, com aviso (auditoria, D11).
+        if (formatDeEventosForaDoPadrao(linhas)) {
+            logStream.publicarLog(CANAL_LOG, "   [AVISO] Format de [Events] fora da ordem padrão — arquivo copiado sem alterações.");
+            resultado.adicionarAviso("Format de [Events] fora da ordem padrão: arquivo copiado sem alterações.");
+            resultado.setTamanhoNovoBytes(bytesOriginais.length);
+            if (gravar) {
+                gravarPreservandoAnterior(pastaDestino.resolve(nome), bytesOriginais, carimboDaExecucao, resultado);
+            }
+            return resultado;
+        }
 
         // --- separa cabeçalho (tudo que não é Dialogue) e eventos ---
         List<String> cabecalho = new ArrayList<>();
@@ -368,7 +397,13 @@ public class ConversorKaraokeUseCase {
         resultado.getLinhasCriadas().addAll(linhasSimples);
 
         // Achata a tipografia EMPILHADA que sobrou fora da música (cartões de data, letreiros).
+        int dialogoAntes = dialogo.size();
         dialogo = colapsarEmpilhados(dialogo);
+        if (dialogo.size() < dialogoAntes) {
+            resultado.registrarTipografiaColapsada(dialogoAntes - dialogo.size());
+            resultado.adicionarAviso((dialogoAntes - dialogo.size()) + " camada(s) de tipografia empilhada "
+                + "(mesmo texto, mesma posição e recorte) achatada(s) na de cima.");
+        }
 
         // --- monta o arquivo de saída ---
         List<String> saida = montarSaida(cabecalho, idxUltimoEstilo, playResY, dialogo, preservados, linhasSimples);
@@ -404,12 +439,33 @@ public class ConversorKaraokeUseCase {
         return resultado;
     }
 
+    private static final String FORMAT_PADRAO_EVENTOS = "layer,start,end,style,name,marginl,marginr,marginv,effect,text";
+
+    /** A linha {@code Format:} da seção [Events] existe e NÃO é a ordem padrão do ASS. */
+    private static boolean formatDeEventosForaDoPadrao(List<String> linhas) {
+        boolean emEventos = false;
+        for (String linha : linhas) {
+            String l = linha.strip();
+            if (PADRAO_SECAO.matcher(l).find()) {
+                emEventos = l.equalsIgnoreCase("[Events]");
+                continue;
+            }
+            if (emEventos && l.regionMatches(true, 0, "Format:", 0, 7)) {
+                String campos = l.substring(7).replace(" ", "").toLowerCase(Locale.ROOT);
+                return !campos.equals(FORMAT_PADRAO_EVENTOS);
+            }
+        }
+        return false;
+    }
+
     /** Subpasta, DENTRO da pasta de destino, que guarda o arquivo anterior antes de regravá-lo. */
     static final String PASTA_BACKUP = "backup_karaoke_simples";
 
     private static String carimboAgora() {
         return java.time.LocalDateTime.now()
-            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            // Milissegundos: duas aplicações no mesmo segundo (pasta enfileirada duas vezes) gravavam
+            // o backup na MESMA subpasta, com REPLACE_EXISTING (auditoria de 28/10/2026).
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
     }
 
     /**
@@ -580,7 +636,8 @@ public class ConversorKaraokeUseCase {
                 }
                 if (descartado[j]
                     || !limparArtefatosVisiveis(outro.textoVisivel()).equals(visivel)
-                    || sobreposicaoJanela(base, outro) < SOBREPOSICAO_EMPILHADO) {
+                    || sobreposicaoJanela(base, outro) < SOBREPOSICAO_EMPILHADO
+                    || !mesmoLugar(base, outro)) {
                     continue;
                 }
                 grupo.add(j);
@@ -617,6 +674,41 @@ public class ConversorKaraokeUseCase {
         return restantes;
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: duas camadas só são a MESMA tipografia empilhada quando estão no mesmo
+     * lugar da tela: mesmo {@code \pos}/{@code \move} (tolerância de {@value #TOLERANCIA_POSICAO_PX}
+     * px) e mesmo {@code \clip}. Até 28/10/2026 o colapso olhava só texto, janela e layer: a placa
+     * dividida em duas metades por {@code \clip} perdia uma metade, e duas placas iguais em lados
+     * opostos da tela viravam uma (Patlabor 03 e 05: centenas de camadas de textura em outra posição).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: sem {@code \pos} nos dois, a posição não distingue (vale o
+     * resto do critério); com {@code \pos} só num deles, não é o mesmo lugar.
+     */
+    private static boolean mesmoLugar(EventoAss a, EventoAss b) {
+        double[] pa = coordenadaPrincipal(a.texto());
+        double[] pb = coordenadaPrincipal(b.texto());
+        boolean semA = Double.isNaN(pa[0]);
+        boolean semB = Double.isNaN(pb[0]);
+        if (semA != semB) {
+            return false;
+        }
+        if (!semA && (Math.abs(pa[0] - pb[0]) > TOLERANCIA_POSICAO_PX || Math.abs(pa[1] - pb[1]) > TOLERANCIA_POSICAO_PX)) {
+            return false;
+        }
+        return java.util.Objects.equals(recorte(a.texto()), recorte(b.texto()));
+    }
+
+    private static final double TOLERANCIA_POSICAO_PX = 2.0;
+    private static final Pattern PADRAO_RECORTE = Pattern.compile("\\\\i?clip\\(([^)]*)\\)");
+
+    private static String recorte(String texto) {
+        if (texto == null) {
+            return null;
+        }
+        Matcher m = PADRAO_RECORTE.matcher(texto);
+        return m.find() ? m.group(1).replace(" ", "") : null;
+    }
+
     /** Fração da janela MENOR coberta pela interseção das duas. */
     private static double sobreposicaoJanela(EventoAss a, EventoAss b) {
         long inicio = Math.max(a.inicioCs(), b.inicioCs());
@@ -643,10 +735,23 @@ public class ConversorKaraokeUseCase {
     ) {
         // agrupa candidatas por texto visível, separando repetições distantes (refrão)
         Map<String, List<EventoAss>> porTexto = new LinkedHashMap<>();
+        // Companhia que faz de uma palavra uma SÍLABA é outra palavra solta (as sílabas do KFX
+        // convivem entre si). A frase inteira do mesmo estilo — a tradução no mesmo estilo do romaji,
+        // Reconguista IV "wasurerarenai" — só não conta quando a palavra é ROMAJI: até 28/10/2026
+        // contava sempre, e o romaji sumia deixando o PT sozinho na tela. Para palavra que não é
+        // romaji ("Claro!", "Set." no 0083 E02, medido no acervo) a regra antiga continua: com a
+        // frase na tela ela é sílaba, e empilhá-la poluía a abertura.
         java.util.Set<EventoAss> acompanhados = acompanhadosNaTela(eventosEstilo);
+        java.util.Set<EventoAss> acompanhadosPorPalavraSolta = acompanhadosNaTela(eventosEstilo.stream()
+            .filter(e -> contarPalavras(limparArtefatosVisiveis(e.textoVisivel())) <= 1)
+            .toList());
         for (EventoAss evento : eventosEstilo) {
+            if (ehDesenho(evento)) {
+                continue;
+            }
             String visivel = limparArtefatosVisiveis(evento.textoVisivel());
-            if (contarPalavras(visivel) >= 2 || versoDeUmaPalavraSozinho(evento, visivel, acompanhados)) {
+            if (contarPalavras(visivel) >= 2
+                    || versoDeUmaPalavraSozinho(evento, visivel, acompanhados, acompanhadosPorPalavraSolta)) {
                 porTexto.computeIfAbsent(visivel, k -> new ArrayList<>()).add(evento);
             }
         }
@@ -703,6 +808,7 @@ public class ConversorKaraokeUseCase {
         }
 
         List<EventoAss> semCoberturaInicial = eventosEstilo.stream()
+            .filter(evento -> !ehDesenho(evento))
             .filter(evento -> finais.stream().noneMatch(g -> cobre(g, evento)))
             .toList();
         List<GrupoFragmentos> gruposFragmentos = reconstruirFragmentosKfx(estilo, semCoberturaInicial);
@@ -719,7 +825,8 @@ public class ConversorKaraokeUseCase {
         for (EventoAss evento : eventosEstilo) {
             boolean coberto = finais.stream().anyMatch(g -> cobre(g, evento))
                 || gruposFragmentos.stream().anyMatch(g -> g.cobre(evento));
-            boolean efeitoVazio = eEventoKfxSimplificavel(evento) && limparArtefatosVisiveis(evento.textoVisivel()).isBlank();
+            boolean efeitoVazio = ehDesenho(evento)
+                || eEventoKfxSimplificavel(evento) && limparArtefatosVisiveis(evento.textoVisivel()).isBlank();
             if (coberto || efeitoVazio) {
                 removidos++;
             } else {
@@ -756,7 +863,8 @@ public class ConversorKaraokeUseCase {
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: texto em branco devolve {@code false}. Nunca lança.
      */
-    private boolean versoDeUmaPalavraSozinho(EventoAss evento, String visivel, java.util.Set<EventoAss> acompanhados) {
+    private boolean versoDeUmaPalavraSozinho(EventoAss evento, String visivel, java.util.Set<EventoAss> acompanhados,
+                                             java.util.Set<EventoAss> acompanhadosPorPalavraSolta) {
         // Dois pisos achados pela revisão do acervo inteiro (24/09/2026): no DanMachi S00E04 a nota
         // sustentada "m" de "Dream" (0:02:54.70–0:03:02.79) só existe na camada de brilho e as
         // outras letras têm duração ZERO — ninguém divide a tela com ela, e a letra "m" sozinha
@@ -765,7 +873,8 @@ public class ConversorKaraokeUseCase {
         return !visivel.isBlank() && contarPalavras(visivel) == 1 && ehVersoInteiro(evento)
             && visivel.codePointCount(0, visivel.length()) >= 2
             && !detectorKaraoke.efeitoDeclaraKaraoke(evento.efeito())
-            && !acompanhados.contains(evento);
+            && !acompanhadosPorPalavraSolta.contains(evento)
+            && (!acompanhados.contains(evento) || detectorKaraoke.proporcaoRomaji(visivel) >= LIMIAR_ROMAJI_SAIDA);
     }
 
     /**
@@ -889,9 +998,44 @@ public class ConversorKaraokeUseCase {
         return new double[] {Double.parseDouble(matcher.group(1)), Double.parseDouble(matcher.group(2))};
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: o evento PERTENCE ao verso do grupo — além de estar na janela, o texto
+     * dele é parte do texto do verso (a sílaba "ki" de "kimi no koe", a cópia de brilho do verso
+     * inteiro). Até 28/10/2026 bastava a janela: o "(Hey!)" concorrente do mesmo estilo era removido
+     * como se fosse sílaba, e um fragmento logo depois do fim partia o bloco KFX ("nunca se perde um
+     * trecho de música", diz o Javadoc de processarEstiloMusical).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: comparação pelas letras do texto, sem espaço nem pontuação nem
+     * caixa; evento sem letra visível (decoração) pertence a qualquer verso da janela.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: nunca lança.
+     */
     private static boolean cobre(Grupo grupo, EventoAss evento) {
-        return evento.inicioCs() < grupo.fimCs + MARGEM_COBERTURA_CS
-            && evento.fimCs() > grupo.inicioCs - MARGEM_COBERTURA_CS;
+        if (evento.inicioCs() >= grupo.fimCs + MARGEM_COBERTURA_CS
+            || evento.fimCs() <= grupo.inicioCs - MARGEM_COBERTURA_CS) {
+            return false;
+        }
+        String doEvento = letras(limparArtefatosVisiveis(evento.textoVisivel()));
+        // Vale o texto de QUALQUER variante absorvida: a variante divergente que perdeu o voto
+        // ("...que desmoronaram" × "...que se desfizeram", 0083) pertence ao mesmo verso e sai com
+        // ele — sem isto ela ficava crua na tela (medido no acervo, 28/10/2026, antes de entrar).
+        return doEvento.isEmpty() || grupo.textosDasVariantes.stream().anyMatch(t -> letras(t).contains(doEvento));
+    }
+
+    /** Só as letras e dígitos, em minúsculas — a forma de comparar sílaba, cópia e verso. */
+    private static String letras(String texto) {
+        return texto == null ? "" : texto.toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}\\d]", "");
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: o evento é DESENHO vetorial ({@code \p1}...), não texto: "m 0 0 l 0 -10"
+     * é coordenada. Até 28/10/2026 a partícula do KFX contava duas palavras, virava candidata a verso
+     * e se juntava a qualquer letra da janela, numa linha de até 84 s com as coordenadas na tela.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: texto nulo devolve {@code false}.
+     */
+    private static boolean ehDesenho(EventoAss evento) {
+        return evento.texto() != null && PADRAO_DESENHO.matcher(evento.texto()).find();
     }
 
     private List<String> montarSaida(
@@ -925,10 +1069,43 @@ public class ConversorKaraokeUseCase {
             emissoes.add(new Emissao(linha.inicioCs(), ordem++, linha.paraEventoAss(NOME_ESTILO_SIMPLES)));
         }
         emissoes.sort(Comparator.comparingLong(Emissao::inicioCs).thenComparingInt(Emissao::ordem));
-        for (Emissao emissao : emissoes) {
-            saida.add(emissao.linha());
-        }
+        // Os eventos vão para o FIM DA SEÇÃO [Events], não do arquivo: com [Aegisub Extradata] depois
+        // de [Events] (30 de 324 arquivos medidos), todo o diálogo ia parar dentro do Extradata — fora
+        // da especificação, e com Comment fora de lugar (auditoria de 28/10/2026).
+        int insercao = fimDaSecaoDeEventos(saida);
+        List<String> linhasDeEvento = emissoes.stream().map(Emissao::linha).toList();
+        saida.addAll(insercao, linhasDeEvento);
         return saida;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: onde termina a seção {@code [Events]} — antes da próxima seção e das
+     * linhas em branco que a precedem.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: sem {@code [Events]}, ou sem seção depois dela, o fim do
+     * arquivo (o comportamento de antes).
+     */
+    private static int fimDaSecaoDeEventos(List<String> linhas) {
+        int eventos = -1;
+        for (int i = 0; i < linhas.size(); i++) {
+            if (linhas.get(i).strip().equalsIgnoreCase("[Events]")) {
+                eventos = i;
+                break;
+            }
+        }
+        if (eventos < 0) {
+            return linhas.size();
+        }
+        for (int i = eventos + 1; i < linhas.size(); i++) {
+            if (PADRAO_SECAO.matcher(linhas.get(i)).find()) {
+                int fim = i;
+                while (fim > eventos + 1 && linhas.get(fim - 1).isBlank()) {
+                    fim--;
+                }
+                return fim;
+            }
+        }
+        return linhas.size();
     }
 
     /**
@@ -1035,7 +1212,11 @@ public class ConversorKaraokeUseCase {
         for (LinhaSimplesKaraoke linha : grupo) {
             List<LinhaSimplesKaraoke> alvo = null;
             for (List<LinhaSimplesKaraoke> camada : camadas) {
-                if (similaridadeTokens(camada.getFirst().texto(), linha.texto()) >= SIMILARIDADE_MINIMA_TOKENS) {
+                // A variante PULVERIZADA ("k i m i n o k o e") tem as mesmas letras do verso e
+                // nenhuma palavra em comum: sem esta comparação ela virava camada própria e empilhava
+                // (auditoria de 28/10/2026, D5), contra a doc ("romaji original vence pulverizado").
+                if (similaridadeTokens(camada.getFirst().texto(), linha.texto()) >= SIMILARIDADE_MINIMA_TOKENS
+                        || mesmaLetraPulverizada(camada.getFirst().texto(), linha.texto())) {
                     alvo = camada;
                     break;
                 }
@@ -1047,6 +1228,11 @@ public class ConversorKaraokeUseCase {
             alvo.add(linha);
         }
         return camadas;
+    }
+
+    /** Uma das duas é pulverizada e as letras, sem espaço, são as mesmas. */
+    private static boolean mesmaLetraPulverizada(String a, String b) {
+        return (pareceTextoPulverizado(a) || pareceTextoPulverizado(b)) && !letras(a).isEmpty() && letras(a).equals(letras(b));
     }
 
     private LinhaSimplesKaraoke melhorDaCamada(List<LinhaSimplesKaraoke> camada) {
@@ -1120,8 +1306,10 @@ public class ConversorKaraokeUseCase {
         if (pareceOriginalJaponesOuRomaji(texto)) {
             pontuacao += 100;
         }
+        // Pulverizado perde SEMPRE, inclusive para o romaji (+100): a doc promete "romaji original
+        // vence texto pulverizado", e com +60 a promessa era o contrário (auditoria de 28/10/2026).
         if (pareceTextoPulverizado(texto)) {
-            pontuacao += 60;
+            pontuacao += 150;
         }
         pontuacao -= Math.min(8, contarPalavras(texto));
         pontuacao -= Math.min(20, pontuacaoPortugues(texto) * 4);
@@ -1563,14 +1751,57 @@ public class ConversorKaraokeUseCase {
         return (double) intersecao / menor;
     }
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: o quanto duas linhas são o MESMO verso escrito de formas diferentes. A
+     * palavra que é NOME PRÓPRIO (maiúscula fora do início, em qualquer das duas) não conta: termo de
+     * lore aparece igual no romaji e na tradução ("mobile suits ha shinka suru noni" × "Os Mobile
+     * Suits evoluem, mas e eu?"), e com ele duas línguas passavam do limiar e a deduplicação apagava
+     * uma delas — a PT no Reconguista V, o romaji em estilos diferentes (auditoria de 28/10/2026).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: mesmo conjunto de palavras é o mesmo verso (1,0), com nome ou sem;
+     * o nome sai só do numerador e o denominador é a linha MAIOR (a variante pulverizada é tratada à
+     * parte, pelas letras).
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: linha sem palavra comparável devolve 0.
+     */
     private static double similaridadeTokens(String a, String b) {
         var tokensA = tokens(a);
         var tokensB = tokens(b);
         if (tokensA.isEmpty() || tokensB.isEmpty()) {
             return 0;
         }
-        long comuns = tokensA.stream().filter(tokensB::contains).count();
-        return (double) comuns / Math.min(tokensA.size(), tokensB.size());
+        if (new java.util.HashSet<>(tokensA).equals(new java.util.HashSet<>(tokensB))) {
+            return 1.0;
+        }
+        // O nome sai só do NUMERADOR: tirá-lo também do denominador encolhia a linha e fundia o que
+        // não é variante — "Kimi ga Yubi Sashita Kanatae to" × "You pointed me toward...", com um
+        // "to" em comum, ia de 1/6 para 1/3 e o Break Blade perdia a tradução empilhada (medido no
+        // acervo, 28/10/2026, antes de entrar).
+        java.util.Set<String> nomes = nomesProprios(a);
+        nomes.addAll(nomesProprios(b));
+        // Denominador pela linha MAIOR (até 28/10/2026, pela menor): duas palavras de lore em comum
+        // davam 2/6 entre o romaji e a tradução inglesa ("mobile suits ha shinka suru noni" ×
+        // "Mobile suits are evolving, but what about me?") e a tradução era fundida e sumia.
+        // Variante de verdade do mesmo verso tem quase as mesmas palavras e não perde nada.
+        long comuns = tokensA.stream().filter(x -> !nomes.contains(x)).filter(tokensB::contains).count();
+        return (double) comuns / Math.max(tokensA.size(), tokensB.size());
+    }
+
+    /** Palavras com inicial maiúscula fora do começo da linha, em minúsculas. */
+    private static java.util.Set<String> nomesProprios(String texto) {
+        java.util.Set<String> nomes = new java.util.HashSet<>();
+        String[] partes = texto.split("[^\\p{L}\\d]+");
+        boolean primeira = true;
+        for (String p : partes) {
+            if (p.isBlank()) {
+                continue;
+            }
+            if (!primeira && Character.isUpperCase(p.codePointAt(0))) {
+                nomes.add(p.toLowerCase(Locale.ROOT));
+            }
+            primeira = false;
+        }
+        return nomes;
     }
 
     private static List<String> tokens(String texto) {
@@ -1598,6 +1829,8 @@ public class ConversorKaraokeUseCase {
         private long fimCs;
         private int eventos;
         private int variantes = 1;
+        /** Os textos de todas as variantes fundidas neste grupo — para a pertença na remoção. */
+        private final List<String> textosDasVariantes = new ArrayList<>();
         /** Fim do último evento de VERSO INTEIRO absorvido; -1 quando só houve cópias curtas. */
         private long fimUltimoVersoInteiro = -1;
 
@@ -1607,6 +1840,7 @@ public class ConversorKaraokeUseCase {
             this.inicioCs = primeiro.inicioCs();
             this.fimCs = primeiro.fimCs();
             this.eventos = 1;
+            this.textosDasVariantes.add(texto);
             marcarSeVersoInteiro(primeiro);
         }
 
@@ -1643,6 +1877,7 @@ public class ConversorKaraokeUseCase {
             inicioCs = Math.min(inicioCs, outro.inicioCs);
             fimCs = Math.max(fimCs, outro.fimCs);
             variantes += outro.variantes;
+            textosDasVariantes.addAll(outro.textosDasVariantes);
         }
 
         private String janela() {
