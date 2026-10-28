@@ -85,6 +85,51 @@ class TradutorCLIAlucinacaoCaracterizacaoTest {
         }
     }
 
+    /** Devolve PARCIAL para quem tem "parcial" no nome e CONCLUIDO para o resto, sem lançar. */
+    private static final class ProcessarArquivoComDesfecho extends ProcessarArquivoUseCase {
+        final List<String> processados = new java.util.ArrayList<>();
+        ProcessarArquivoComDesfecho() {
+            super(null, null, null, null, null, null, null, null, null, null,
+                  null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                  null, null, null, null, null, null);
+        }
+        @Override
+        public ResultadoTraducaoArquivo processar(
+            Path arquivoEntrada, boolean permitirRetraducao, SnapshotContexto contextoDoJob) {
+            String nome = arquivoEntrada.getFileName().toString();
+            processados.add(nome);
+            int avisos = nome.contains("parcial") ? 1 : 0;
+            return ResultadoTraducaoArquivo.concluido(arquivoEntrada, nome, "lore", 3, 0, 3 - avisos, avisos);
+        }
+    }
+
+    /**
+     * 28/10/2026: o PARCIAL volta sem lançar, e a CLI descartava o retorno — o arquivo com falas
+     * em inglês contava como "traduzido com sucesso". E o filtro da CLI ignorava {@code .srt}.
+     */
+    @Test
+    @DisplayName("PARCIAL nao conta como sucesso, e .srt entra no lote")
+    void parcialNaoEhSucessoESrtEntra(@TempDir Path entrada) throws Exception {
+        Files.writeString(entrada.resolve("ep1-parcial.ass"), "conteudo");
+        Files.writeString(entrada.resolve("ep2.ass"), "conteudo");
+        Files.writeString(entrada.resolve("ep3.srt"), "conteudo");
+
+        UiLoggerCaptor uiLogger = new UiLoggerCaptor();
+        ProcessarArquivoComDesfecho processar = new ProcessarArquivoComDesfecho();
+        TradutorProperties props = new TradutorProperties(
+            entrada.toString(), entrada.toString(), entrada.toString(), 20, List.of(), "en", "pt-BR");
+        new TradutorCLI(processar, uiLogger, props, new PastasExecucao(), new LlmDisponivel(),
+            new GerenciadorContexto(List.of())).executar();
+
+        assertEquals(3, processar.processados.size(), "o .srt tem de entrar: " + processar.processados);
+        assertTrue(uiLogger.linhas.stream().anyMatch(l -> l.contains("2 sucesso(s), 1 falha(s) de 3 arquivo(s)")),
+            "o parcial nao e sucesso: " + uiLogger.linhas);
+        assertTrue(uiLogger.linhas.stream().anyMatch(l -> l.startsWith("[ PARCIAL ] ep1-parcial.ass")),
+            "o parcial e dito na linha do arquivo");
+        assertTrue(uiLogger.linhas.stream().noneMatch(l -> l.contains("ep1-parcial.ass traduzido com sucesso")),
+            "o arquivo com pendencia nao pode ser anunciado como sucesso");
+    }
+
     @Test
     @DisplayName("dois arquivos que alucinam: ambos contam como falha, mensagem preservada, lote continua")
     void alucinacaoEmArquivoContaComoFalhaESegueOLote(@TempDir Path entrada) throws Exception {

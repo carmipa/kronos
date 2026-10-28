@@ -8,6 +8,8 @@ import org.traducao.projeto.lore.domain.SnapshotContexto;
 import org.traducao.projeto.lore.infrastructure.GerenciadorContexto;
 import org.traducao.projeto.traducao.application.ProcessarArquivoUseCase;
 import org.traducao.projeto.llm.domain.StatusLlm;
+import org.traducao.projeto.traducao.domain.ResultadoTraducaoArquivo;
+import org.traducao.projeto.traducao.domain.StatusArquivoTraducao;
 import org.traducao.projeto.traducao.domain.exceptions.TradutorException;
 import org.traducao.projeto.qualidadeTraducao.domain.AlucinacaoDetectadaException;
 import org.traducao.projeto.traducao.domain.exceptions.TraducaoParcialException;
@@ -29,7 +31,7 @@ import java.util.stream.Stream;
 
 /**
  * Entrada de linha de comando da Tradução Local (Opção 4). Varre a pasta de
- * entrada por arquivos {@code .ass}/{@code .ssa} e traduz cada um sequencialmente.
+ * entrada por arquivos {@code .ass}/{@code .ssa}/{@code .srt} e traduz cada um sequencialmente.
  *
  * <h2>Propósito de negócio</h2>
  * Representa a interface CLI da Tradução Local: recebe e valida a configuração
@@ -72,7 +74,8 @@ import java.util.stream.Stream;
 public class TradutorCLI {
 
     private static final Logger log = LoggerFactory.getLogger(TradutorCLI.class);
-    private static final Set<String> EXTENSOES_SUPORTADAS = Set.of(".ass", ".ssa");
+    /** As mesmas da rota web (TraducaoController): o caso de uso traduz SRT, e so o filtro da CLI o deixava de fora. */
+    private static final Set<String> EXTENSOES_SUPORTADAS = Set.of(".ass", ".ssa", ".srt");
 
     private final ProcessarArquivoUseCase processarArquivoUseCase;
     private final ConsoleUILogger uiLogger;
@@ -109,7 +112,7 @@ public class TradutorCLI {
 
     /**
      * PROPÓSITO DE NEGÓCIO: executa a varredura da pasta de entrada e traduz cada
-     * legenda {@code .ass}/{@code .ssa} sequencialmente. É o ponto de entrada da CLI
+     * legenda {@code .ass}/{@code .ssa}/{@code .srt} sequencialmente. É o ponto de entrada da CLI
      * da Tradução Local, agora disparado pelo bootstrap próprio do slice
      * ({@code TraducaoStartup}) — não mais por um contrato compartilhado da fatia
      * {@code config}.
@@ -158,8 +161,8 @@ public class TradutorCLI {
         }
 
         if (arquivos.isEmpty()) {
-            log.warn("Nenhum arquivo .ass/.ssa encontrado em {}", diretorioEntrada);
-            uiLogger.log("Nenhum arquivo .ass/.ssa encontrado em " + diretorioEntrada);
+            log.warn("Nenhum arquivo .ass/.ssa/.srt encontrado em {}", diretorioEntrada);
+            uiLogger.log("Nenhum arquivo .ass/.ssa/.srt encontrado em " + diretorioEntrada);
             return;
         }
 
@@ -181,9 +184,20 @@ public class TradutorCLI {
             Path arquivo = arquivos.get(i);
             uiLogger.tituloEpisodio(arquivo.getFileName().toString(), i + 1, arquivos.size());
             try {
-                processarArquivoUseCase.processar(arquivo, false, contextoDoJob);
-                uiLogger.log("[ OK ] " + arquivo.getFileName() + " traduzido com sucesso.");
-                sucesso++;
+                // O DESFECHO vem no retorno, não só nas exceções: PARCIAL (falas pendentes, saída
+                // em .parcial) volta sem lançar. A CLI descartava o resultado e contava o arquivo
+                // como "traduzido com sucesso" (auditoria de 28/10/2026); a web já o separava.
+                ResultadoTraducaoArquivo resultado = processarArquivoUseCase.processar(arquivo, false, contextoDoJob);
+                if (resultado.status() == StatusArquivoTraducao.CONCLUIDO) {
+                    uiLogger.log("[ OK ] " + arquivo.getFileName() + " traduzido com sucesso.");
+                    sucesso++;
+                } else {
+                    uiLogger.log("[ PARCIAL ] " + arquivo.getFileName() + ": " + resultado.falasPendentes()
+                        + " fala(s) pendente(s); saída em " + resultado.arquivoSaida());
+                    falha++;
+                    arquivosComFalha.add(arquivo.getFileName() + " (parcial: "
+                        + resultado.falasPendentes() + " pendente(s))");
+                }
             } catch (TraducaoParcialException e) {
                 int salvas = e.getDicionarioParcial() != null ? e.getDicionarioParcial().size() : 0;
                 log.warn("Processamento parcial em {}: {} traduções salvas. {}", arquivo.getFileName(), salvas, e.getMessage());
