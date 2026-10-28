@@ -372,4 +372,26 @@ class DetectorTraducaoIdenticaServiceTest {
         assertFalse(detector.pareceNaoTraduzida("...", "...!"));
         assertFalse(detector.pareceNaoTraduzida("A pursuer?!", "Um perseguidor?!"));
     }
+
+    /**
+     * 28/10/2026: a quebra {@code \N} perdia a contrabarra e ficava o N — "NEXT\NEPISODE" virava
+     * a sigla NEXTNEPISODE, aceita idêntica pelo portão do cache e reprovada pelo final. Medido
+     * nos 5 episódios do 0080. E "GO!" passava só por estar gritado.
+     */
+    @Test
+    void quebraDoAssEhEspacoECaixaAltaNaoAbsolveInglesCorrente() {
+        assertFalse(detector.deveManterIdentico("{\\fnQuadraat-Bold\\pos(718,548)}NEXT\\NEPISODE"),
+            "letreiro em ingles com quebra tem de ir ao modelo");
+        assertFalse(detector.deveManterIdentico("No!\\NNo!"));
+        assertFalse(detector.deveManterIdentico("{\\b1\\fscx208}GO!"));
+        assertFalse(detector.deveManterIdentico("HELP!"));
+
+        assertTrue(detector.deveManterIdentico("GHQ!"), "CONTROLE: sigla continua preservada");
+        assertTrue(detector.deveManterIdentico("GP02A"), "CONTROLE: sigla com digito continua preservada");
+        assertTrue(detector.deveManterIdentico("OK!"), "CONTROLE: OK e como o portugues escreve");
+        assertTrue(detector.deveManterIdentico("Kamille\\NJudau"), "CONTROLE: dois nomes com quebra");
+        assertTrue(detector.deveManterIdentico(
+                "{\\c&H0399C5&}C\\N\\N{\\c&H04733E&}a\\N\\N{\\c&H973C4F&}f\\N\\N{\\c&H9231C5&}é"),
+            "CONTROLE: letreiro vertical, uma letra por linha, continua sendo a palavra que forma");
+    }
 }

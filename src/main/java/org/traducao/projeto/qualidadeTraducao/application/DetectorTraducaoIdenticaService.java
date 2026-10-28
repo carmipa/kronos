@@ -42,6 +42,7 @@ public class DetectorTraducaoIdenticaService {
     private static final String INICIO_DE_TERMO = FronteiraTermoAss.INICIO;
 
     private static final Pattern PADRAO_REMOVE_TAGS_ASS = Pattern.compile("\\{[^}]+}");
+    private static final Pattern QUEBRA_ASS = Pattern.compile("\\\\[Nnh]");
     private static final Pattern PADRAO_GAGUEIRA_NOME = Pattern.compile(
         "(?iu)" + INICIO_DE_TERMO + "([\\p{L}])-(?=\\1[\\p{L}])");
     /** Fala só com dígitos e espaços (a pontuação já saiu na limpeza): número não se traduz. */
@@ -208,8 +209,21 @@ public class DetectorTraducaoIdenticaService {
      */
     private String limpar(String texto) {
         String limpo = PADRAO_REMOVE_TAGS_ASS.matcher(texto).replaceAll("").strip();
+        // A QUEBRA DO ASS É ESPAÇO, não pontuação. Sem esta linha a contrabarra saía e o N ficava:
+        // "NEXT\NEPISODE" virava a "palavra" NEXTNEPISODE, em caixa alta, e era aceita idêntica
+        // pelo portão do cache — enquanto o portão final, que troca \N por espaço, a reprovava.
+        // Medido em 28/10/2026: 5 episódios do 0080 com o letreiro em inglês.
+        limpo = QUEBRA_ASS.matcher(limpo).replaceAll(" ");
         limpo = removerGagueiraDeNome(limpo);
-        return limpo.replaceAll("[^\\w\\s\\d]", "").strip();
+        limpo = limpo.replaceAll("[^\\w\\s\\d]", "").strip();
+        // LETREIRO VERTICAL: uma letra por linha ("C\N\Na\N\Nf\N\Né" é o letreiro "Café"). Com a
+        // quebra virando espaço, cada letra seria uma palavra e o letreiro deixaria de ser
+        // reconhecido; as letras soltas voltam a formar a palavra que são.
+        String[] pedacos = limpo.split("\\s+");
+        if (pedacos.length > 1 && java.util.Arrays.stream(pedacos).allMatch(p -> p.codePointCount(0, p.length()) == 1)) {
+            return String.join("", pedacos);
+        }
+        return limpo;
     }
 
     /**
@@ -407,11 +421,16 @@ public class DetectorTraducaoIdenticaService {
         if (textoLimpo.matches("\\d+")) {
             return true;
         }
-        if (textoLimpo.length() > 1 && textoLimpo.equals(textoLimpo.toUpperCase())) {
+        String minusculo = textoLimpo.toLowerCase(Locale.ROOT);
+        // Caixa alta é SIGLA (GHQ, GP02A, NTD) — mas não quando a palavra é inglês corrente:
+        // "HELP!" e "GO!" eram aceitos idênticos só por estarem gritados, enquanto "Help!" ia ao
+        // modelo (Macross II E01, medido em 28/10/2026). "OK" fica fora: é como o português
+        // escreve, e mandá-lo ao modelo só gastaria três chamadas para voltar "OK".
+        boolean inglesCorrente = PALAVRAS_INGLES_COMUNS.contains(minusculo) && !"ok".equals(minusculo);
+        if (textoLimpo.length() > 1 && textoLimpo.equals(textoLimpo.toUpperCase(Locale.ROOT))
+            && !inglesCorrente) {
             return true;
         }
-
-        String minusculo = textoLimpo.toLowerCase(Locale.ROOT);
 
         if (PADRAO_INTERJEICAO.matcher(minusculo).matches()) {
             return true;
