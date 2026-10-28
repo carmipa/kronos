@@ -203,8 +203,13 @@ public class TraducaoController {
                     ? "[SEGUNDA-OPINIAO] DESLIGADA (tradutor.llm.modelo-recuperacao vazio)."
                     : "[SEGUNDA-OPINIAO] Ligada: \"" + segundaOpiniao + "\".");
 
-                // Configura as pastas compartilhadas
-                String saida = req.saida() != null && !req.saida().isBlank() ? req.saida() : "";
+                // Configura as pastas compartilhadas, pelo MESMO normalizador que a guarda e a
+                // pasta de entrada usam (aspas do "Copiar como caminho" fora, relativo ancorado).
+                // Antes ia o texto cru: a rota respondia 200 "iniciada" e o job morria com
+                // InvalidPathException (auditoria de 28/10/2026; o conserto 0e18ed57 de 09/10
+                // corrigiu 3.3, 3.2 e 1.3 e não alcançou esta rota).
+                Path pathSaida = pipelineWebSupport.normalizarCaminho(req.saida());
+                String saida = pathSaida != null ? pathSaida.toString() : "";
                 // Tradução SEM LORE nunca cai na pasta canônica por omissão: uma tradução crua
                 // (nomes próprios desprotegidos, zero terminologia) não pode virar a versão
                 // definitiva só porque o operador deixou o campo vazio. Saída explícita continua
@@ -215,7 +220,7 @@ public class TraducaoController {
                         .resolve("traducao_ptbr_sem_lore").toString();
                     System.out.println("[33m[SEM LORE] Saída separada: " + saida + "[0m");
                 }
-                pastasExecucao.configurar(req.entrada(), saida, propriedades.diretorioCache(), propriedades);
+                pastasExecucao.configurar(pathEntrada.toString(), saida, propriedades.diretorioCache(), propriedades);
 
                 // Fotografia ÚNICA do job, resolvida a partir do contextoId EXPLÍCITO da
                 // requisição — não do contexto ativo global. Todos os arquivos deste lote

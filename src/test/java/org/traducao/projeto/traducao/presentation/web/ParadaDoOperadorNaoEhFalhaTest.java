@@ -178,6 +178,49 @@ class ParadaDoOperadorNaoEhFalhaTest {
             "parada nao e falha do arquivo e nao pode ir a telemetria como FALHOU: " + telemetria.statusRegistrados);
     }
 
+    /** Caso de uso que conclui todo arquivo, para exercitar a borda sem o pipeline. */
+    private static final class CasoDeUsoQueConclui extends ProcessarArquivoUseCase {
+        CasoDeUsoQueConclui() {
+            super(null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null);
+        }
+
+        @Override
+        public ResultadoTraducaoArquivo processar(Path arquivoEntrada, boolean permitirRetraducao,
+                SnapshotContexto contextoDoJob, boolean ignorarLoreExistente) {
+            return ResultadoTraducaoArquivo.concluido(null, arquivoEntrada.getFileName().toString(), "teste", 1, 0, 1, 0);
+        }
+    }
+
+    /**
+     * 28/10/2026: o caminho colado com aspas ("Copiar como caminho" do Explorer) passava na guarda,
+     * a rota respondia 200 "iniciada", e o job morria com InvalidPathException ao configurar as
+     * pastas com o texto cru — o lote saía FALHA GERAL.
+     */
+    @Test
+    void caminhoEntreAspasNaoDerrubaOLote(@TempDir Path raiz) throws Exception {
+        Path entrada = Files.createDirectories(raiz.resolve("Obra").resolve("legendas_originais"));
+        Files.writeString(entrada.resolve("ep01.ass"), "[Events]\n", StandardCharsets.UTF_8);
+        Path saida = raiz.resolve("saida-escolhida");
+        TradutorProperties props = new TradutorProperties(entrada.toString(), raiz.resolve("saida").toString(),
+            raiz.resolve("cache").toString(), 20, List.of(), "en", "pt-BR");
+        LogStreamEspiao espiao = new LogStreamEspiao();
+        PastasExecucao pastas = new PastasExecucao();
+        TraducaoController controller = new TraducaoController(
+            new PipelineWebSupport(new FilaExecucaoPipeline(), espiao), new CasoDeUsoQueConclui(), new LlmNoAr(),
+            new GerenciadorContexto(List.of(new ContextoTeste())), pastas, props, new TelemetriaEspia(),
+            new GuardaCaminhoEntrada(), espiao, new AvisoSonoroMudo());
+
+        controller.traduzir(new OperacaoRequest(
+            "\"" + entrada + "\"", "\"" + saida + "\"", "parada_teste", null, false, null, null, false));
+
+        assertTrue(espiao.chegouOFim.await(10, TimeUnit.SECONDS), "o lote nao anunciou o fim");
+        assertEquals("CONCLUÍDO", espiao.desfecho(), "o lote tem de rodar, nao cair em FALHA GERAL");
+        assertEquals(entrada, pastas.diretorioEntrada(), "a pasta de entrada vai sem as aspas");
+        assertEquals(saida, pastas.diretorioSaida(), "a pasta de saida vai sem as aspas");
+    }
+
     @Test
     void mesmaExcecaoSemInterrupcaoContinuaSendoFalha(@TempDir Path raiz) throws Exception {
         TelemetriaEspia telemetria = new TelemetriaEspia();
