@@ -52,8 +52,10 @@ public class ProcessarEpisodioUseCase {
      * é do modelo principal. São poucas falas (3 em 50 episódios, medido em 11/08/2026): sai
      * mais barato recuperá-las de novo a cada execução do que sujar o carimbo.
      *
-     * <p>ThreadLocal porque os lotes são traduzidos em paralelo, e escopado com
-     * {@code remove()} no {@code finally} porque a thread é de pool e sobrevive ao job.
+     * <p>ThreadLocal porque este caso de uso é um bean único que pode atender mais de uma
+     * thread ao mesmo tempo (fila de jobs, CLI, testes) — dentro de uma thread os lotes são
+     * sequenciais —, e escopado com {@code remove()} no {@code finally} porque a thread é de
+     * pool e sobrevive ao job.
      */
     private static final ThreadLocal<List<String>> SEGUNDA_OPINIAO_DO_LOTE =
         ThreadLocal.withInitial(ArrayList::new);
@@ -262,8 +264,9 @@ public class ProcessarEpisodioUseCase {
         MDC.put(MDC_LOTE_ID, String.valueOf(lote.idLote()));
         // Escopo por lote, no MESMO padrão do MDC acima: a recuperação por segunda opinião
         // acontece no fundo da recursão de traduzirComDivisao, e é aqui em cima que o
-        // TraducaoLote é montado. ThreadLocal porque os lotes rodam em paralelo — uma coleção
-        // de instância misturaria a segunda opinião de um episódio com a de outro.
+        // TraducaoLote é montado. ThreadLocal porque o bean é único e pode servir mais de uma
+        // thread (os lotes de UMA thread são sequenciais) — uma coleção de instância misturaria a
+        // segunda opinião de um episódio com a de outro.
         SEGUNDA_OPINIAO_DO_LOTE.set(new ArrayList<>());
         CAUSAS_DO_LOTE.set(new java.util.LinkedHashMap<>());
         try {

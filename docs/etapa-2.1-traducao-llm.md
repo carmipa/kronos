@@ -63,6 +63,7 @@ sequenceDiagram
     UC->>Cache: carregar(arquivo.cache.json, proveniência)
     Cache-->>UC: mapa original → traduzido
     UC->>Aval: cada entrada — reaproveita, repara ([REPARADA]) ou volta ao modelo
+    UC->>UC: fala que é inteira um termo do glossário ("No." → "Não.") resolve sem o modelo ([ GLOSSARIO ])
     UC->>Lotes: traduzirPendentes(falas sem tradução aproveitável)
     Lotes->>Lotes: mascara tags — {\pos(...)} → [[TAG0]] — e monta os lotes
     Lotes->>LLM: traduzir(lote, prompt da lore congelada)
@@ -70,9 +71,9 @@ sequenceDiagram
     Lotes-->>UC: traduções com as tags restauradas
     UC->>UC: pós-transformações (terminologia, aspas, acentos, dicionário, homógrafo, cartão de data, glossário)
     UC->>UC: portão pós-transformação — reprovou, volta à versão aprovada ([ DESFEITA ])
-    UC->>Escritor: publica com mescla de três vias contra cache/obra/.publicado/
+    UC->>Cache: salva o cache do arquivo (uma vez, no fim — ou no parcial, se parar) ANTES de publicar
+    UC->>Escritor: publica com mescla de três vias contra cache/obra/.publicado/<pasta de saída>/
     Escritor-->>UC: arquivo_PT-BR.ass
-    UC->>Cache: salva o cache do arquivo (uma vez, no fim — ou no parcial, se parar)
     UC-->>API: resultado do arquivo (SSE canal "traducao")
 ```
 
@@ -80,9 +81,10 @@ sequenceDiagram
 
 ## Cache de tradução
 
-- **Formato:** JSON, lista de `EntradaCache(indice, estilo, original, traduzido, idiomaOriginal, idiomaTraduzido)`.
+- **Formato:** JSON, objeto `{"proveniencia": ProvenienciaCache, "entradas": [EntradaCache(indice, estilo, original, traduzido, idiomaOriginal, idiomaTraduzido), ...]}` (`CacheDocumento`). O formato antigo — a lista de entradas solta, sem proveniência — ainda é lido e passa a ser gravado no formato novo.
 - **Localização:** `cache/<pasta da obra>/<nomeLegenda>.cache.json` — a pasta da obra é a **avó** do arquivo (`<Obra>/legendas_extraidas_ass/ep.ass` → `cache/<Obra>/ep.cache.json`). Consequência medida em 25/09/2026: duas pastas com o mesmo nome de obra e o mesmo nome de arquivo **compartilham o cache** — uma cópia de teste precisa de nome de obra próprio para não ler nem gravar o cache real. Exceção: a [Tradução sem Lore (2.2)](etapa-2.2-traducao-sem-lore.md) grava em `cache/<obra>/sem_lore/`, que a 2.1 nunca lê.
-- **Gravação:** o cache é gravado **uma vez por arquivo**, no fim — e também quando a execução para no meio, com o que já foi traduzido —, não a cada fala.
+- **Gravação:** o cache é gravado **uma vez por arquivo**, no fim — e também quando a execução para no meio, com o que já foi traduzido —, não a cada fala. Desde 28/10/2026 ele é gravado **antes** da publicação da legenda: uma falha ao publicar (disco cheio, arquivo travado pelo player) não joga fora o trabalho do modelo, e a reexecução publica a partir do cache sem retraduzir.
+- **Glossário de fala completa:** fala que é inteira um termo do glossário (`No.`, `Roger.`) recebe a tradução sabida sem ir ao modelo (`[ GLOSSARIO ]`, 28/10/2026). Antes ela ia, o modelo era recusado nas três temperaturas e a fala saía em inglês — 49 das 165 falas com esse defeito no acervo de 28/10/2026.
 - **Chave de lookup:** o **texto original**, não o índice — se a mesma frase aparecer em falas diferentes, a mesma tradução é reaproveitada (cada evento mantém seu próprio timestamp, então isso nunca afeta sincronismo).
 - **Editável manualmente:** o operador pode abrir o `.cache.json` e corrigir uma tradução na mão. Na próxima execução a correção só é reaproveitada se passar no `AvaliadorTraducaoCache` (a mesma régua aplicada à saída do LLM); se não passar, é reparada sem chamar o modelo (`[REPARADA]`) quando o defeito tem conserto conhecido, ou volta ao modelo.
 - **Entradas de falha:** fala que termina pendente é salva com `traduzido` **vazio** (a legenda publica o original). Na execução seguinte ela volta ao LLM. Caches antigos podem ainda ter `original == traduzido`, que é o "fallback de falha" que os fluxos de [Correção & Revisão](etapa-2.3-correcao-revisao.md) tratam.
@@ -95,7 +97,11 @@ sequenceDiagram
 ## Reexecução, parada e causa das pendências (auditoria de 25/09/2026)
 
 - **Reexecutar sobre uma pasta já traduzida faz mesclagem de três vias**, linha a linha, contra o
-  registro do que o cache gerou na publicação anterior (`cache/<obra>/.publicado/`):
+  registro do que o cache gerou na publicação anterior **naquela pasta de saída**
+  (`cache/<obra>/.publicado/<12 primeiros caracteres do SHA-256 da pasta>/`, com um `ORIGEM.txt`
+  dizendo qual pasta é — desde 28/10/2026; antes a base era só pelo nome do arquivo, e publicar o
+  mesmo episódio em duas pastas fazia uma usar a base da outra; a base antiga por nome é lida uma
+  vez, como migração):
   linha que o arquivo não mudou recebe a do cache (é assim que a correção da
   [2.3](etapa-2.3-correcao-revisao.md) chega); linha **corrigida direto no `.ass`** (Revisão de
   Lore, Concordância, edição manual) e não mudada no cache é **mantida**; mudou dos dois lados é

@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * PROPÓSITO DE NEGÓCIO: expõe a tradução local via LLM (Opção 3) à interface
+ * PROPÓSITO DE NEGÓCIO: expõe a tradução local via LLM (opção 2.1) à interface
  * web, verificando a disponibilidade do servidor LLM, configurando as pastas de
  * execução, aplicando o contexto de lore selecionado e traduzindo em lote os
  * arquivos de legenda encontrados.
