@@ -1576,6 +1576,29 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             "instantes: " + telemetriaCaptor.naoTraduzidas.stream().map(f -> f.instante()).toList());
     }
 
+    /**
+     * 28/10/2026: o dataset descrevia o arquivo GERADO, não o publicado. A fala corrigida à mão,
+     * mantida pela mescla, seguia registrada como não traduzida a cada execução.
+     */
+    @Test
+    @DisplayName("fala corrigida no arquivo e mantida pela mescla sai do dataset de nao traduzidas")
+    void falaMantidaPelaMesclaSaiDoDataset() throws Exception {
+        Path entrada = escreverAss("ep.ass", "Hello there", "KEEPME stays");
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+        assertTrue(telemetriaCaptor.naoTraduzidas.stream().anyMatch(f -> f.indice() == 1),
+            "CONTROLE: na primeira execucao a fala pendente vai ao dataset: " + telemetriaCaptor.naoTraduzidas);
+
+        Path parcial = raiz.resolve("saida").resolve("ep_PT-BR.parcial.ass");
+        Files.writeString(parcial, Files.readString(parcial, StandardCharsets.UTF_8)
+            .replace(",KEEPME stays", ",Fica assim, corrigido a mao."), StandardCharsets.UTF_8);
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertTrue(Files.readString(parcial, StandardCharsets.UTF_8).contains("corrigido a mao"),
+            "CONTROLE: a mescla manteve a correcao do arquivo");
+        assertTrue(telemetriaCaptor.naoTraduzidas.stream().noneMatch(f -> f.indice() == 1),
+            "no arquivo publicado a fala esta corrigida: " + telemetriaCaptor.naoTraduzidas);
+    }
+
     /** Corretor ortográfico do caso de uso; {@code null} usa o real. */
     private org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda ortografiaTeste;
 

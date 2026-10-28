@@ -1216,8 +1216,14 @@ public class ProcessarArquivoUseCase {
 
         // Depois de a legenda estar em disco: o dataset e ACESSORIO e a porta engole a propria
         // falha, entao perder o registro nunca custa o arquivo que acabou de ser publicado.
+        // O dataset descreve o arquivo PUBLICADO: a fala que a mescla manteve do arquivo (corrigida
+        // a mao, pela 3.2 ou pela 3.3) nao e mais "nao traduzida" la — era registrada como
+        // TRADUCAO_IGUAL_AO_ORIGINAL a cada execucao (auditoria de 28/10/2026).
+        Set<Integer> mantidasDoArquivo = publicacao.preservadasDoArquivo();
+        List<FalaNaoTraduzida> naoTraduzidasNoPublicado = mantidasDoArquivo.isEmpty() ? naoTraduzidas
+            : naoTraduzidas.stream().filter(f -> !mantidasDoArquivo.contains(f.indice())).toList();
         telemetriaTraducao.registrarFalasNaoTraduzidas(
-            arquivoSaida, resolvedorCache.animeAPartirDoArquivo(arquivoEntrada), naoTraduzidas);
+            arquivoSaida, resolvedorCache.animeAPartirDoArquivo(arquivoEntrada), naoTraduzidasNoPublicado);
 
         long tempoTotalMs = System.currentTimeMillis() - inicioMs;
         String animeNome = resolvedorCache.animeAPartirDoArquivo(arquivoEntrada);
