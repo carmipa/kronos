@@ -311,7 +311,9 @@ public class LlmClientAdapter implements LlmPort {
         // O servidor RESPONDEU e recusou este pedido (4xx permanente)? É problema desta fala,
         // não do servidor — e só aqui essa informação existe. Ver TraducaoLote#recusaDaRequisicao.
         boolean recusaDoServidor = false;
+        int tentativasFeitas = 0;
         for (int tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
+            tentativasFeitas = tentativa;
             try {
                 log.debug("Enviando lote {} ao LLM ({} linha(s)) — tentativa {}/{}",
                     lote.idLote(), lote.linhasOriginais().size(), tentativa, MAX_TENTATIVAS);
@@ -412,11 +414,20 @@ public class LlmClientAdapter implements LlmPort {
         }
 
         String mensagemFinal = "Erro ao traduzir o lote " + lote.idLote()
-            + " após " + MAX_TENTATIVAS + " tentativa(s)";
+            + " após " + tentativasFeitas + " tentativa(s)";
         if (ultimaFalha != null) {
             mensagemFinal += ": " + ultimaFalha.getMessage();
         }
         log.error(mensagemFinal);
+        // RESPOSTA TRUNCADA OU VAZIA TAMBÉM É PROBLEMA DESTA FALA: o servidor respondeu, só que com
+        // algo inutilizável para ela. Sem esta marca o lote voltava como "servidor fora do ar" e o
+        // episódio INTEIRO abortava por uma fala patológica — a mesma perda das 373 falas de
+        // 11/08, chegando por outro sinal (auditoria de 28/10/2026). Interrompido não entra: aí é
+        // o operador parando, e o chamador lê o flag.
+        if ((ultimaFalha instanceof RespostaLlmTruncadaException || ultimaFalha instanceof RespostaLlmVaziaException)
+                && !Thread.currentThread().isInterrupted()) {
+            recusaDoServidor = true;
+        }
         return recusaDoServidor
             ? TraducaoLote.recusadaPeloServidor(lote.idLote(), mensagemFinal)
             : new TraducaoLote(lote.idLote(), null, false, mensagemFinal);

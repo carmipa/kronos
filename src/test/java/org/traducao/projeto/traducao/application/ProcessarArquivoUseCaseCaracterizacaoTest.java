@@ -266,6 +266,15 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             return f;
         }
 
+        /** Fala que contém isto volta como o adaptador devolve uma resposta TRUNCADA esgotada. */
+        private String gatilhoTruncar;
+
+        static FakeLlmPort queTruncaAFala(String gatilho) {
+            FakeLlmPort f = new FakeLlmPort(false, false);
+            f.gatilhoTruncar = gatilho;
+            return f;
+        }
+
         /** Como {@link #queParteAFala(String)}, devolvendo estas partes, uma por linha. */
         static FakeLlmPort queParteAFalaEm(String gatilho, String... partes) {
             FakeLlmPort f = queParteAFala(gatilho);
@@ -303,6 +312,10 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             tamanhosDeLote.add(lote.linhasOriginais().size());
             if (chamada >= caiNaChamada) {
                 return new TraducaoLote(lote.idLote(), null, false, "Connection refused (dublê: LM Studio caiu)");
+            }
+            if (gatilhoTruncar != null && lote.linhasOriginais().stream().anyMatch(l -> l.contains(gatilhoTruncar))) {
+                return TraducaoLote.recusadaPeloServidor(lote.idLote(), "Erro ao traduzir o lote " + lote.idLote()
+                    + " após 3 tentativa(s): Resposta truncada pelo teto de tokens (finish_reason=length)");
             }
             List<String> saida = lote.linhasOriginais().stream()
                 .flatMap(l -> gatilhoPartir != null && l.contains(gatilhoPartir)
@@ -1430,6 +1443,27 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         assertTrue(Files.readString(cache, StandardCharsets.UTF_8).contains("fala traduzida"),
             "com as traducoes do modelo dentro");
         assertEquals(1, llm.chamadas.get(), "CONTROLE: o modelo foi chamado uma vez");
+    }
+
+    /**
+     * 28/10/2026: resposta truncada esgotada voltava como servidor fora do ar e abortava o
+     * episódio inteiro. Agora o adaptador a marca como recusa DESTA fala: ela fica pendente com a
+     * causa RESPOSTA_TRUNCADA e as outras seguem.
+     */
+    @Test
+    @DisplayName("fala truncada fica pendente com a causa e o episodio continua")
+    void falaTruncadaNaoAbortaOEpisodio() throws Exception {
+        Path entrada = escreverAss("ep.ass", "Hello there", "Repeat repeat repeat", "How are you");
+
+        ResultadoTraducaoArquivo r = montar(FakeLlmPort.queTruncaAFala("Repeat"))
+            .processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertEquals(StatusArquivoTraducao.PARCIAL, r.status(), "uma fala pendente, nao o episodio abortado");
+        String conteudo = Files.readString(raiz.resolve("saida").resolve("ep_PT-BR.parcial.ass"), StandardCharsets.UTF_8);
+        assertEquals(2, conteudo.split("fala traduzida", -1).length - 1, "as duas outras falas sairam traduzidas");
+        assertTrue(telemetriaCaptor.ultima.pendenciasPorCausa().stream()
+                .anyMatch(p -> p.causaRaiz().equals("RESPOSTA_TRUNCADA")),
+            "a causa chega ao KPI: " + telemetriaCaptor.ultima.pendenciasPorCausa());
     }
 
     /** Corretor ortográfico do caso de uso; {@code null} usa o real. */

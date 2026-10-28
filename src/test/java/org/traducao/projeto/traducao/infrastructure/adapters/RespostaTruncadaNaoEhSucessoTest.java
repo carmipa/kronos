@@ -94,6 +94,34 @@ class RespostaTruncadaNaoEhSucessoTest {
         assertNotNull(resultado.mensagemErro(), "falha sem diagnóstico é saída ambígua");
         assertTrue(resultado.mensagemErro().toLowerCase().contains("trunc"),
             "o diagnóstico tem de dizer que foi truncamento, e disse: " + resultado.mensagemErro());
+        // 28/10/2026: o servidor RESPONDEU — é problema desta fala, não de todas. Sem a marca, o
+        // caso de uso tratava como servidor fora do ar e abortava o episódio inteiro.
+        assertTrue(resultado.recusaDaRequisicao(),
+            "truncamento tem de voltar como recusa DESTA requisicao, para a fala ficar pendente e o episodio seguir");
+    }
+
+    @Test
+    @DisplayName("resposta vazia nas tres tentativas tambem e problema desta fala, nao do servidor")
+    void respostaVaziaEhRecusaDaRequisicao() throws Exception {
+        subirServidorQueResponde("""
+            {"choices":[{"message":{"role":"assistant","content":"   "},"finish_reason":"stop"}]}""");
+
+        TraducaoLote resultado = traduzirUmaFala();
+
+        assertFalse(resultado.sucesso());
+        assertTrue(resultado.recusaDaRequisicao(), "o servidor respondeu: " + resultado.mensagemErro());
+    }
+
+    @Test
+    @DisplayName("CASO-CONTROLE: servidor fora do ar continua sendo indisponibilidade, nao recusa")
+    void servidorForaDoArNaoEhRecusa() {
+        baseUrl = "http://127.0.0.1:9/v1";
+
+        TraducaoLote resultado = traduzirUmaFala();
+
+        assertFalse(resultado.sucesso());
+        assertFalse(resultado.recusaDaRequisicao(),
+            "conexao recusada e problema de TODAS as falas: o episodio deve abortar, como sempre");
     }
 
     @Test
