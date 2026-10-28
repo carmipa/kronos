@@ -89,7 +89,17 @@ public class SimplificadorItalicoRedundante {
             if (!apenasItalico(blocoReliga)) {
                 continue;
             }
-            saida.append(original, ultimo, composto.start()).append("\\N");
+            // O bloco que DESLIGA pode trazer outros overrides junto ({\i0\c&H00FFFF&}): só o
+            // \i0 sai, o resto fica. Antes o bloco inteiro sumia e a cor (ou o \a8) se perdia
+            // da linha seguinte (auditoria de 28/10/2026).
+            String blocoDesliga = original.substring(composto.start(), original.indexOf('}', composto.start()) + 1);
+            String restoDoDesliga = blocoDesliga.substring(1, blocoDesliga.length() - 1)
+                .replaceAll("\\\\i[0]?(?![0-9])", "");
+            saida.append(original, ultimo, composto.start());
+            if (!restoDoDesliga.isBlank()) {
+                saida.append('{').append(restoDoDesliga).append('}');
+            }
+            saida.append("\\N");
             ultimo = composto.end();
             mudou = true;
             // 'religa' existe só para deixar explícito o limite consumido pelo casamento.

@@ -109,6 +109,17 @@ class SimplificadorItalicoRedundanteTest {
         assertFalse(simplificador.temRedundancia(null));
     }
 
+    /** 28/10/2026: o bloco que desliga com outros overrides sumia inteiro, levando a cor junto. */
+    @Test
+    @DisplayName("caminho composto tira so o \\i0 do bloco que desliga e mantem a cor")
+    void compostoMantemOsOutrosOverrides() {
+        assertEquals("{\\i1}linha um{\\c&H00FFFF&}\\Nlinha dois",
+            simplificador.simplificar("{\\i1}linha um{\\i0\\c&H00FFFF&}\\N{\\i1}linha dois"));
+        assertEquals("{\\i1}A{\\a8}\\NB", simplificador.simplificar("{\\i1}A{\\i0\\a8}\\N{\\i1}B"));
+        assertEquals("{\\i1}A\\NB", simplificador.simplificar("{\\i1}A{\\i\\i0}\\N{\\i1}B"),
+            "CONTROLE: bloco so de italico continua saindo inteiro");
+    }
+
     private static int contarBlocos(String t) {
         return (int) t.chars().filter(c -> c == '{').count();
     }
