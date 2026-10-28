@@ -309,8 +309,8 @@ class TraduzirKaraokeUseCaseTest {
         assertTrue(console.stream().anyMatch(l -> l.startsWith("[NADA A FAZER]")), () -> "banner errado: " + console);
         assertTrue(console.stream().noneMatch(l -> l.startsWith("[SUCESSO]")), () -> "SUCESSO sem arquivo: " + console);
 
-        assertEquals("SUCESSO", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 1, 0));
-        assertEquals("ATENÇÃO", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 0, 1));
+        assertEquals("SUCESSO", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 1, 0, 0));
+        assertEquals("ATENÇÃO", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 0, 1, 0));
     }
 
     /**
@@ -743,5 +743,153 @@ class TraduzirKaraokeUseCaseTest {
         assertTrue(cache.contains("reconhecer os outros"), () -> "o cache tem de guardar o que foi para o arquivo: " + cache);
         assertTrue(Files.readString(pastaEntrada.resolve(NOME_ARQUIVO), StandardCharsets.UTF_8).contains(original),
             "a entrada nao pode mudar");
+    }
+
+    // ---- auditoria da 4.1, 28/10/2026: desfecho honesto da execucao ----
+
+    private void escreverLegendaCom(String... dialogos) throws IOException {
+        List<String> linhas = new ArrayList<>(List.of("[Script Info]", "Title: Teste", "", "[Events]",
+            "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"));
+        linhas.addAll(List.of(dialogos));
+        linhas.add("");
+        Files.writeString(pastaEntrada.resolve(NOME_ARQUIVO), String.join("\r\n", linhas), StandardCharsets.UTF_8);
+    }
+
+    private Path arquivoCacheDoTeste() {
+        return tempDir.resolve("cache").resolve("karaoke").resolve("Anime Teste - S01E01.cache.json");
+    }
+
+    @AfterEach
+    void limparInterrupcao() {
+        Thread.interrupted();
+    }
+
+    /** C8: com o LLM fora do ar, a pasta de destino nao nasce vazia ao lado da obra. */
+    @Test
+    void llmForaDoArNaoCriaPastaDeDestinoVazia() {
+        usarLlm(new LlmForaDoAr());
+        assertThrows(TraducaoKaraokeException.class, () -> useCase.aplicar(pastaEntrada, CONTEXTO_08TH));
+        assertFalse(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada)),
+            "22/08/2026: cinco execucoes abortadas deixaram -karaoke-ptbr vazia");
+    }
+
+    /** C2: Parar durante o unico arquivo fecha INTERROMPIDA, sem gravar o arquivo meio ingles; o que ja veio do LLM fica no cache. */
+    @Test
+    void pararDentroDoArquivoNaoFechaComoCompleta() throws IOException {
+        escreverLegendaCom(
+            "Dialogue: 0,0:01:00.00,0:01:05.00,OP - English,,0,0,0,,First line of the song",
+            "Dialogue: 0,0:01:05.00,0:01:10.00,OP - English,,0,0,0,,Second line of the song");
+        usarLlm(new LlmPortFake() {
+            @Override
+            public TraducaoLote traduzir(Lote lote) {
+                chamadasTraduzir++;
+                Thread.currentThread().interrupt();
+                return new TraducaoLote(lote.idLote(), List.of("Primeira linha da música"), true, null);
+            }
+        });
+
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+        Thread.interrupted();
+
+        DesfechoKaraoke desfecho = persistenciaMock.desfechoCapturado.get();
+        assertEquals(StatusExecucaoKaraoke.INTERROMPIDA, desfecho.status(),
+            "o Parar dentro do ultimo arquivo saia COMPLETA com [SUCESSO]");
+        assertFalse(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO)),
+            "arquivo meio em ingles nao pode ser gravado como se estivesse pronto");
+        assertTrue(Files.readString(arquivoCacheDoTeste(), StandardCharsets.UTF_8).contains("Primeira linha da música"),
+            "o trabalho do LLM antes do Parar fica no cache para a proxima execucao");
+    }
+
+    /** B5/C3: servidor caindo no meio para a execucao (ABORTADA), guarda o que ja veio e nao grava o arquivo em ingles. */
+    @Test
+    void servidorCaindoNoMeioParaAExecucao() throws IOException {
+        escreverLegendaCom(
+            "Dialogue: 0,0:01:00.00,0:01:05.00,OP - English,,0,0,0,,First line of the song",
+            "Dialogue: 0,0:01:05.00,0:01:10.00,OP - English,,0,0,0,,Second line of the song");
+        usarLlm(new LlmPortFake() {
+            @Override
+            public TraducaoLote traduzir(Lote lote) {
+                chamadasTraduzir++;
+                return chamadasTraduzir == 1
+                    ? new TraducaoLote(lote.idLote(), List.of("Primeira linha da música"), true, null)
+                    : new TraducaoLote(lote.idLote(), null, false, "connection refused");
+            }
+        });
+
+        assertThrows(TraducaoKaraokeException.class, () -> useCase.aplicar(pastaEntrada, CONTEXTO_08TH));
+
+        DesfechoKaraoke desfecho = persistenciaMock.desfechoCapturado.get();
+        assertEquals(StatusExecucaoKaraoke.ABORTADA, desfecho.status());
+        assertTrue(desfecho.motivo().contains("connection refused"), desfecho::motivo);
+        assertFalse(Files.exists(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO)));
+        assertTrue(Files.readString(arquivoCacheDoTeste(), StandardCharsets.UTF_8).contains("Primeira linha da música"));
+    }
+
+    /** B5/C3: linha sem traducao numa execucao completa nao e [SUCESSO]. */
+    @Test
+    void bannerComLinhaSemTraducaoNaoEhSucesso() {
+        assertEquals("ATENÇÃO", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 1, 0, 2));
+        assertEquals("SUCESSO", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 1, 0, 0));
+        assertEquals("NADA A FAZER", TraduzirKaraokeUseCase.rotuloDoBanner(StatusExecucaoKaraoke.COMPLETA, 0, 0, 0));
+    }
+
+    /** C6: falha ao gravar o .ass nao perde o trabalho do LLM — o cache foi gravado antes. */
+    @Test
+    void falhaAoGravarOAssNaoPerdeOCache() {
+        useCase.escritor = new EscritorLegendaAss() {
+            @Override
+            public void escrever(Path destino, org.traducao.projeto.legenda.domain.DocumentoLegenda documento) {
+                throw new org.traducao.projeto.legenda.domain.ArquivoLegendaException("arquivo travado pelo player");
+            }
+        };
+
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+
+        assertEquals(1, persistenciaMock.desfechoCapturado.get().falhas().size());
+        assertTrue(Files.exists(arquivoCacheDoTeste()), "a 2.1 grava o cache antes de publicar (ea4c57ff); a 4.1 tambem");
+    }
+
+    /** C1: lore trocada retraduz tudo E diz isso no manifesto. */
+    @Test
+    void loreTrocadaMarcaCacheIgnorado() {
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+        assertFalse(persistenciaMock.desfechoCapturado.get().cacheIgnorado(), "contra-caso: primeira execucao");
+
+        useCase.aplicar(pastaEntrada, "gundam_zz");
+
+        assertTrue(persistenciaMock.desfechoCapturado.get().cacheIgnorado(),
+            "Guilty Crown 09/10/2026: 20 caches arquivados e o manifesto dizia cacheIgnorado=false");
+    }
+
+    /** C5: entrada suspeita de verso perdido cuja retraducao falha continua valendo (a suspeita nao apaga nada). */
+    @Test
+    void suspeitaDeVersoPerdidoNaoApagaQuandoARetraducaoFalha() throws IOException {
+        escreverLegendaCom("Dialogue: 0,0:01:00.00,0:01:05.00,OP - English,,0,0,0,,{\\fad(1,1)}Have a little break\\NWe're running through the lights");
+        usarLlm(new LlmPortFake() {
+            @Override
+            public TraducaoLote traduzir(Lote lote) {
+                chamadasTraduzir++;
+                String e = lote.linhasOriginais().getFirst();
+                return e.contains("\\N") ? new TraducaoLote(lote.idLote(), List.of("Pausa"), true, null)
+                    : TraducaoLote.recusadaPeloServidor(lote.idLote(), "recusado");
+            }
+        });
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+        assertTrue(Files.readString(arquivoCacheDoTeste(), StandardCharsets.UTF_8).contains("Pausa"), "preparo: suspeita gravada");
+
+        usarLlm(new LlmPortFake() {
+            @Override
+            public TraducaoLote traduzir(Lote lote) {
+                chamadasTraduzir++;
+                return TraducaoLote.recusadaPeloServidor(lote.idLote(), "recusado");
+            }
+        });
+        useCase.aplicar(pastaEntrada, CONTEXTO_08TH);
+
+        assertTrue(Files.readString(arquivoCacheDoTeste(), StandardCharsets.UTF_8).contains("Pausa"),
+            "o Javadoc diz que a suspeita nao apaga nada; a entrada sumia na regravacao");
+        String saida = Files.readString(TraduzirKaraokeUseCase.resolverPastaSaida(pastaEntrada).resolve(NOME_ARQUIVO),
+            StandardCharsets.UTF_8);
+        assertTrue(saida.contains("Pausa"), "sem retraducao, vale a traducao do cache, nao o ingles: " + saida);
     }
 }

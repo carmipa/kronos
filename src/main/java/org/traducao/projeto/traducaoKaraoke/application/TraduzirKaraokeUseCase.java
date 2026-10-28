@@ -30,6 +30,7 @@ import org.traducao.projeto.traducaoKaraoke.domain.AcentosLetraKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.ClasseLinhaKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.DesfechoKaraoke;
 import org.traducao.projeto.traducaoKaraoke.domain.FalhaArquivoKaraoke;
+import org.traducao.projeto.traducaoKaraoke.domain.ServidorLlmIndisponivelException;
 import org.traducao.projeto.traducaoKaraoke.domain.StatusExecucaoKaraoke;
 import org.traducao.projeto.core.texto.FonteVietnamitaLegada;
 import org.traducao.projeto.core.texto.TextoSemTags;
@@ -236,14 +237,6 @@ public class TraduzirKaraokeUseCase {
             logStream.publicarLog(CANAL_LOG, "Arquivos de legenda encontrados: " + arquivos.size());
 
             if (gravar) {
-                try {
-                    Files.createDirectories(pastaDestino);
-                } catch (IOException e) {
-                    throw new TraducaoKaraokeException("Não foi possível criar a pasta de destino: " + pastaDestino, e);
-                }
-            }
-
-            if (gravar) {
                 StatusLlm statusLlm = llmPort.verificarDisponibilidade();
                 if (statusLlm == null || !statusLlm.modeloCarregado()) {
                     throw new TraducaoKaraokeException("Servidor LLM indisponível: "
@@ -254,6 +247,14 @@ public class TraduzirKaraokeUseCase {
                 proveniencia = provenienciaDe(contextoJob);
                 logStream.publicarLog(CANAL_LOG, "[CONTEXTO CONGELADO] " + contextoJob.nomeExibicao()
                     + " | id=" + contextoJob.id() + " | hash=" + proveniencia.contextoHash());
+                // Só DEPOIS de saber que o LLM está no ar: até 28/10/2026 a pasta nascia antes da
+                // checagem, e o LLM fora do ar deixava "-karaoke-ptbr" vazia ao lado da obra (cinco
+                // vezes em 22/08/2026) — a mesma classe consertada em 5713af48 para pasta sem .ass.
+                try {
+                    Files.createDirectories(pastaDestino);
+                } catch (IOException e) {
+                    throw new TraducaoKaraokeException("Não foi possível criar a pasta de destino: " + pastaDestino, e);
+                }
             }
 
             // Contador de lotes local à execução: um use case @ApplicationScoped é
@@ -274,6 +275,18 @@ public class TraduzirKaraokeUseCase {
                     resultados.add(r);
                     houveLinhaCorrigivel = houveLinhaCorrigivel
                         || r.traduzidas() + r.reaproveitadasCache() > 0;
+                } catch (InterrompidoNoArquivo e) {
+                    // "Parar" DENTRO do arquivo: até 28/10/2026 as linhas restantes caíam em "sem
+                    // tradução" e, no último ou único arquivo, a execução fechava COMPLETA com
+                    // [SUCESSO] e o arquivo gravado meio em inglês.
+                    status = StatusExecucaoKaraoke.INTERROMPIDA;
+                    motivo = e.getMessage();
+                    logStream.publicarLog(CANAL_LOG, "[INTERROMPIDO] " + motivo);
+                    break;
+                } catch (ServidorLlmIndisponivelException e) {
+                    // Problema de TODAS as linhas, não deste arquivo: a execução para (ABORTADA no
+                    // catch externo) em vez de gravar o resto da pasta em inglês.
+                    throw e;
                 } catch (Exception e) {
                     // O arquivo que quebra NÃO pode sumir do manifesto: até 14/08/2026 ele virava
                     // só um contador e uma linha de console, e quem auditasse depois via 23 de 25
@@ -297,13 +310,14 @@ public class TraduzirKaraokeUseCase {
             int traduzidas = resultados.stream().mapToInt(ResultadoTraducaoKaraoke::traduzidas).sum();
             int doCache = resultados.stream().mapToInt(ResultadoTraducaoKaraoke::reaproveitadasCache).sum();
             int preservadas = resultados.stream().mapToInt(ResultadoTraducaoKaraoke::preservadasOriginalJapones).sum();
+            int semTraducaoTotal = resultados.stream().mapToInt(ResultadoTraducaoKaraoke::mantidasSemTraducao).sum();
 
             logStream.publicarLog(CANAL_LOG, "==============================================================");
             logStream.publicarLog(CANAL_LOG, String.format(Locale.ROOT,
-                "[%s] %s %s: %d arquivo(s), %d falha(s) | letras originais preservadas: %d | traduzíveis: %d (LLM: %d, cache: %d)",
-                rotuloDoBanner(status, resultados.size(), falhas.size()),
+                "[%s] %s %s: %d arquivo(s), %d falha(s) | letras originais preservadas: %d | traduzíveis: %d (LLM: %d, cache: %d, sem tradução: %d)",
+                rotuloDoBanner(status, resultados.size(), falhas.size(), gravar ? semTraducaoTotal : 0),
                 modo, status.name().toLowerCase(Locale.ROOT), resultados.size(), falhas.size(),
-                preservadas, musicas, traduzidas, doCache));
+                preservadas, musicas, traduzidas, doCache, semTraducaoTotal));
             for (FalhaArquivoKaraoke f : falhas) {
                 logStream.publicarLog(CANAL_LOG, "   [FALHOU] " + f.arquivo() + " — " + f.motivo());
             }
@@ -328,12 +342,14 @@ public class TraduzirKaraokeUseCase {
      * PROPÓSITO DE NEGÓCIO: escolhe a palavra que abre o banner final, para "não havia nada a
      * fazer" não sair como "[SUCESSO]" — o mesmo silêncio ambíguo que o {@link StatusExecucaoKaraoke}
      * existe para evitar, agora no console.
-     * <p>INVARIANTES DO DOMÍNIO: SUCESSO só com execução completa, sem falha e com ao menos um
-     * arquivo processado; zero arquivos e zero falhas numa execução completa é NADA A FAZER.
+     * <p>INVARIANTES DO DOMÍNIO: SUCESSO só com execução completa, sem falha de arquivo, sem linha
+     * de música deixada no idioma original e com ao menos um arquivo processado; zero arquivos e
+     * zero falhas numa execução completa é NADA A FAZER. Linha sem tradução entra desde 28/10/2026:
+     * antes, a pasta gravada em inglês por falha do LLM fechava com [SUCESSO].
      * <p>COMPORTAMENTO EM CASO DE FALHA: qualquer outro caso é ATENÇÃO; nunca lança.
      */
-    static String rotuloDoBanner(StatusExecucaoKaraoke status, int arquivos, int falhas) {
-        if (status == StatusExecucaoKaraoke.COMPLETA && falhas == 0) {
+    static String rotuloDoBanner(StatusExecucaoKaraoke status, int arquivos, int falhas, int semTraducao) {
+        if (status == StatusExecucaoKaraoke.COMPLETA && falhas == 0 && semTraducao == 0) {
             return arquivos > 0 ? "SUCESSO" : "NADA A FAZER";
         }
         return "ATENÇÃO";
@@ -427,8 +443,14 @@ public class TraduzirKaraokeUseCase {
         DocumentoLegenda documento = leitor.ler(arquivo);
         reprovarFonteVietnamitaAntiga(documento);
         Path arquivoCache = cacheDoArquivo.arquivoDe(arquivo);
+        // As entradas que o cache deixou de reaproveitar por suspeita de verso perdido ficam à mão:
+        // se a retradução falhar, vale a tradução antiga, nunca o inglês (C5, 28/10/2026).
+        Map<String, String> suspeitasDoCache = new HashMap<>();
         Map<String, String> cacheExistente =
-            cacheDoArquivo.carregar(arquivoCache, gravar, proveniencia, cacheIgnorado);
+            cacheDoArquivo.carregar(arquivoCache, gravar, proveniencia, cacheIgnorado, suspeitasDoCache);
+        // Tudo o que estava no cache, inclusive o suspeito: e o que a gravacao PARCIAL tem de preservar.
+        Map<String, String> cacheCompleto = new HashMap<>(suspeitasDoCache);
+        cacheCompleto.putAll(cacheExistente);
 
         int kfx = 0;
         int originais = 0;
@@ -536,12 +558,28 @@ public class TraduzirKaraokeUseCase {
                             veioDoCache = true;
                         } else if (gravar) {
                             if (Thread.currentThread().isInterrupted()) {
-                                eventosFinais.add(evento);
-                                semTraducao++;
-                                continue;
+                                throw interrompido(nome, arquivoCache, documento, traducoes, cacheCompleto, proveniencia);
                             }
-                            traduzido = tradutorDeLetra.traduzirViaLlm(
-                                original, avisos, sequencialLote, contextoJob.promptSistema());
+                            try {
+                                traduzido = tradutorDeLetra.traduzirViaLlm(
+                                    original, avisos, sequencialLote, contextoJob.promptSistema());
+                            } catch (ServidorLlmIndisponivelException e) {
+                                // O que já veio do LLM neste arquivo não se perde: vai ao cache antes
+                                // de a execução parar, e a próxima recomeça dali.
+                                cacheDoArquivo.salvarParcial(arquivoCache, documento, traducoes, cacheCompleto,
+                                    proveniencia);
+                                throw e;
+                            }
+                            if (traduzido == null && Thread.currentThread().isInterrupted()) {
+                                throw interrompido(nome, arquivoCache, documento, traducoes, cacheCompleto, proveniencia);
+                            }
+                            String suspeita = suspeitasDoCache.get(original);
+                            if (traduzido == null && suspeita != null) {
+                                traduzido = suspeita;
+                                veioDoCache = true;
+                                avisos.add("Retradução da letra suspeita de verso perdido falhou; mantida a "
+                                    + "tradução do cache: " + RegistroDaExecucao.visivelResumido(suspeita));
+                            }
                         }
                     }
                     if (traduzido == null) {
@@ -642,10 +680,13 @@ public class TraduzirKaraokeUseCase {
         String nomeDestino = null;
         if (gravar) {
             Path destino = pastaDestino.resolve(nome);
+            // Cache ANTES da legenda (a 2.1 fez a mesma troca em ea4c57ff): se a gravação do .ass
+            // falhar — arquivo travado pelo player, disco cheio —, o trabalho do LLM fica guardado e
+            // a próxima execução não paga de novo.
+            cacheDoArquivo.salvar(arquivoCache, documento, traducoes, proveniencia);
             escritor.escrever(destino, new DocumentoLegenda(
                 documento.cabecalho(), eventosFinais, documento.quebraDeLinha(), documento.comBom()));
             nomeDestino = destino.toString();
-            cacheDoArquivo.salvar(arquivoCache, documento, traducoes, proveniencia);
             logStream.publicarLog(CANAL_LOG, "   [GRAVADO] " + destino);
         }
 
@@ -668,16 +709,22 @@ public class TraduzirKaraokeUseCase {
         // de evidencia positiva tornou inalcançavel o que o classificador antigo criou por engano
         // (258 entradas de estilo Signs e 8 de romaji, medidas no cache real em 19/08). Mas cache
         // que encolhe sem numero e indistinguivel de perda de dado, entao o numero vai ao relatorio.
+        // Só há descarte quando o cache é regravado: sem tradução nenhuma aplicada ele não é tocado,
+        // e dizer "descartadas" ali era falso. A causa também deixou de ser fixa — "o critério de
+        // música mudou em 19/08/2026" aparecia para qualquer descarte (auditoria de 28/10/2026).
         int entradasCacheDescartadas = 0;
-        for (String original : cacheExistente.keySet()) {
-            if (!traducoes.containsKey(original)) {
-                entradasCacheDescartadas++;
+        if (gravar && !traducoes.isEmpty()) {
+            for (String original : cacheExistente.keySet()) {
+                if (!traducoes.containsKey(original)) {
+                    entradasCacheDescartadas++;
+                }
             }
         }
         if (entradasCacheDescartadas > 0) {
             logStream.publicarLog(CANAL_LOG, String.format(Locale.ROOT,
-                "   [CACHE] %d entrada(s) do cache nao sao mais alcancaveis e serao descartadas na "
-                    + "regravacao — o criterio de musica mudou em 19/08/2026.",
+                "   [CACHE] %d entrada(s) do cache não foram usadas nesta execução e saem na regravação "
+                    + "(linha que sumiu do arquivo, mudou de classe ou deixou de ser música pelo critério "
+                    + "de 19/08/2026).",
                 entradasCacheDescartadas));
         }
 
@@ -686,6 +733,29 @@ public class TraduzirKaraokeUseCase {
             paraTraduzir, doCache, traduzidas, semTraducao, acentosRepostos,
             entradasCacheDescartadas, frasesKfxSoPortugues.size(), silabasSilenciadas,
             tipografia.linhasComFonteDoDialogo(), estadoFontes, List.copyOf(avisos));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: sinal de que o operador pediu "Parar" DENTRO de um arquivo. O arquivo
+     * não é gravado (sairia meio em inglês como se estivesse pronto) e a execução fecha
+     * INTERROMPIDA; o que o LLM já devolveu fica no cache.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só nasce com a thread interrompida; nunca sai deste caso de uso.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: é a própria falha; a mensagem vai ao manifesto como motivo.
+     */
+    private static final class InterrompidoNoArquivo extends RuntimeException {
+        InterrompidoNoArquivo(String mensagem) {
+            super(mensagem, null, false, false);
+        }
+    }
+
+    /** Guarda o parcial no cache e monta o sinal de interrupção do arquivo. */
+    private InterrompidoNoArquivo interrompido(String nome, Path arquivoCache, DocumentoLegenda documento,
+            Map<String, String> traducoes, Map<String, String> cacheExistente, ProvenienciaCache proveniencia) {
+        cacheDoArquivo.salvarParcial(arquivoCache, documento, traducoes, cacheExistente, proveniencia);
+        return new InterrompidoNoArquivo("Execução cancelada durante " + nome + "; o arquivo NÃO foi gravado "
+            + "(sairia meio em inglês) e as " + traducoes.size() + " tradução(ões) já obtidas ficaram no cache.");
     }
 
     /**

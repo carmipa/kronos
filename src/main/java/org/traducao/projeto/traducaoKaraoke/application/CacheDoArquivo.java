@@ -87,10 +87,35 @@ public class CacheDoArquivo {
         Path arquivoCache, boolean gravar, ProvenienciaCache proveniencia,
         java.util.concurrent.atomic.AtomicBoolean cacheIgnorado
     ) {
+        return carregar(arquivoCache, gravar, proveniencia, cacheIgnorado, new java.util.HashMap<>());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: carrega o cache reaproveitável do arquivo e devolve, à parte, as
+     * entradas que deixaram de ser reaproveitadas por suspeita de verso perdido — para que a falha
+     * da retradução use a tradução antiga em vez de deixar a letra em inglês.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: proveniência divergente (lore, prompt ou modelo mudaram) liga
+     * {@code cacheIgnorado} e avisa no console, como o cache legado — até 28/10/2026 só o legado
+     * ligava, e o Guilty Crown de 09/10 teve 20 caches arquivados e 560 letras retraduzidas com o
+     * manifesto dizendo {@code cacheIgnorado=false}.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: simulação devolve mapa vazio sem ler nada.
+     */
+    public Map<String, String> carregar(
+        Path arquivoCache, boolean gravar, ProvenienciaCache proveniencia,
+        java.util.concurrent.atomic.AtomicBoolean cacheIgnorado, Map<String, String> suspeitas
+    ) {
         if (!gravar) {
             return Map.of();
         }
         CacheTraducaoService.ResultadoCarga carga = cacheService.carregar(arquivoCache, proveniencia);
+        if (!carga.migrado() && carga.invalidadas() > 0) {
+            cacheIgnorado.set(true);
+            logStream.publicarLog(CANAL_LOG, "   [CACHE IGNORADO] a lore, o prompt ou o modelo mudaram: "
+                + carga.invalidadas() + " entrada(s) da geração anterior foram arquivadas e as letras serão "
+                + "retraduzidas (uma correção feita à mão no cache está na geração arquivada).");
+        }
         if (carga.migrado()) {
             cacheService.arquivarGeracaoSemProveniencia(arquivoCache);
             // Sobe para o manifesto: descartar o cache multiplica tempo e chamadas ao LLM, e sem
@@ -100,7 +125,7 @@ public class CacheDoArquivo {
                 "   [CACHE IGNORADO] cache antigo sem contexto/lore foi preservado; linhas serão retraduzidas e carimbadas.");
             return Map.of();
         }
-        return semVersoPerdido(carga.mapa());
+        return semVersoPerdido(carga.mapa(), suspeitas);
     }
 
     /**
@@ -115,6 +140,10 @@ public class CacheDoArquivo {
      * <p>COMPORTAMENTO EM CASO DE FALHA: mapa nulo ou vazio volta como veio.
      */
     Map<String, String> semVersoPerdido(Map<String, String> mapa) {
+        return semVersoPerdido(mapa, new java.util.HashMap<>());
+    }
+
+    Map<String, String> semVersoPerdido(Map<String, String> mapa, Map<String, String> suspeitas) {
         if (mapa == null || mapa.isEmpty()) {
             return mapa;
         }
@@ -122,6 +151,7 @@ public class CacheDoArquivo {
         for (Map.Entry<String, String> entrada : mapa.entrySet()) {
             if (VersosDaLetra.suspeitaDeVersoPerdido(entrada.getKey(), entrada.getValue())) {
                 filtrado.remove(entrada.getKey());
+                suspeitas.put(entrada.getKey(), entrada.getValue());
                 logStream.publicarLog(CANAL_LOG, "   [CACHE] retraduzindo letra com verso perdido: \""
                     + entrada.getValue() + "\" (original: \"" + entrada.getKey() + "\")");
             }
@@ -150,5 +180,24 @@ public class CacheDoArquivo {
             }
         }
         cacheService.salvar(arquivoCache, proveniencia, new ArrayList<>(porOriginal.values()));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: guarda o que já foi traduzido quando o arquivo NÃO chega ao fim —
+     * "Parar" ou servidor fora do ar no meio. A gravação normal só guarda o que foi aplicado; aqui
+     * as entradas do cache que a execução ainda não alcançou ficam, senão parar no meio apagaria
+     * a tradução do resto do episódio.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a tradução desta execução vence a do cache para o mesmo original;
+     * nada que estava no cache é perdido.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: sem nada a guardar, não toca no arquivo; erro de gravação
+     * propaga como na gravação normal.
+     */
+    public void salvarParcial(Path arquivoCache, DocumentoLegenda documento, Map<String, String> traducoes,
+                              Map<String, String> cacheExistente, ProvenienciaCache proveniencia) {
+        Map<String, String> unido = new LinkedHashMap<>(cacheExistente);
+        unido.putAll(traducoes);
+        salvar(arquivoCache, documento, unido, proveniencia);
     }
 }
