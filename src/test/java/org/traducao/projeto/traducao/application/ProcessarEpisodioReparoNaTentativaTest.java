@@ -178,6 +178,36 @@ class ProcessarEpisodioReparoNaTentativaTest {
         assertEquals(3, llm.chamadas.get());
     }
 
+    /**
+     * 28/10/2026: "recuperada" é desfecho, não tentativa. A 1ª temperatura reprovada e o reparo na
+     * 2ª contavam a MESMA fala duas vezes; e um reparo seguido de alternativa inventada contava
+     * recuperação de uma fala que terminava pendente.
+     */
+    @org.junit.jupiter.api.Test
+    @DisplayName("fala recuperada conta uma vez, por mais tentativas e reparos que custe")
+    void recuperadaContaUmaVezPorFala() throws Exception {
+        ValidadorTraducaoService validador = new ValidadorTraducaoService(LoreAtivaFake.comPares(
+            List.of("Uraki", "Kou"), List.of("Keith", "Chuck"), List.of("Handler One", "Lena")));
+
+        // 1a temperatura: eco; 2a: troca de registro, reparada. Antes: 2 recuperadas.
+        LlmEmSequencia ecoDepoisPar = new LlmEmSequencia("Uraki, you're with me.", "Kou, fique comigo.");
+        TelemetriaFake t1 = new TelemetriaFake();
+        List<String> saida = new ProcessarEpisodioUseCase(ecoDepoisPar, validador, new ConsoleUILogger(), t1,
+                new MascaradorTags(), new ReparadorMarcadoresLlm(new MascaradorTags()))
+            .processarEpisodio(List.of(new Lote(1, List.of("Uraki, you're with me."))), null)
+            .getFirst().linhasTraduzidas();
+        assertEquals(List.of("Uraki, fique comigo."), saida);
+        assertEquals(1, t1.recuperadas.get(), "uma fala, uma recuperacao; rejeitadas=" + t1.rejeitadas.get());
+
+        // Reparo a cada temperatura, reprovado pela alternativa inventada ate a ultima aceitar.
+        // Antes: 4 recuperadas (3 reparos + o laco).
+        LlmTeimoso teimoso = new LlmTeimoso("Kou(a), fique comigo.");
+        TelemetriaFake t2 = new TelemetriaFake();
+        traduzir(teimoso, t2, "Uraki, you're with me.");
+        assertEquals(3, teimoso.chamadas.get(), "as tres temperaturas foram gastas");
+        assertEquals(1, t2.recuperadas.get(), "ainda e uma fala so: " + t2.recuperadas.get());
+    }
+
     @ParameterizedTest(name = "[{index}] legítima: {0} -> {1}")
     @DisplayName("A1: tradução certa com o mesmo sinal passa intacta, sem reparo nem rejeição")
     @CsvSource(delimiter = '|', value = {

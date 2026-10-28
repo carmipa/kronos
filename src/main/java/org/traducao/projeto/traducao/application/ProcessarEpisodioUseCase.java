@@ -185,8 +185,16 @@ public class ProcessarEpisodioUseCase {
             return processarEpisodioSequencial(lotes, promptSistemaCongelado);
         } finally {
             PARTES_ISOLADAS.remove();
+            REPAROS_NA_TENTATIVA.remove();
         }
     }
+
+    /**
+     * Linhas reparadas pelo portão de par na ÚLTIMA chamada de {@link #traduzirERevalidarBruto};
+     * zerado a cada chamada e lido por quem devolve a tradução com sucesso, para contar a fala
+     * recuperada uma vez só. Array de um elemento para ser mutável dentro do ThreadLocal.
+     */
+    private static final ThreadLocal<int[]> REPAROS_NA_TENTATIVA = ThreadLocal.withInitial(() -> new int[1]);
 
     /** Partes da fala separadas pela quebra isolada, por linha mascarada; escopo de um episódio. */
     private static final ThreadLocal<java.util.Map<String, List<String>>> PARTES_ISOLADAS =
@@ -300,7 +308,11 @@ public class ProcessarEpisodioUseCase {
         }
 
         try {
-            return traduzirERevalidarBruto(lote, null, promptSistemaCongelado, null, disjuntor, false);
+            List<String> traduzidas = traduzirERevalidarBruto(lote, null, promptSistemaCongelado, null, disjuntor, false);
+            for (int i = 0; i < REPAROS_NA_TENTATIVA.get()[0]; i++) {
+                telemetriaTraducao.registrarFalhaTraducaoRecuperada();
+            }
+            return traduzidas;
         } catch (DivergenciaLinhasException | AlucinacaoDetectadaException
                 | RequisicaoRecusadaPeloLlmException e) {
             int total = lote.linhasOriginais().size();
@@ -347,7 +359,8 @@ public class ProcessarEpisodioUseCase {
                     Math.min(tentativa - 1, TEMPERATURA_POR_TENTATIVA.length - 1)];
                 List<String> traducao = traduzirERevalidarBruto(lote, temperatura, promptSistemaCongelado, null,
                     disjuntor, tentativa == 1 + MAX_TENTATIVAS_LINHA_UNICA);
-                if (houveRespostaRejeitada) {
+                // Uma fala, um desfecho: recuperada se houve resposta rejeitada antes OU reparo nesta.
+                if (houveRespostaRejeitada || REPAROS_NA_TENTATIVA.get()[0] > 0) {
                     telemetriaTraducao.registrarFalhaTraducaoRecuperada();
                 }
                 return traducao;
@@ -442,6 +455,7 @@ public class ProcessarEpisodioUseCase {
     private List<String> traduzirERevalidarBruto(Lote lote, Double temperaturaOverride,
             String promptSistemaCongelado, String modeloOverride, DisjuntorRecusas disjuntor,
             boolean ultimaTentativa) {
+        REPAROS_NA_TENTATIVA.get()[0] = 0;
         TraducaoLote resultado = llmPort.traduzir(lote, temperaturaOverride, promptSistemaCongelado, modeloOverride);
 
         if (!resultado.sucesso() || resultado.linhasTraduzidas() == null) {
@@ -602,7 +616,10 @@ public class ProcessarEpisodioUseCase {
             validador.validarFala(reparada, original);
             validador.validarPar(original, reparada);
             telemetriaTraducao.registrarRespostaTraducaoRejeitada();
-            telemetriaTraducao.registrarFalhaTraducaoRecuperada();
+            // "Recuperada" é DESFECHO, não tentativa: a fala reparada aqui ainda pode ser reprovada
+            // pela alternativa inventada logo a seguir, e o laço de temperaturas contava de novo
+            // (auditoria de 28/10/2026). Quem devolve a tradução com sucesso é quem conta.
+            REPAROS_NA_TENTATIVA.get()[0]++;
             String aviso = "Lote " + lote.idLote() + ": fala reparada na tentativa (" + reprovada.getMessage()
                 + "): \"" + linha + "\" -> \"" + reparada + "\". Original: " + original;
             log.info(aviso);
