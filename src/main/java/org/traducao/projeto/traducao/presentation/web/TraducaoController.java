@@ -252,6 +252,8 @@ public class TraducaoController {
                 // no relatório, arquivos que foram traduzidos com a obra anterior.
                 String loreNome = contextoDoJob.nomeExibicao();
                 boolean parado = false;
+                // Bloqueio por OBRA nao e "ja traduzido": conta como falha no desfecho do lote.
+                int bloqueadosPorObra = 0;
                 for (int i = 0; i < arquivos.size(); i++) {
                     Path arquivo = arquivos.get(i);
                     if (Thread.currentThread().isInterrupted()) {
@@ -281,6 +283,7 @@ public class TraducaoController {
                         // contexto. É BLOQUEIO, não falha técnica — nada foi enviado ao LLM
                         // nem gravado em cache, e o lote segue para o próximo arquivo.
                         resultados.add(org.traducao.projeto.traducao.domain.ResultadoTraducaoArquivo.bloqueado(arquivo.getFileName().toString(), loreNome));
+                        bloqueadosPorObra++;
                         registrarTelemetriaFalhaTraducao(arquivo, loreNome, org.traducao.projeto.traducao.domain.StatusArquivoTraducao.BLOQUEADO, ex.getMessage());
                         System.out.println("[BLOQUEADO] " + arquivo.getFileName() + ": " + ex.getMessage());
                     } catch (org.traducao.projeto.traducao.domain.exceptions.EntradaJaTraduzidaException ex) {
@@ -338,7 +341,7 @@ public class TraducaoController {
                 // devolvia FALHOU — o pior rótulo para quem só apertou "Sair".
                 org.traducao.projeto.traducao.domain.StatusLoteTraducao statusLote = parado
                     ? org.traducao.projeto.traducao.domain.StatusLoteTraducao.CANCELADO
-                    : org.traducao.projeto.traducao.domain.StatusLoteTraducao.consolidar(resultados);
+                    : org.traducao.projeto.traducao.domain.StatusLoteTraducao.consolidar(resultados, bloqueadosPorObra);
                 long okCount = resultados.stream().filter(r ->
                     r.status() == org.traducao.projeto.traducao.domain.StatusArquivoTraducao.CONCLUIDO).count();
                 long parcialCount = resultados.stream().filter(r ->
