@@ -151,9 +151,11 @@ public class TelemetriaTraducaoAdapter implements TelemetriaTraducaoPort {
         }
         String chave = NormalizadorNomeEpisodio.normalizar(telemetria.nomeEpisodio());
         // Grava quando o registro NOVO representa trabalho, ou quando não há trabalho anterior
-        // a proteger (chave ausente ou já bloqueada). Só o caso "bloqueio por cima de trabalho"
-        // é recusado.
-        if (!ehBloqueado(telemetria) || ehBloqueado(banco.get(chave))) {
+        // a proteger (chave ausente ou já sem trabalho). Só o caso "registro sem trabalho por cima
+        // de trabalho" é recusado — bloqueio, e desde 28/10/2026 também a FALHA zerada: o arquivo
+        // abortado sem gerar saída deixa o .ass anterior intacto, e a foto trocava um episódio
+        // CONCLUIDO por FALHOU com zeros (ZZ S01E16 com 382 falas, Stink Bomb com 402, medidos).
+        if (!semTrabalho(telemetria) || semTrabalho(banco.get(chave))) {
             banco.put(chave, telemetria);
             persistir();
         }
@@ -174,6 +176,22 @@ public class TelemetriaTraducaoAdapter implements TelemetriaTraducaoPort {
      */
     private static boolean ehBloqueado(TelemetriaTraducao t) {
         return t == null || StatusArquivoTraducao.BLOQUEADO.name().equals(t.statusFinal());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: o registro não traz trabalho que a foto precise mostrar — bloqueio do
+     * portão, ou falha que abortou o arquivo antes de qualquer linha (zero linhas e zero falas).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: falha COM trabalho (alguma linha ou fala) continua sendo trabalho
+     * e vence; só a falha zerada se iguala ao bloqueio.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: {@code null} conta como sem trabalho, como em
+     * {@link #ehBloqueado}.
+     */
+    private static boolean semTrabalho(TelemetriaTraducao t) {
+        return ehBloqueado(t)
+            || (StatusArquivoTraducao.FALHOU.name().equals(t.statusFinal())
+                && t.totalLinhas() == 0 && t.falasTraduzidas() == 0);
     }
 
     /**

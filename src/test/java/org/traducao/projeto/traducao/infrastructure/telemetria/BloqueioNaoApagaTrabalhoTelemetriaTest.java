@@ -135,6 +135,28 @@ class BloqueioNaoApagaTrabalhoTelemetriaTest {
             "proteger contra bloqueio NAO pode impedir a foto de refletir uma retraducao real");
     }
 
+    /**
+     * 28/10/2026: a falha que aborta o arquivo antes de gerar saída sai com zeros, e trocava na
+     * foto um episódio CONCLUIDO — medido no ZZ S01E16 (382 falas) e no Stink Bomb (402).
+     */
+    @Test
+    @DisplayName("FALHOU zerado nao apaga da foto o trabalho anterior; FALHOU com trabalho, sim")
+    void falhaZeradaNaoApagaTrabalho() throws Exception {
+        TelemetriaTraducaoAdapter adapter = new TelemetriaTraducaoAdapter(new ObjectMapper());
+        adapter.registrarTraducao(trabalho("ZZ_S01E16.ass", "2026-08-07T12:00:00Z", "CONCLUIDO"));
+
+        adapter.registrarTraducao(new TelemetriaTraducao(
+            "ZZ_S01E16.ass", "modelo-teste", 0, 0, 0, 0L,
+            List.of("LLM caiu"), "AnimeTeste", "S01", "2026-08-08T12:00:00Z", "Lore Teste", "FALHOU",
+            List.of(), null, null));
+        assertTrue(foto().contains("CONCLUIDO") && !foto().contains("FALHOU"),
+            "a falha zerada nao pode zerar o episodio no painel: " + foto());
+
+        adapter.registrarTraducao(trabalho("ZZ_S01E16.ass", "2026-08-09T12:00:00Z", "FALHOU"));
+        assertTrue(foto().contains("FALHOU"),
+            "CONTROLE: falha que traz linhas e falas e trabalho, e vence como antes");
+    }
+
     @Test
     @DisplayName("o historico registra TODAS as execucoes, inclusive as bloqueadas")
     void historicoNaoPerdeOBloqueio() throws Exception {
