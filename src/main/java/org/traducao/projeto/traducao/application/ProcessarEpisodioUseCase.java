@@ -161,6 +161,39 @@ public class ProcessarEpisodioUseCase {
      */
     public List<TraducaoLote> processarEpisodio(List<Lote> lotes, String promptSistemaCongelado)
             throws InterruptedException, ExecutionException {
+        return processarEpisodio(lotes, promptSistemaCongelado, java.util.Map.of());
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: como {@link #processarEpisodio(List, String)}, sabendo em que partes a
+     * quebra {@code \N} isolada dividia cada fala — para aceitar a resposta que o modelo devolveu
+     * em linhas separadas exatamente onde a quebra estava (ver {@link #juntarPartesDaQuebraIsolada}).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o mapa vale só para ESTE episódio (escopado por chamada e removido
+     * no {@code finally}); sem entrada para a linha, nada muda.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: igual ao da sobrecarga de dois argumentos.
+     *
+     * @param partesIsoladasPorLinha linha mascarada enviada → partes do original separadas pelo
+     *        {@code \N} que foi isolado antes do envio
+     */
+    public List<TraducaoLote> processarEpisodio(List<Lote> lotes, String promptSistemaCongelado,
+            java.util.Map<String, List<String>> partesIsoladasPorLinha)
+            throws InterruptedException, ExecutionException {
+        PARTES_ISOLADAS.set(partesIsoladasPorLinha == null ? java.util.Map.of() : partesIsoladasPorLinha);
+        try {
+            return processarEpisodioSequencial(lotes, promptSistemaCongelado);
+        } finally {
+            PARTES_ISOLADAS.remove();
+        }
+    }
+
+    /** Partes da fala separadas pela quebra isolada, por linha mascarada; escopo de um episódio. */
+    private static final ThreadLocal<java.util.Map<String, List<String>>> PARTES_ISOLADAS =
+        ThreadLocal.withInitial(java.util.Map::of);
+
+    private List<TraducaoLote> processarEpisodioSequencial(List<Lote> lotes, String promptSistemaCongelado)
+            throws InterruptedException, ExecutionException {
         if (lotes.isEmpty()) {
             return List.of();
         }
@@ -424,9 +457,10 @@ public class ProcessarEpisodioUseCase {
         // disjuntor de somar recusas de falas distantes entre si ao longo do episódio.
         disjuntor.registrarPedidoAceito();
 
-        if (resultado.linhasTraduzidas().size() != lote.linhasOriginais().size()) {
+        List<String> traduzido = juntarPartesDaQuebraIsolada(lote, resultado.linhasTraduzidas());
+        if (traduzido.size() != lote.linhasOriginais().size()) {
             throw new DivergenciaLinhasException(
-                "Lote " + lote.idLote() + " retornou " + resultado.linhasTraduzidas().size()
+                "Lote " + lote.idLote() + " retornou " + traduzido.size()
                     + " linha(s), esperado " + lote.linhasOriginais().size()
                     + ". Provável alucinação do LLM fundindo ou quebrando falas, o que desalinharia a legenda.");
         }
@@ -436,7 +470,6 @@ public class ProcessarEpisodioUseCase {
         // retry tente de novo com outra temperatura, em vez de deixar a corrupção só
         // ser detectada no desmascaramento (fora do retry) e a fala virar pendente.
         List<String> mascaradoOriginal = lote.linhasOriginais();
-        List<String> traduzido = resultado.linhasTraduzidas();
         List<String> saneadas = new ArrayList<>(traduzido.size());
         for (int i = 0; i < traduzido.size(); i++) {
             String linha = traduzido.get(i);
@@ -475,6 +508,63 @@ public class ProcessarEpisodioUseCase {
         }
 
         return saneadas;
+    }
+
+    /** Tags ASS, para validar cada parte pelo texto visível. */
+    private static final java.util.regex.Pattern TAG_ASS = java.util.regex.Pattern.compile("\\{[^{}]*}");
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: aceita a resposta que o modelo devolveu em linhas separadas EXATAMENTE
+     * onde estava a quebra {@code \N} que foi isolada antes do envio. O isolador tira o {@code \N}
+     * para o modelo ver a frase inteira; o modelo às vezes devolve uma linha por parte, e a
+     * contagem 1 → 2 era recusada como alucinação nas três temperaturas.
+     *
+     * <h2>O prejuízo medido — 09/10/2026, filme de Sidonia e acervo</h2>
+     * Reproduzidas as 304 pendências "1 → 2 linhas" do acervo: juntando só quando
+     * {@code linhas == quebras + 1}, ~51 seriam aceitas, e 4 delas seriam português ERRADO numa das
+     * partes. Por isso cada parte é validada contra a parte correspondente do original.
+     *
+     * <h2>Invariantes do domínio</h2>
+     * <ul>
+     *   <li>Só lote de UMA linha, só com o mapa de partes deste episódio, só quando o número de
+     *       linhas devolvidas é exatamente o de partes, e nenhuma parte veio vazia.</li>
+     *   <li>Cada parte passa por {@code validarFala} contra a parte do original; uma reprovação
+     *       cancela a junção e a divergência de linhas volta a valer, como antes.</li>
+     *   <li>As partes juntam por {@code \N}, ONDE O MODELO SEPAROU — que é onde a quebra do original
+     *       estava. Juntar por espaço deixaria o {@code reaplicar} pôr a quebra no ponto de
+     *       equilíbrio ({@code "Quem é você? Por\Nque está aqui?"}); o {@code reaplicar} só insere
+     *       as quebras que ainda faltam.</li>
+     *   <li>A7: a junção vai ao log e ao console ({@code [ JUNTADA ]}), com as partes.</li>
+     * </ul>
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: qualquer condição não satisfeita devolve a lista recebida,
+     * e a divergência é tratada como sempre foi. Não lança.
+     */
+    private List<String> juntarPartesDaQuebraIsolada(Lote lote, List<String> linhas) {
+        if (lote.linhasOriginais().size() != 1 || linhas.size() < 2) {
+            return linhas;
+        }
+        List<String> partesOriginais = PARTES_ISOLADAS.get().get(lote.linhasOriginais().get(0));
+        if (partesOriginais == null || partesOriginais.size() != linhas.size()
+            || linhas.stream().anyMatch(l -> l == null || l.isBlank())) {
+            return linhas;
+        }
+        for (int i = 0; i < linhas.size(); i++) {
+            try {
+                validador.validarFala(linhas.get(i).strip(),
+                    TAG_ASS.matcher(partesOriginais.get(i)).replaceAll("").strip());
+            } catch (RuntimeException parteReprovada) {
+                log.info("Lote {}: resposta em {} linhas NAO juntada, a parte {} reprovou: {}",
+                    lote.idLote(), linhas.size(), i + 1, parteReprovada.getMessage());
+                return linhas;
+            }
+        }
+        String juntada = String.join("\\N", linhas.stream().map(String::strip).toList());
+        String aviso = "lote " + lote.idLote() + ": o modelo separou a fala onde estava a quebra; "
+            + linhas.size() + " partes juntadas: \"" + juntada + "\"";
+        log.info(aviso);
+        uiLogger.log("[ JUNTADA ] " + aviso);
+        return List.of(juntada);
     }
 
     /**

@@ -63,6 +63,16 @@ class TradutorLotesServiceTest {
             }
             return r;
         }
+
+        /** A chamada que o serviço faz desde 28/10/2026, com as partes da quebra isolada. */
+        @Override
+        public List<TraducaoLote> processarEpisodio(List<Lote> lotes, String promptSistemaCongelado,
+                Map<String, List<String>> partesIsoladasPorLinha) {
+            partesRecebidas.putAll(partesIsoladasPorLinha);
+            return processarEpisodio(lotes, promptSistemaCongelado);
+        }
+
+        final Map<String, List<String>> partesRecebidas = new java.util.HashMap<>();
     }
 
     /** Dublê da UI: conta {@code finalizar()} e não constrói a barra de progresso. */

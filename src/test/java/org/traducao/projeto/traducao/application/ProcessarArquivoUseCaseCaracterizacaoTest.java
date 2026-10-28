@@ -246,6 +246,8 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
 
         /** Trecho do original cuja fala o dublê devolve PARTIDA em duas linhas. */
         private String gatilhoPartir;
+        /** O que o dublê devolve, uma linha por parte, quando parte a fala. */
+        private List<String> partesAoPartir = List.of("3, 2, 1,", "vai!");
 
         /**
          * PROPÓSITO DE NEGÓCIO: dublê do defeito MEDIDO em 25/09/2026 com o aya-expanse-8b: para
@@ -261,6 +263,13 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         static FakeLlmPort queParteAFala(String gatilho) {
             FakeLlmPort f = new FakeLlmPort(false, false);
             f.gatilhoPartir = gatilho;
+            return f;
+        }
+
+        /** Como {@link #queParteAFala(String)}, devolvendo estas partes, uma por linha. */
+        static FakeLlmPort queParteAFalaEm(String gatilho, String... partes) {
+            FakeLlmPort f = queParteAFala(gatilho);
+            f.partesAoPartir = List.of(partes);
             return f;
         }
 
@@ -297,7 +306,7 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             }
             List<String> saida = lote.linhasOriginais().stream()
                 .flatMap(l -> gatilhoPartir != null && l.contains(gatilhoPartir)
-                    ? java.util.stream.Stream.of("3, 2, 1,", "vai!")
+                    ? partesAoPartir.stream()
                     : java.util.stream.Stream.of(traduzirLinha(l)))
                 .toList();
             if (interromperNaPrimeira && chamada == 1) {
@@ -687,6 +696,38 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             "o KPI tem de cair em ESTRUTURA_DIVERGENTE; KPI: " + tel.pendenciasPorCausa());
         assertTrue(tel.pendenciasPorCausa().stream().noneMatch(p -> p.causaRaiz().equals("ECO")),
             "nao houve eco; KPI: " + tel.pendenciasPorCausa());
+    }
+
+    /**
+     * 09/10/2026, filme de Sidonia: o isolador tira o {@code \N} para o modelo ver a frase inteira,
+     * o modelo devolve uma linha por parte, e a fala era recusada nas três temperaturas — 304
+     * pendências "1 → 2 linhas" no acervo, ~51 recuperáveis. Agora as partes juntam com {@code \N}
+     * onde o modelo separou, e cada parte é validada contra a parte do original.
+     */
+    @Test
+    @DisplayName("fala com \\N isolado que volta em duas linhas e JUNTADA onde o modelo separou")
+    void falaComQuebraIsoladaEmDuasLinhasEhJuntada() throws Exception {
+        Path entrada = escreverAss("ep.ass", "Who are you?\\NWhy are you here?");
+
+        ResultadoTraducaoArquivo r = montar(FakeLlmPort.queParteAFalaEm("Why", "Quem é você?", "Por que está aqui?"))
+            .processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertEquals(StatusArquivoTraducao.CONCLUIDO, r.status());
+        String conteudo = Files.readString(raiz.resolve("saida").resolve("ep_PT-BR.ass"), StandardCharsets.UTF_8);
+        assertTrue(conteudo.contains(",Quem é você?\\NPor que está aqui?"),
+            "a quebra fica onde o modelo separou, uma so: " + conteudo);
+    }
+
+    /** A1: o MESMO sinal (duas linhas onde se esperava uma), mas uma das partes é inglês. */
+    @Test
+    @DisplayName("CONTROLE: parte em ingles cancela a juncao e a fala continua pendente")
+    void parteEmInglesCancelaAJuncao() throws Exception {
+        Path entrada = escreverAss("ep.ass", "Hello there", "Who are you?\\NWhy are you here?");
+
+        ResultadoTraducaoArquivo r = montar(FakeLlmPort.queParteAFalaEm("Why", "Quem é você?", "Why are you here?"))
+            .processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertEquals(StatusArquivoTraducao.PARCIAL, r.status(), "a parte inglesa nao pode ser publicada");
     }
 
     /**

@@ -134,6 +134,14 @@ public class IsoladorQuebraDialogo {
         if (traduzido == null || quebras <= 0) {
             return traduzido;
         }
+        // Só as quebras que FALTAM. Quando o modelo devolve a fala em linhas separadas onde a
+        // quebra estava, o episódio as junta com \N no ponto exato (ProcessarEpisodioUseCase,
+        // 28/10/2026); reaplicar todas criaria uma segunda quebra no ponto de equilíbrio.
+        int existentes = traduzido.split("\\\\N", -1).length - 1;
+        quebras -= existentes;
+        if (quebras <= 0) {
+            return traduzido;
+        }
         // Coleta espaços candidatos, IGNORANDO os que estão dentro de tags {...} — inserir um
         // \N ali corromperia a formatação (ex.: {\pos(20 50)} vira {\pos(20\N50)}) — e também
         // os espaços SEGUIDOS de pontuação: quebrar num "palavra , resto" (espaço antes da

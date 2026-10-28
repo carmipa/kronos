@@ -323,6 +323,7 @@ public class TradutorLotesService {
         Map<String, List<String>> tagsPorTexto = new LinkedHashMap<>();
         Map<String, String> textoMascaradoPorOriginal = new LinkedHashMap<>();
         Map<String, Integer> quebrasPorOriginal = new LinkedHashMap<>();
+        Map<String, List<String>> partesIsoladasPorOriginal = new LinkedHashMap<>();
         // Falas cuja moldura foi SEPARADA em vez de mascarada; a recomposição acontece em
         // expandirParaCamadas, depois de o desmascaramento comum ter feito suas checagens.
         Map<String, TextoSemTags> semTagsPorOriginal = new LinkedHashMap<>();
@@ -359,6 +360,9 @@ public class TradutorLotesService {
             if (quebraIsolavel) {
                 IsoladorQuebraDialogo.FalaIsolada isolada = isoladorQuebra.isolar(textoParaMascarar);
                 if (isolada.quebras() > 0) {
+                    // As partes que a quebra separava, para o episódio aceitar a resposta que o
+                    // modelo devolve uma linha por parte (ProcessarEpisodioUseCase).
+                    partesIsoladasPorOriginal.put(original, List.of(textoParaMascarar.split("\\\\N", -1)));
                     textoParaMascarar = isolada.textoSemQuebra();
                     quebrasPorOriginal.put(original, isolada.quebras());
                 }
@@ -445,9 +449,12 @@ public class TradutorLotesService {
 
         uiLogger.iniciarLotes(lotes.size(), nomeArquivo);
         ProcedenciaPorRepresentante procedencia = new ProcedenciaPorRepresentante(textoMascaradoPorOriginal);
+        Map<String, List<String>> partesPorLinhaEnviada = new HashMap<>();
+        partesIsoladasPorOriginal.forEach((original, partes) ->
+            partesPorLinhaEnviada.putIfAbsent(textoMascaradoPorOriginal.get(original), partes));
         List<TraducaoLote> resultados;
         try {
-            resultados = processarEpisodioUseCase.processarEpisodio(lotes, promptCongelado);
+            resultados = processarEpisodioUseCase.processarEpisodio(lotes, promptCongelado, partesPorLinhaEnviada);
         } catch (TraducaoParcialException e) {
             Map<String, String> mascaradoPorRepresentante = new HashMap<>();
             if (e.getLotesSalvos() != null) {
@@ -477,7 +484,7 @@ public class TradutorLotesService {
         coletarMascaradoPorRepresentante(resultados, chunksRepresentantes, mascaradoPorRepresentante, procedencia);
         if (propriedades.agruparFrasePartida()) {
             retraduzirCorrentesReprovadas(chunksRepresentantes, textoMascaradoPorOriginal,
-                mascaradoPorRepresentante, promptCongelado, procedencia);
+                mascaradoPorRepresentante, promptCongelado, procedencia, partesPorLinhaEnviada);
         }
         procedencia.transferirPara(desfecho, textosPendentes, representanteDeOriginal);
         return expandirParaCamadas(
@@ -580,7 +587,7 @@ public class TradutorLotesService {
     private void retraduzirCorrentesReprovadas(
             List<List<String>> chunksRepresentantes, Map<String, String> textoMascaradoPorOriginal,
             Map<String, String> mascaradoPorRepresentante, String promptCongelado,
-            ProcedenciaPorRepresentante procedencia) {
+            ProcedenciaPorRepresentante procedencia, Map<String, List<String>> partesPorLinhaEnviada) {
         List<String> aRefazer = correntesReprovadas(chunksRepresentantes, textoMascaradoPorOriginal,
             mascaradoPorRepresentante);
         if (aRefazer.isEmpty()) {
@@ -597,7 +604,7 @@ public class TradutorLotesService {
         }
         try {
             List<TraducaoLote> refeitos =
-                processarEpisodioUseCase.processarEpisodio(lotesIndividuais, promptCongelado);
+                processarEpisodioUseCase.processarEpisodio(lotesIndividuais, promptCongelado, partesPorLinhaEnviada);
             coletarMascaradoPorRepresentante(refeitos, chunksIndividuais, mascaradoPorRepresentante, procedencia);
         } catch (Exception e) {
             // A corrente foi REPROVADA por deslocar texto entre as linhas: publicá-la seria pôr na
