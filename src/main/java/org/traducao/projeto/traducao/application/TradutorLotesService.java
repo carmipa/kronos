@@ -472,7 +472,7 @@ public class TradutorLotesService {
             procedencia.transferirPara(desfecho, textosPendentes, representanteDeOriginal);
             Map<String, String> traducoesParciais = expandirParaCamadas(
                 textosPendentes, representanteDeOriginal, mascaradoPorRepresentante, tagsPorTexto,
-                quebrasPorOriginal, semTagsPorOriginal, avisos);
+                quebrasPorOriginal, semTagsPorOriginal, avisos, desfecho);
             TraducaoParcialException relancada =
                 new TraducaoParcialException(e.getMessage(), traducoesParciais, e.getCause());
             throw e.interrompidaPeloUsuario() ? relancada.marcarInterrompidaPeloUsuario() : relancada;
@@ -489,7 +489,7 @@ public class TradutorLotesService {
         procedencia.transferirPara(desfecho, textosPendentes, representanteDeOriginal);
         return expandirParaCamadas(
             textosPendentes, representanteDeOriginal, mascaradoPorRepresentante, tagsPorTexto,
-            quebrasPorOriginal, semTagsPorOriginal, avisos);
+            quebrasPorOriginal, semTagsPorOriginal, avisos, desfecho);
     }
 
     /**
@@ -701,7 +701,7 @@ public class TradutorLotesService {
             LinkedHashSet<String> textosPendentes, Map<String, String> representanteDeOriginal,
             Map<String, String> mascaradoPorRepresentante, Map<String, List<String>> tagsPorTexto,
             Map<String, Integer> quebrasPorOriginal, Map<String, TextoSemTags> semTagsPorOriginal,
-            List<String> avisos) {
+            List<String> avisos, DesfechoDasFalas desfecho) {
         Map<String, String> traducoes = new HashMap<>();
         for (String original : textosPendentes) {
             String rep = representanteDeOriginal.get(original);
@@ -736,7 +736,7 @@ public class TradutorLotesService {
             }
             traducoes.put(original, SaneadorEnfaseDegenerada.sanear(desmascararComFallback(
                 original, traduzidoMascarado, tagsPorTexto.get(original),
-                quebrasPorOriginal.getOrDefault(original, 0), avisos)));
+                quebrasPorOriginal.getOrDefault(original, 0), avisos, desfecho)));
         }
         return traducoes;
     }
@@ -810,7 +810,7 @@ public class TradutorLotesService {
      * caso contrário devolve a fala traduzida com o {@code \N} isolado reaplicado.
      */
     private String desmascararComFallback(String original, String traduzidoMascarado, List<String> tags,
-            int quebrasIsoladas, List<String> avisos) {
+            int quebrasIsoladas, List<String> avisos, DesfechoDasFalas desfecho) {
         try {
             String traduzido = mascarador.desmascarar(traduzidoMascarado, tags);
             if (protecaoAss.respostaSuspeita(original, traduzido)) {
@@ -819,6 +819,10 @@ public class TradutorLotesService {
                     original, traduzido);
                 uiLogger.log("[ WARN ] Linha ASS pesada contaminada pelo LLM — mantida sem tradução (revise manualmente): " + original);
                 avisos.add("Linha ASS pesada mantida sem tradução por resposta suspeita do LLM: " + original);
+                // A7: o PIPELINE desistiu e devolveu o original. Sem a causa no desfecho, a fala de
+                // locutores remontava com este trecho em inglês ("- Vá até lá.\N- Sorry.") e nada
+                // a marcava pendente (auditoria de 28/10/2026).
+                desfecho.registrarOriginalMantido(original, "resposta suspeita do LLM em linha ASS pesada");
                 return original;
             }
             return isoladorQuebra.reaplicar(traduzido, quebrasIsoladas);
@@ -840,6 +844,7 @@ public class TradutorLotesService {
                 e.getMessage(), original);
             uiLogger.log("[ WARN ] Tags corrompidas pelo LLM — fala mantida sem tradução (revise manualmente): " + original);
             avisos.add("Fala mantida sem tradução (tags corrompidas pelo LLM): " + original);
+            desfecho.registrarOriginalMantido(original, "marcadores de formatação corrompidos pelo LLM");
             return original;
         }
     }

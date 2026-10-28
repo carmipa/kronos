@@ -252,6 +252,28 @@ class TradutorLotesServiceTest {
             "a causa tem de nomear o trecho e carregar a causa dele: " + causa);
     }
 
+    /**
+     * 28/10/2026: o trecho que caía em marcador corrompido voltava como o ORIGINAL inglês sem
+     * causa registrada, e a fala era remontada meio em inglês ("- Vá até lá.\N- Sorry.").
+     */
+    @Test
+    void trechoComMarcadorCorrompidoDeixaAFalaPendente() throws Exception {
+        String locutores = "- Go there.\\N- Sorry.";
+        FakeEpisodio ep = new FakeEpisodio();
+        ep.tradutor = l -> l.linhasOriginais().stream()
+            .map(t -> t.equals("Sorry.") ? "Desculpe.[[TAG0]]" : "Vá até lá.").toList();
+        TradutorLotesService s = servico(props(1), ep, new FakeUiLogger(), new FakeProtecao(), new FakeTelemetria());
+        DesfechoDasFalas desfecho = new DesfechoDasFalas();
+
+        Map<String, String> r = s.traduzirPendentes(pendentes(locutores), Set.of(), Set.of(locutores),
+            "ep.srt", new ArrayList<>(), null, desfecho);
+
+        assertNull(r.get(locutores), "fala meio em ingles nao pode ser publicada: " + r.get(locutores));
+        String causa = desfecho.causaDoOriginalMantido().get(locutores);
+        assertTrue(causa != null && causa.contains("\"Sorry.\"") && causa.contains("marcadores"),
+            "a causa nomeia o trecho e diz que foi marcador corrompido: " + causa);
+    }
+
     private TradutorLotesService servico(TradutorProperties props, FakeEpisodio ep,
                                          FakeUiLogger ui, FakeProtecao protecao, FakeTelemetria telemetria) {
         return new TradutorLotesService(new MascaradorTags(), props, ui, ep, protecao, telemetria,
