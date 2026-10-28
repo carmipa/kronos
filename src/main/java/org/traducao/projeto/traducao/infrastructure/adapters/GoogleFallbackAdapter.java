@@ -184,7 +184,11 @@ public class GoogleFallbackAdapter implements FallbackTraducaoMaquinaPort {
                 Thread.currentThread().interrupt();
             }
             log.warn("Fallback Google: falha de comunicação ({}) — fala mantida pendente.", e.getMessage());
-            return ResultadoFallback.recusada(ProvedorFallback.GOOGLE, StatusFallback.PROVEDOR_INDISPONIVEL, "falha de comunicacao: " + e.getMessage());
+            // TIMEOUT tem causa própria no enum e nenhum produtor até 28/10/2026: o diagnóstico por
+            // causa — a razão de existir do relatório — misturava rede lenta com servidor fora.
+            StatusFallback causa = e instanceof java.net.http.HttpTimeoutException
+                ? StatusFallback.TIMEOUT : StatusFallback.PROVEDOR_INDISPONIVEL;
+            return ResultadoFallback.recusada(ProvedorFallback.GOOGLE, causa, "falha de comunicacao: " + e.getMessage());
         }
 
         String traduzido;

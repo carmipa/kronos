@@ -54,6 +54,29 @@ public record ResultadoRecuperacao(
      * <p>INVARIANTES DO DOMÍNIO: ordem estável (a do enum); causas com zero são omitidas.
      * <p>COMPORTAMENTO EM CASO DE FALHA: sem causas devolve texto indicando nenhuma tentativa.
      */
+    /**
+     * PROPÓSITO DE NEGÓCIO: o mesmo relatório, descontando as candidatas que passaram na guarda e
+     * a validação final do chamador reprovou. Antes elas ficavam em {@code RECUPERADA} e ainda
+     * apareciam em {@code REPROVADA_VALIDACAO}: 5 tentativas somavam 7 (auditoria de 28/10/2026).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a soma das causas continua igual ao número de tentativas; nada
+     * fica negativo.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: {@code reprovadas <= 0} devolve este mesmo resultado.
+     */
+    public ResultadoRecuperacao comReprovadasNaValidacao(int reprovadas) {
+        if (reprovadas <= 0) {
+            return this;
+        }
+        int movidas = Math.min(reprovadas, porCausa.getOrDefault(StatusFallback.RECUPERADA, 0));
+        Map<StatusFallback, Integer> ajustado = new EnumMap<>(StatusFallback.class);
+        ajustado.putAll(porCausa);
+        ajustado.merge(StatusFallback.RECUPERADA, -movidas, Integer::sum);
+        ajustado.merge(StatusFallback.REPROVADA_VALIDACAO, movidas, Integer::sum);
+        ajustado.values().removeIf(n -> n <= 0);
+        return new ResultadoRecuperacao(recuperadas, ajustado);
+    }
+
     public String resumoPorCausa() {
         if (porCausa.isEmpty()) {
             return "nenhuma tentativa";

@@ -771,8 +771,7 @@ public class ProcessarArquivoUseCase {
             // provedor fora do ar, marcador corrompido ou guarda de lore — e não há como
             // decidir se vale trocar de provedor, ajustar a guarda ou subir um container.
             if (!dialogosPendentes.isEmpty() && recuperarPendenciaGoogle.ativo()) {
-                String resumo = recuperacao.resumoPorCausa()
-                    + (reprovadasNaValidacao > 0 ? ", REPROVADA_VALIDACAO=" + reprovadasNaValidacao : "");
+                String resumo = recuperacao.comReprovadasNaValidacao(reprovadasNaValidacao).resumoPorCausa();
                 log.info("Fallback por causa: {}", resumo);
                 uiLogger.log("[FALLBACK] Desfecho por causa: " + resumo);
             }

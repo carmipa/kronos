@@ -469,4 +469,74 @@ class RecuperarPendenciaFallbackServiceTest {
         assertTrue(resultado.recuperadas().isEmpty(),
             "500 dentro de 12500 não é sobrevivência: a fronteira de dígito deve valer nas duas pontas");
     }
+
+    private static LinkedHashSet<String> falas(int n) {
+        LinkedHashSet<String> s = new LinkedHashSet<>();
+        for (int i = 0; i < n; i++) {
+            s.add("Line number " + (char) ('A' + i) + " here.");
+        }
+        return s;
+    }
+
+    /** 28/10/2026: com o provedor fora, cada uma das 300 falas pagava o próprio timeout. */
+    @Test
+    @DisplayName("disjuntor: 3 indisponibilidades seguidas e o resto fica NAO_TENTADA")
+    void disjuntorParaDepoisDeTresIndisponibilidades() {
+        int[] chamadas = {0};
+        FallbackTraducaoMaquinaPort fora = porta(o -> {
+            chamadas[0]++;
+            return ResultadoFallback.recusada(ProvedorFallback.GOOGLE, StatusFallback.TIMEOUT, "timeout");
+        });
+
+        var r = servico(true, fora).recuperar(falas(10));
+
+        assertEquals(3, chamadas[0], "o provedor nao pode ser martelado depois de 3 falhas seguidas");
+        assertEquals(3, r.porCausa().get(StatusFallback.TIMEOUT));
+        assertEquals(7, r.porCausa().get(StatusFallback.NAO_TENTADA));
+    }
+
+    @Test
+    @DisplayName("CONTROLE: falha de fala (eco) nao arma o disjuntor")
+    void ecoNaoArmaODisjuntor() {
+        int[] chamadas = {0};
+        FallbackTraducaoMaquinaPort eco = porta(o -> {
+            chamadas[0]++;
+            return ResultadoFallback.recusada(ProvedorFallback.GOOGLE, StatusFallback.ECO, "eco");
+        });
+
+        servico(true, eco).recuperar(falas(6));
+
+        assertEquals(6, chamadas[0], "eco e problema da fala, nao do provedor");
+    }
+
+    /** 28/10/2026: o "Sair" seguia fala a fala, e as restantes saíam como provedor indisponível. */
+    @Test
+    @DisplayName("parada do operador interrompe o laco e o resto fica NAO_TENTADA")
+    void paradaInterrompeOLaco() {
+        int[] chamadas = {0};
+        FallbackTraducaoMaquinaPort quePara = porta(o -> {
+            chamadas[0]++;
+            Thread.currentThread().interrupt();
+            return ResultadoFallback.recusada(ProvedorFallback.GOOGLE, StatusFallback.PROVEDOR_INDISPONIVEL, "Sair");
+        });
+        try {
+            var r = servico(true, quePara).recuperar(falas(5));
+            assertEquals(1, chamadas[0], "depois do Sair nenhuma outra fala vai ao provedor");
+            assertEquals(4, r.porCausa().get(StatusFallback.NAO_TENTADA));
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    /** 28/10/2026: "RECUPERADA=5, REPROVADA_VALIDACAO=2" somava 7 para 5 tentativas. */
+    @Test
+    @DisplayName("relatorio desconta da RECUPERADA a reprovada na validacao final")
+    void relatorioDescontaReprovadas() {
+        var r = new org.traducao.projeto.traducao.domain.fallback.ResultadoRecuperacao(Map.of(),
+            Map.of(StatusFallback.RECUPERADA, 5, StatusFallback.ECO, 1));
+
+        assertEquals("RECUPERADA=3, ECO=1, REPROVADA_VALIDACAO=2", r.comReprovadasNaValidacao(2).resumoPorCausa());
+        assertEquals("ECO=1, REPROVADA_VALIDACAO=5", r.comReprovadasNaValidacao(5).resumoPorCausa());
+        assertEquals(r.resumoPorCausa(), r.comReprovadasNaValidacao(0).resumoPorCausa(), "CONTROLE");
+    }
 }

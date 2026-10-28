@@ -70,6 +70,28 @@ class GoogleFallbackAdapterTest {
         assertTrue(!Thread.interrupted(), "IOException nao e parada");
     }
 
+    /** 28/10/2026: TIMEOUT existia no enum e nada o produzia; o timeout virava "indisponível". */
+    @Test
+    @DisplayName("timeout do HTTP vira TIMEOUT, e falha de rede comum continua PROVEDOR_INDISPONIVEL")
+    void timeoutTemCausaPropria() {
+        GoogleFallbackAdapter lento = new GoogleFallbackAdapter(new ObjectMapper()) {
+            @Override
+            protected RespostaHttp executarGet(String url) throws Exception {
+                throw new java.net.http.HttpTimeoutException("request timed out");
+            }
+        };
+        GoogleFallbackAdapter fora = new GoogleFallbackAdapter(new ObjectMapper()) {
+            @Override
+            protected RespostaHttp executarGet(String url) throws Exception {
+                throw new java.net.ConnectException("Connection refused");
+            }
+        };
+        assertEquals(org.traducao.projeto.traducao.domain.fallback.StatusFallback.TIMEOUT,
+            lento.traduzir("Hello there").status());
+        assertEquals(org.traducao.projeto.traducao.domain.fallback.StatusFallback.PROVEDOR_INDISPONIVEL,
+            fora.traduzir("Hello there").status(), "CONTROLE");
+    }
+
     /** Monta o JSON no formato do endpoint translate_a/single para um único segmento. */
     private static String jsonGoogle(String traducao) {
         return "[[[\"" + traducao + "\",\"orig\",null,null,10]],null,\"en\"]";

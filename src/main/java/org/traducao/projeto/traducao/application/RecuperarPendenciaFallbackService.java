@@ -58,6 +58,13 @@ public class RecuperarPendenciaFallbackService {
     private static final Pattern PADRAO_TAG = Pattern.compile("\\{[^{}]*}");
     private static final int TAMANHO_MINIMO_NOME = 3;
 
+    /** Falhas de provedor seguidas que fazem o fallback desistir do resto do arquivo. */
+    static final int LIMITE_INDISPONIVEIS_SEGUIDAS = 3;
+
+    /** Desfechos que dizem "o provedor não está atendendo", e não "esta fala é ruim". */
+    private static final Set<StatusFallback> INDISPONIBILIDADE = java.util.EnumSet.of(
+        StatusFallback.PROVEDOR_INDISPONIVEL, StatusFallback.TIMEOUT, StatusFallback.HTTP_ERRO);
+
     /**
      * PALAVRAS COMUNS que aparecem DENTRO de termos de lore compostos e que a obra espera ver
      * TRADUZIDAS, não preservadas em inglês. Sem esta lista, decompor "Earth Federation",
@@ -176,8 +183,23 @@ public class RecuperarPendenciaFallbackService {
         Map<StatusFallback, Integer> porCausa = new EnumMap<>(StatusFallback.class);
         Set<String> tokensDeLore = tokensProtegidos();
 
+        int indisponiveisSeguidas = 0;
+        int restantes = dialogosPendentes.size();
         for (String original : dialogosPendentes) {
+            // PARADA e DISJUNTOR (auditoria de 28/10/2026). O laço seguia fala a fala depois do
+            // "Sair" — as restantes saíam como provedor indisponível, causa errada —, e com a rede
+            // num buraco negro 300 pendências custavam até uma hora de timeouts. As que não forem
+            // tentadas ficam pendentes com a causa NAO_TENTADA e o motivo no log.
+            if (Thread.currentThread().isInterrupted() || indisponiveisSeguidas >= LIMITE_INDISPONIVEIS_SEGUIDAS) {
+                String motivo = Thread.currentThread().isInterrupted()
+                    ? "parada pedida pelo operador" : indisponiveisSeguidas + " falhas de provedor seguidas";
+                porCausa.merge(StatusFallback.NAO_TENTADA, restantes, Integer::sum);
+                log.warn("Fallback interrompido ({}): {} fala(s) nao tentada(s), mantidas pendentes.", motivo, restantes);
+                break;
+            }
+            restantes--;
             ResultadoFallback resultado = fallbackPort.traduzir(original);
+            indisponiveisSeguidas = INDISPONIBILIDADE.contains(resultado.status()) ? indisponiveisSeguidas + 1 : 0;
             if (!resultado.recuperou()) {
                 // A causa NUNCA é descartada: sem ela, uma pendência vira um número sem diagnóstico.
                 porCausa.merge(resultado.status(), 1, Integer::sum);
