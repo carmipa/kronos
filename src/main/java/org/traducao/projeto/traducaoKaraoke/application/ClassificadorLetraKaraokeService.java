@@ -396,6 +396,22 @@ public class ClassificadorLetraKaraokeService {
         return detector.proporcaoRomaji(texto);
     }
 
+    /**
+     * Palavra de gramática inglesa ({@code the}, {@code you}, {@code with}...)? Pergunta única desta
+     * fatia — o plano consulta aqui, não copia a lista.
+     */
+    static boolean ehInglesGramatical(String palavra) {
+        return palavra != null && INGLES_FORTE.contains(normalizar(palavra));
+    }
+
+    /**
+     * Palavra inteira silabável em romaji Hepburn ({@code como}, {@code de}, {@code anata})? Pergunta
+     * única desta fatia — o plano consulta aqui, não copia o padrão.
+     */
+    static boolean ehSilabavelEmRomaji(String palavra) {
+        return palavra != null && PALAVRA_ROMAJI_PATTERN.matcher(normalizar(palavra)).matches();
+    }
+
     /** Há kana ou kanji no texto? Pergunta única desta fatia — o plano consulta aqui, não copia. */
     static boolean temEscritaJaponesa(String texto) {
         return texto != null && ESCRITA_JAPONESA_PATTERN.matcher(texto).find();

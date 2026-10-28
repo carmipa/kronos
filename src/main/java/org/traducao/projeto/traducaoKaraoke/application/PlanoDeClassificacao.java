@@ -211,6 +211,9 @@ public final class PlanoDeClassificacao {
             }
             janelasComRomaji.removeIf(j -> todaInglesa.contains((int) j[2]));
         }
+        for (int i : traduziveisJaEmPortugues(eventos, classes, todaInglesa, corretor)) {
+            classes.set(i, ClasseLinhaKaraoke.JA_PORTUGUES);
+        }
         for (int i : inglesCantadoNaCamadaOriginal(eventos, classes)) {
             classes.set(i, ClasseLinhaKaraoke.ORIGINAL_JAPONES);
             janelasComRomaji.add(new long[] {inicioCs(eventos.get(i)), fimCs(eventos.get(i)), i});
@@ -513,6 +516,74 @@ public final class PlanoDeClassificacao {
             }
         }
         return todaInglesa;
+    }
+
+    /** Mínimo de palavras para reconhecer letra já em português pelo dicionário. */
+    static final int MINIMO_PALAVRAS_PORTUGUESAS = 2;
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: as linhas TRADUZÍVEIS que já estão em português, reconhecidas pelos
+     * dicionários — para não irem ao LLM como se fossem inglês. F91, auditoria de 28/10/2026: num
+     * estilo "Eng", 37 letras já traduzidas iam ao modelo e voltavam reescritas ("aos recuerdos" =>
+     * "aos lembranças", "um milagre" => "uma bênção"), gravadas no cache como inglês. O classificador
+     * só reconhece português por acento ou por duas palavras de uma lista de 26.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: exige as quatro marcas juntas — ao menos
+     * {@link #MINIMO_PALAVRAS_PORTUGUESAS} palavras; TODAS reconhecidas pelo português (ou com acento
+     * faltando); NENHUMA de gramática inglesa (o pt_BR aceita "I", "a", "time", "sun" — medido em
+     * 24/09/2026); e ao menos UMA que não é silabável em romaji (o pt_BR aceita "ai suru anata ni
+     * sou" inteiro). As linhas que a regra F8 acabou de converter não entram. Sem corretor, ou com o
+     * inglês fora do ar, nada muda: "nenhuma palavra inglesa" sem o dicionário inglês não prova nada.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: erro na consulta devolve conjunto vazio — o plano fica
+     * como era.
+     */
+    private static Set<Integer> traduziveisJaEmPortugues(
+            List<EventoLegenda> eventos, List<ClasseLinhaKaraoke> classes, Set<Integer> convertidasPeloF8,
+            org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda corretor) {
+        if (corretor == null) {
+            return Set.of();
+        }
+        java.util.Map<Integer, List<String>> candidatas = new java.util.LinkedHashMap<>();
+        Set<String> todasAsPalavras = new HashSet<>();
+        for (int i = 0; i < eventos.size(); i++) {
+            if (classes.get(i) != ClasseLinhaKaraoke.TRADUZIVEL_INGLES || convertidasPeloF8.contains(i)) {
+                continue;
+            }
+            List<String> palavras = org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda
+                .palavrasDe(visivelDe(eventos.get(i)));
+            if (palavras.size() < MINIMO_PALAVRAS_PORTUGUESAS
+                || palavras.stream().anyMatch(ClassificadorLetraKaraokeService::ehInglesGramatical)
+                || palavras.stream().allMatch(ClassificadorLetraKaraokeService::ehSilabavelEmRomaji)) {
+                continue;
+            }
+            candidatas.put(i, palavras);
+            todasAsPalavras.addAll(palavras);
+        }
+        if (candidatas.isEmpty()) {
+            return Set.of();
+        }
+        java.util.Map<String, org.traducao.projeto.core.texto.dicionarioOrtografia.VeredictoPalavra> veredicto;
+        try {
+            veredicto = corretor.classificarPalavras(todasAsPalavras);
+        } catch (RuntimeException e) {
+            return Set.of();
+        }
+        if (!corretor.inglesDisponivel()) {
+            return Set.of();
+        }
+        Set<Integer> jaPortuguesas = new HashSet<>();
+        for (java.util.Map.Entry<Integer, List<String>> c : candidatas.entrySet()) {
+            boolean todasPortuguesas = c.getValue().stream().allMatch(p -> {
+                var v = veredicto.get(p);
+                return v == org.traducao.projeto.core.texto.dicionarioOrtografia.VeredictoPalavra.PORTUGUES_OK
+                    || v == org.traducao.projeto.core.texto.dicionarioOrtografia.VeredictoPalavra.ACENTO_FALTANDO;
+            });
+            if (todasPortuguesas) {
+                jaPortuguesas.add(c.getKey());
+            }
+        }
+        return jaPortuguesas;
     }
 
     /**
