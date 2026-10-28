@@ -1409,6 +1409,29 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             "a linha de ortografia precisa dizer o estado, nao so existir: " + ortografia);
     }
 
+    /**
+     * 28/10/2026 (INV-CACHE-001): o cache era gravado só DEPOIS de publicar. Uma falha de I/O na
+     * publicação descartava todo o trabalho do modelo no episódio, e a próxima execução retraduzia
+     * tudo. Aqui a pasta de saída é um ARQUIVO, a publicação falha, e o cache tem de existir.
+     */
+    @Test
+    @DisplayName("falha ao publicar nao perde a traducao: o cache ja foi gravado")
+    void falhaAoPublicarNaoPerdeOCache() throws Exception {
+        FakeLlmPort llm = new FakeLlmPort();
+        ProcessarArquivoUseCase uc = montar(llm);
+        Path entrada = escreverAss("ep.ass", "Hello there", "How are you");
+        Files.writeString(raiz.resolve("saida"), "isto nao e uma pasta", StandardCharsets.UTF_8);
+
+        assertThrows(Exception.class, () -> uc.processar(entrada, false, gerenciadorMontado.snapshotAtivo()),
+            "a publicacao tinha de falhar: a saida e um arquivo");
+
+        Path cache = raiz.resolve("cache").resolve("AnimeTeste").resolve("ep.cache.json");
+        assertTrue(Files.exists(cache), "o cache tinha de ter sido gravado antes da publicacao");
+        assertTrue(Files.readString(cache, StandardCharsets.UTF_8).contains("fala traduzida"),
+            "com as traducoes do modelo dentro");
+        assertEquals(1, llm.chamadas.get(), "CONTROLE: o modelo foi chamado uma vez");
+    }
+
     /** Corretor ortográfico do caso de uso; {@code null} usa o real. */
     private org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda ortografiaTeste;
 
@@ -2240,8 +2263,9 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
      *
      * <p>INVARIANTES DO DOMÍNIO: a falha vira {@link ArquivoLegendaException}; o
      * temporário criado pelo escritor é sempre removido; o diretório que ocupa o
-     * destino permanece; a entrada permanece byte a byte intacta; o cache não é
-     * persistido (a gravação ocorre depois da publicação e nunca é alcançada).
+     * destino permanece; a entrada permanece byte a byte intacta; o cache JÁ FOI
+     * persistido — desde 28/10/2026 (INV-CACHE-001) ele é gravado antes da publicação,
+     * para uma falha de I/O aqui não descartar o trabalho do modelo no episódio inteiro.
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: qualquer regressão que publique saída
      * final, deixe {@code .tmp} órfão, altere a entrada ou troque o tipo da
@@ -2271,8 +2295,8 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             assertFalse(sobrouTemporario, "nenhum temporario de publicacao pode permanecer em raiz/saida");
         }
         assertEquals(origemAntes, Files.readString(entrada, StandardCharsets.UTF_8), "entrada byte a byte intacta");
-        assertFalse(Files.exists(raiz.resolve("cache").resolve("AnimeTeste").resolve("ep.cache.json")),
-            "cache nao e persistido quando a publicacao falha antes da gravacao do cache");
+        assertTrue(Files.exists(raiz.resolve("cache").resolve("AnimeTeste").resolve("ep.cache.json")),
+            "o cache e gravado antes da publicacao: a falha nela nao perde a traducao (INV-CACHE-001)");
     }
 
     /**

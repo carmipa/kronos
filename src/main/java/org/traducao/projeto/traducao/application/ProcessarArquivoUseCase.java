@@ -1167,6 +1167,28 @@ public class ProcessarArquivoUseCase {
         DocumentoLegenda documentoFinal = new DocumentoLegenda(
             cabecalhoFinal, eventosFinais, documento.quebraDeLinha(), documento.comBom());
 
+        // O CACHE ANTES DA LEGENDA (auditoria de 28/10/2026). O cache era gravado so depois de
+        // publicar, e o unico salvamento de emergencia fica em volta da traducao: qualquer falha
+        // daqui para baixo (backup obrigatorio, AccessDenied depois das retentativas, disco que
+        // saiu) descartava o trabalho do LLM no episodio inteiro, e a proxima execucao retraduzia
+        // tudo. O conteudo do cache nao depende da publicacao (a mescla decide so o que vai ao
+        // arquivo). Se a publicacao falhar agora, cache novo + arquivo e base antigos fazem a
+        // proxima execucao levar a mudanca ao arquivo pela regra "mudou so no cache".
+        // SEGUNDA OPINIÃO NÃO VAI PARA O CACHE: o carimbo de proveniência declara UM modelo para o
+        // arquivo inteiro, e guardar ali a tradução do modelo de recuperação faria a execução
+        // seguinte reusá-la como se o principal a tivesse produzido. A promessa existia desde
+        // 11/08/2026 em ProcessarEpisodioUseCase e não tinha consumidor — medido em 25/09/2026.
+        List<EntradaCache> entradasParaCache = desfecho.traduzidasPorSegundaOpiniao().isEmpty()
+            ? entradasCache
+            : entradasCache.stream()
+                .filter(e -> !desfecho.traduzidasPorSegundaOpiniao().contains(e.original()))
+                .toList();
+        // Substituição atômica da geração: só AQUI o cache ativo deixa de ser o anterior.
+        // preservarAnterior fica falso quando a retradução já copiou esta mesma geração no
+        // início — do contrário o mesmo arquivo iria duas vezes para backups/traducao-cache.
+        politicaBackup.salvarCacheDaExecucao(arquivoCache, proveniencia, entradasParaCache,
+            permitirRetraducao && !cacheAnteriorJaPreservado);
+
         // Registro do que o cache gerou nesta publicação: é a BASE da mesclagem de três vias da
         // próxima reexecução. Mora ao lado do cache da obra, fora da pasta de saída — nada ali pode
         // ser confundido com legenda pelo remux.
@@ -1182,25 +1204,10 @@ public class ProcessarArquivoUseCase {
         conferirArquivoGravado(arquivoSaida, ehSrt, entradasCache, jaNoIdiomaAlvo.keySet(),
             publicacao.preservadasDoArquivo());
 
-        // Substituição atômica da geração: só AQUI o cache ativo deixa de ser o anterior.
-        // preservarAnterior fica falso quando a retradução já copiou esta mesma geração no
-        // início — do contrário o mesmo arquivo iria duas vezes para backups/traducao-cache.
         // Depois de a legenda estar em disco: o dataset e ACESSORIO e a porta engole a propria
         // falha, entao perder o registro nunca custa o arquivo que acabou de ser publicado.
         telemetriaTraducao.registrarFalasNaoTraduzidas(
             arquivoSaida, resolvedorCache.animeAPartirDoArquivo(arquivoEntrada), naoTraduzidas);
-
-        // SEGUNDA OPINIÃO NÃO VAI PARA O CACHE: o carimbo de proveniência declara UM modelo para o
-        // arquivo inteiro, e guardar ali a tradução do modelo de recuperação faria a execução
-        // seguinte reusá-la como se o principal a tivesse produzido. A promessa existia desde
-        // 11/08/2026 em ProcessarEpisodioUseCase e não tinha consumidor — medido em 25/09/2026.
-        List<EntradaCache> entradasParaCache = desfecho.traduzidasPorSegundaOpiniao().isEmpty()
-            ? entradasCache
-            : entradasCache.stream()
-                .filter(e -> !desfecho.traduzidasPorSegundaOpiniao().contains(e.original()))
-                .toList();
-        politicaBackup.salvarCacheDaExecucao(arquivoCache, proveniencia, entradasParaCache,
-            permitirRetraducao && !cacheAnteriorJaPreservado);
 
         long tempoTotalMs = System.currentTimeMillis() - inicioMs;
         String animeNome = resolvedorCache.animeAPartirDoArquivo(arquivoEntrada);
