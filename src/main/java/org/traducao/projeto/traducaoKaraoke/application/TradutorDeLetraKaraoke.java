@@ -13,6 +13,7 @@ import org.traducao.projeto.qualidadeTraducao.domain.AlucinacaoDetectadaExceptio
 import org.traducao.projeto.qualidadeTraducao.domain.MarcadorPerdidoException;
 import org.traducao.projeto.telemetria.TelemetriaService;
 import org.traducao.projeto.traducaoKaraoke.domain.GradienteKaraoke;
+import org.traducao.projeto.traducaoKaraoke.domain.ServidorLlmIndisponivelException;
 import org.traducao.projeto.traducaoKaraoke.domain.TagsNoMeioDaLetra;
 import org.traducao.projeto.traducaoKaraoke.domain.VersosDaLetra;
 
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * PROPÓSITO DE NEGÓCIO: leva UMA linha de letra ao LLM e devolve a tradução vestida com a
@@ -47,15 +49,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * <h2>Invariantes do domínio</h2>
  * <ul>
- *   <li>Falha, resposta inválida ou alucinação devolvem {@code null} — a linha fica no idioma
- *       original e um aviso é registrado. NUNCA derruba o arquivo.</li>
+ *   <li>Resposta inválida, recusa do pedido ou alucinação devolvem {@code null} — a linha fica
+ *       no idioma original e um aviso é registrado COM A CAUSA que o adaptador deu (A7: até
+ *       28/10/2026 toda falha virava "LLM não retornou tradução").</li>
+ *   <li>Servidor indisponível (falha que o adaptador não classificou como recusa deste pedido) NÃO
+ *       é problema da linha: lança {@link ServidorLlmIndisponivelException} e a execução para,
+ *       em vez de gravar o resto da pasta em inglês com banner de sucesso.</li>
+ *   <li>Interrupção pelo operador ("Parar") nunca vira chamada nova nem exceção de servidor: a
+ *       linha volta {@code null} e quem decide o desfecho é o caso de uso.</li>
  *   <li>A moldura devolvida é a do ORIGINAL, nunca a que o modelo imaginou.</li>
  *   <li>O {@code sequencialLote} é o contador LOCAL da execução, recebido por parâmetro — nunca
  *       campo de instância, para não ser perturbado por execução concorrente deste bean.</li>
  * </ul>
  *
  * <h2>Comportamento em caso de falha</h2>
- * Nunca lança. Todo caminho de erro devolve {@code null} e escreve o motivo em {@code avisos}.
+ * Lança só {@link ServidorLlmIndisponivelException}. Todo outro caminho de erro devolve
+ * {@code null} e escreve o motivo em {@code avisos}.
  */
 @ApplicationScoped
 public class TradutorDeLetraKaraoke {
@@ -99,6 +108,14 @@ public class TradutorDeLetraKaraoke {
      * de override próprio, e este comentário é o aviso.
      */
     static final Double TEMPERATURA_DETERMINISTICA = 0.0d;
+
+    /**
+     * Marcador de máscara ({@code [[TAG0]]}) que o modelo inventa nos caminhos que NÃO mandaram
+     * marcador nenhum. Reconguista IV, 14/10/2026: "Encontrarei minha força dentro do seu
+     * encanto." / "[[TAG0]]" — duas linhas para um verso, e a tradução certa foi recusada nas duas
+     * camadas. Nesses caminhos ele nunca é legítimo; no do mascarador ele é, e não passa por aqui.
+     */
+    private static final Pattern MARCADOR_INVENTADO = Pattern.compile("\\[\\[TAG\\d+\\]\\]");
 
     @Inject
     LlmPort llmPort;
@@ -171,15 +188,10 @@ public class TradutorDeLetraKaraoke {
                 new Lote(sequencialLote.incrementAndGet(), List.of(mascarado.texto())),
                 TEMPERATURA_DETERMINISTICA,
                 promptSistemaCongelado);
-        } catch (Exception e) {
-            avisos.add("Falha de comunicação com o LLM; linha mantida sem tradução: " + original);
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM falhou nesta linha (mantida no idioma original): " + e.getMessage());
-            return null;
+        } catch (RuntimeException e) {
+            resposta = falhaDeComunicacao(e);
         }
-        if (resposta == null || !resposta.sucesso()
-            || resposta.linhasTraduzidas() == null || resposta.linhasTraduzidas().isEmpty()) {
-            avisos.add("LLM não retornou tradução; linha mantida: " + original);
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM sem resposta válida — linha mantida sem tradução.");
+        if (!respostaUtil(resposta, avisos, original, "")) {
             return null;
         }
         // Os avisos desta tentativa ficam de lado ate se saber se o segundo tiro a salva: se
@@ -191,7 +203,7 @@ public class TradutorDeLetraKaraoke {
         }
         try {
             String traduzido = mascarador.desmascarar(unida, mascarado.tags());
-            validador.validarFala(traduzido);
+            validarContraOriginal(original, traduzido);
             return traduzido;
         } catch (MarcadorPerdidoException e) {
             // NAO e alucinacao, e o console nao pode dizer que e (08/08/2026): o modelo traduziu
@@ -237,24 +249,29 @@ public class TradutorDeLetraKaraoke {
                 new Lote(sequencialLote.incrementAndGet(), List.of(semTags.textoLimpo())),
                 TEMPERATURA_DETERMINISTICA,
                 promptSistemaCongelado);
-        } catch (Exception e) {
-            avisos.add("Falha de comunicação com o LLM; letra mantida: " + semTags.textoLimpo());
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM falhou nesta linha (mantida): " + e.getMessage());
+        } catch (RuntimeException e) {
+            resposta = falhaDeComunicacao(e);
+        }
+        if (!respostaUtil(resposta, avisos, semTags.textoLimpo(), "")) {
             return null;
         }
-        if (resposta == null || !resposta.sucesso()
-            || resposta.linhasTraduzidas() == null || resposta.linhasTraduzidas().isEmpty()) {
-            avisos.add("LLM não retornou tradução; letra mantida: " + semTags.textoLimpo());
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM sem resposta válida — letra mantida.");
-            return null;
-        }
-        String traduzido = unirVersos(resposta.linhasTraduzidas(),
+        String traduzido = unirVersos(semMarcadorInventado(resposta.linhasTraduzidas()),
             VersosDaLetra.contar(semTags.textoLimpo()), avisos, semTags.textoLimpo());
         if (traduzido == null) {
             return null;
         }
+        if (VersosDaLetra.suspeitaDeVersoPerdido(semTags.textoLimpo(), traduzido)) {
+            String porVerso = versoAVerso(semTags.textoLimpo(), sequencialLote, promptSistemaCongelado);
+            if (porVerso != null) {
+                avisos.add("Verso perdido na resposta (\"" + traduzido + "\"); refeita verso a verso: "
+                    + semTags.textoLimpo() + " => " + porVerso);
+                logStream.publicarLog(CANAL_LOG, "   [VERSO A VERSO] a resposta juntou os versos e encurtou; refeita: "
+                    + porVerso);
+                traduzido = porVerso;
+            }
+        }
         try {
-            validador.validarFala(traduzido);
+            validarContraOriginal(semTags.textoLimpo(), traduzido);
         } catch (AlucinacaoDetectadaException e) {
             telemetriaService.registrarAlucinacaoPrevenida();
             avisos.add("Alucinação detectada (" + e.getMessage() + "); letra mantida: "
@@ -289,25 +306,20 @@ public class TradutorDeLetraKaraoke {
                 new Lote(sequencialLote.incrementAndGet(), List.of(gradiente.textoVisivel())),
                 TEMPERATURA_DETERMINISTICA,
                 promptSistemaCongelado);
-        } catch (Exception e) {
-            avisos.add("Falha de comunicação com o LLM; letra mantida: " + gradiente.textoVisivel());
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM falhou nesta linha de karaokê (mantida): "
-                + e.getMessage());
-            return null;
+        } catch (RuntimeException e) {
+            resposta = falhaDeComunicacao(e);
         }
-        if (resposta == null || !resposta.sucesso()
-            || resposta.linhasTraduzidas() == null || resposta.linhasTraduzidas().isEmpty()) {
-            avisos.add("LLM não retornou tradução; letra mantida: " + gradiente.textoVisivel());
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM sem resposta válida — letra mantida.");
+        if (!respostaUtil(resposta, avisos, gradiente.textoVisivel(), "")) {
             return null;
         }
         // O gradiente veta \N na decomposição: aqui a letra é sempre de UM verso.
-        String traduzido = unirVersos(resposta.linhasTraduzidas(), 1, avisos, gradiente.textoVisivel());
+        String traduzido = unirVersos(semMarcadorInventado(resposta.linhasTraduzidas()), 1, avisos,
+            gradiente.textoVisivel());
         if (traduzido == null) {
             return null;
         }
         try {
-            validador.validarFala(traduzido);
+            validarContraOriginal(gradiente.textoVisivel(), traduzido);
         } catch (AlucinacaoDetectadaException e) {
             telemetriaService.registrarAlucinacaoPrevenida();
             avisos.add("Alucinação detectada (" + e.getMessage() + "); letra mantida: "
@@ -355,6 +367,12 @@ public class TradutorDeLetraKaraoke {
             return null;
         }
         String frase = moldura.get().textoVisivel().strip();
+        if (Thread.currentThread().isInterrupted()) {
+            // "Parar" pedido entre o primeiro tiro e o segundo: não gasta chamada nova.
+            avisos.addAll(recusaDoMascarador);
+            avisos.add("Tradução interrompida pelo operador antes do segundo tiro; letra mantida: " + frase);
+            return null;
+        }
         logStream.publicarLog(CANAL_LOG, "   [SEM MARCADOR] refazendo com a frase limpa; as tags voltam recolocadas: "
             + frase);
         List<String> recusaDoSegundoTiro = new ArrayList<>();
@@ -364,28 +382,24 @@ public class TradutorDeLetraKaraoke {
                 new Lote(sequencialLote.incrementAndGet(), List.of(frase)),
                 TEMPERATURA_DETERMINISTICA,
                 promptSistemaCongelado);
-        } catch (Exception e) {
-            avisos.addAll(recusaDoMascarador);
-            avisos.add("Falha de comunicação com o LLM no segundo tiro; letra mantida: " + frase);
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM falhou no segundo tiro (mantida): " + e.getMessage());
-            return null;
+        } catch (RuntimeException e) {
+            resposta = falhaDeComunicacao(e);
         }
-        if (resposta == null || !resposta.sucesso()
-            || resposta.linhasTraduzidas() == null || resposta.linhasTraduzidas().isEmpty()) {
+        List<String> falhaDoSegundoTiro = new ArrayList<>();
+        if (!respostaUtil(resposta, falhaDoSegundoTiro, frase, " no segundo tiro")) {
             avisos.addAll(recusaDoMascarador);
-            avisos.add("LLM não retornou tradução no segundo tiro; letra mantida: " + frase);
-            logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM sem resposta válida no segundo tiro — letra mantida.");
+            avisos.addAll(falhaDoSegundoTiro);
             return null;
         }
         // O recorte veta \N: aqui a letra e sempre de UM verso.
-        String traduzido = unirVersos(resposta.linhasTraduzidas(), 1, recusaDoSegundoTiro, frase);
+        String traduzido = unirVersos(semMarcadorInventado(resposta.linhasTraduzidas()), 1, recusaDoSegundoTiro, frase);
         if (traduzido == null) {
             avisos.addAll(recusaDoMascarador);
             avisos.addAll(recusaDoSegundoTiro);
             return null;
         }
         try {
-            validador.validarFala(traduzido);
+            validarContraOriginal(frase, traduzido);
             validador.validarPar(frase, traduzido);
         } catch (AlucinacaoDetectadaException e) {
             telemetriaService.registrarAlucinacaoPrevenida();
@@ -400,6 +414,137 @@ public class TradutorDeLetraKaraoke {
         avisos.add("Refeita sem marcador (" + motivo + "); traduzida: " + frase + " => " + traduzido);
         logStream.publicarLog(CANAL_LOG, "   [SEM MARCADOR] traduzida: " + frase + "  =>  " + traduzido);
         return recomposta;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: julga a tradução da letra com a letra enviada em mãos. Até 28/10/2026
+     * os três caminhos principais chamavam {@code validarFala} só com a tradução: "Não recebi a
+     * ordem." para "I didn't receive the order." era reprovada como recusa do modelo, porque a
+     * absolvição de 09/09/2026 depende do original.
+     *
+     * <h2>Por que o par ({@code validarPar}) NÃO entra aqui — medido, não suposto</h2>
+     * Os 2.070 pares distintos do cache real do karaokê (208 arquivos, 28/10/2026), com o par
+     * ligado: 11 reprovações novas. 9 eram letra JÁ em português devolvida igual (a saída não
+     * muda); 1 era erro real ("Will anyone ever find out?" virou afirmação); 1 era tradução certa
+     * ("asking, ..." => "perguntando: ...", acusada de locutor inventado). Um acerto por um falso
+     * positivo não paga o custo, e a regra do par segue no segundo tiro, onde a linha já se perdeu
+     * uma vez.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o original só ABSOLVE (regra de recusa ambígua); toda regra que
+     * reprovava sem ele continua reprovando.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: lança {@link AlucinacaoDetectadaException}, que cada
+     * caminho converte em linha mantida com aviso.
+     */
+    private void validarContraOriginal(String original, String traduzido) {
+        validador.validarFala(traduzido, original);
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: separa as duas razões de uma resposta inútil — o problema é DESTA linha
+     * (recusa do pedido, resposta vazia ou truncada: a linha fica no original com a causa no aviso)
+     * ou do SERVIDOR (timeout, 5xx, conexão: a execução para). Antes as duas eram "LLM não retornou
+     * tradução", e o servidor caído no meio da pasta gravava o resto em inglês com [SUCESSO].
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a classificação é a do adaptador ({@code recusaDaRequisicao}); falha
+     * sem essa marca é indisponibilidade, como manda o contrato do {@link TraducaoLote}. Com a thread
+     * interrompida nada é servidor: é o "Parar" do operador, e quem decide é o caso de uso.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: resposta útil devolve {@code true}; problema da linha
+     * registra o aviso com a causa e devolve {@code false}; servidor indisponível lança
+     * {@link ServidorLlmIndisponivelException}.
+     */
+    private boolean respostaUtil(TraducaoLote resposta, List<String> avisos, String letra, String etapa) {
+        if (resposta != null && resposta.sucesso()
+            && resposta.linhasTraduzidas() != null && !resposta.linhasTraduzidas().isEmpty()) {
+            return true;
+        }
+        String causa = resposta == null ? "sem resposta do adaptador"
+            : resposta.sucesso() ? "resposta sem linhas"
+            : resposta.mensagemErro() == null || resposta.mensagemErro().isBlank() ? "sem diagnóstico do adaptador"
+            : resposta.mensagemErro();
+        if (Thread.currentThread().isInterrupted()) {
+            avisos.add("Tradução interrompida pelo operador" + etapa + "; letra mantida: " + letra);
+            return false;
+        }
+        if (resposta == null || (!resposta.sucesso() && !resposta.recusaDaRequisicao())) {
+            throw new ServidorLlmIndisponivelException("Servidor LLM indisponível" + etapa + " (" + causa
+                + "); a tradução de karaokê parou em vez de gravar o resto em inglês. Letra: " + letra);
+        }
+        avisos.add("LLM não traduziu" + etapa + " (" + causa + "); letra mantida: " + letra);
+        logStream.publicarLog(CANAL_LOG, "   [AVISO] LLM não traduziu" + etapa + " (" + causa + ") — letra mantida: "
+            + letra);
+        return false;
+    }
+
+    /** Exceção lançada pela porta vira falha sem classificação — o contrato a trata como indisponibilidade. */
+    private static TraducaoLote falhaDeComunicacao(RuntimeException e) {
+        return new TraducaoLote(0, null, false, "falha de comunicação: "
+            + (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()));
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: tira o marcador de máscara que o modelo inventou nos caminhos que não
+     * mandaram marcador — linha que era só o marcador some, marcador colado ao texto sai do texto.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: só é chamado onde nenhum marcador foi enviado; linha sem marcador
+     * volta idêntica.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula volta nula.
+     */
+    static List<String> semMarcadorInventado(List<String> linhas) {
+        if (linhas == null) {
+            return null;
+        }
+        List<String> limpas = new ArrayList<>(linhas.size());
+        for (String linha : linhas) {
+            if (linha == null || !MARCADOR_INVENTADO.matcher(linha).find()) {
+                limpas.add(linha);
+                continue;
+            }
+            limpas.add(MARCADOR_INVENTADO.matcher(linha).replaceAll(" ").replaceAll(" {2,}", " ").strip());
+        }
+        return limpas;
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: refaz verso a verso a letra cuja resposta juntou os versos E encurtou —
+     * a marca do verso perdido. Até 28/10/2026 essa marca só era conferida no REAPROVEITAMENTO do
+     * cache: o verso realmente perdido ia para a tela na primeira execução, e o falso positivo
+     * ("Busco aqueles que tentam pisar neles." para os dois versos do Break Blade 05) voltava ao LLM
+     * em TODA execução, com a mesma resposta, para sempre. Verso a verso, a resposta tem o mesmo
+     * número de linhas do original e deixa de ser suspeita.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: cada verso vai sozinho; só aceita se TODOS voltarem, unidos por
+     * {@code \N} na ordem. A letra montada passa depois pelo mesmo portão contra o original.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: qualquer verso que falhe devolve {@code null} e o chamador
+     * fica com a resposta de antes; servidor indisponível propaga.
+     */
+    private String versoAVerso(String letra, AtomicInteger sequencialLote, String promptSistemaCongelado) {
+        List<String> traduzidos = new ArrayList<>();
+        for (String verso : letra.split(Pattern.quote("\\N"))) {
+            if (verso.isBlank()) {
+                continue;
+            }
+            TraducaoLote resposta;
+            try {
+                resposta = llmPort.traduzir(new Lote(sequencialLote.incrementAndGet(), List.of(verso.strip())),
+                    TEMPERATURA_DETERMINISTICA, promptSistemaCongelado);
+            } catch (RuntimeException e) {
+                resposta = falhaDeComunicacao(e);
+            }
+            List<String> descartados = new ArrayList<>();
+            if (!respostaUtil(resposta, descartados, verso, " verso a verso")) {
+                return null;
+            }
+            String unido = unirVersos(semMarcadorInventado(resposta.linhasTraduzidas()), 1, descartados, verso);
+            if (unido == null) {
+                return null;
+            }
+            traduzidos.add(unido);
+        }
+        return traduzidos.size() < 2 ? null : String.join("\\N", traduzidos);
     }
 
     /**
