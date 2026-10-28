@@ -1534,6 +1534,31 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             .contains("Bom dia ajustado."), "a correcao do cache tem de chegar a pasta A tambem");
     }
 
+    /**
+     * 28/10/2026: o cabeçalho editado no arquivo (a 1.3 troca a fonte) era preservado INTEIRO,
+     * com o carimbo antigo dentro — o "; KRONOS pendentes: 5" ficava para sempre, depois de as
+     * pendências serem resolvidas. O estilo editado fica; o carimbo é o desta execução.
+     */
+    @Test
+    @DisplayName("cabecalho editado no arquivo fica, mas o carimbo e o desta execucao")
+    void cabecalhoPreservadoRecebeOCarimboNovo() throws Exception {
+        Path entrada = escreverAss("ep.ass", "Hello there", "How are you");
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+        Path saida = raiz.resolve("saida").resolve("ep_PT-BR.ass");
+        String publicado = Files.readString(saida, StandardCharsets.UTF_8);
+        String editado = publicado.replace("Style: Default,Arial,48", "Style: Default,Verdana,52")
+            .replace("[Script Info]", "[Script Info]\n; KRONOS pendentes: 5 fala(s) mantida(s) no original — CARIMBO VELHO");
+        assertTrue(editado.contains("Verdana") && editado.contains("CARIMBO VELHO"), "o ensaio precisa editar o arquivo");
+        Files.writeString(saida, editado, StandardCharsets.UTF_8);
+
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        String depois = Files.readString(saida, StandardCharsets.UTF_8);
+        assertTrue(depois.contains("Style: Default,Verdana,52"), "o estilo editado no arquivo fica:\n" + depois);
+        assertFalse(depois.contains("CARIMBO VELHO"), "o carimbo antigo nao pode sobreviver:\n" + depois);
+        assertTrue(depois.contains("; KRONOS traduziu: 2 fala(s)"), "o carimbo desta execucao entra:\n" + depois);
+    }
+
     /** Corretor ortográfico do caso de uso; {@code null} usa o real. */
     private org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda ortografiaTeste;
 

@@ -1390,11 +1390,16 @@ public class ProcessarArquivoUseCase {
                 }
             }
         }
-        String hd = noArquivo.cabecalho();
-        String hb = publicadoAntes.cabecalho();
+        // O CARIMBO NÃO ENTRA NA COMPARAÇÃO (auditoria de 28/10/2026). Ele muda a cada execução, e
+        // comparado junto fazia o cabeçalho editado no arquivo (1.3 trocando fonte) valer INTEIRO,
+        // com o carimbo antigo — "pendentes: 5" para sempre, depois de a 2.3 resolver as cinco.
+        // É a classe do "carimbo mentiroso" de 09/09: o artefato tem de declarar o que ESTA
+        // execução fez (decisão de 07/08).
         String hn = gerado.cabecalho();
-        boolean cabecalhoPreservado = !hd.equals(hb) && !hd.equals(hn);
-        String cabecalho = cabecalhoPreservado ? hd : hn;
+        String hd = CarimboCabecalhoLegenda.remover(noArquivo.cabecalho());
+        boolean cabecalhoPreservado = !hd.equals(CarimboCabecalhoLegenda.remover(publicadoAntes.cabecalho()))
+            && !hd.equals(CarimboCabecalhoLegenda.remover(hn));
+        String cabecalho = cabecalhoPreservado ? CarimboCabecalhoLegenda.aplicar(hd, linhasDoCarimbo(hn)) : hn;
 
         if (!preservadas.isEmpty() || atualizadas > 0 || cabecalhoPreservado) {
             String resumo = destino.getFileName() + ": " + preservadas.size()
@@ -1440,6 +1445,14 @@ public class ProcessarArquivoUseCase {
         }
         return publicado.resolve(ProvenienciaCache.hashDe(pasta.toString().toLowerCase(java.util.Locale.ROOT)).substring(0, 12))
             .resolve(arquivoSaida.getFileName().toString());
+    }
+
+    /** As linhas do carimbo {@code ; KRONOS} de um cabeçalho, sem o fim de linha. */
+    private static List<String> linhasDoCarimbo(String cabecalho) {
+        return cabecalho.lines()
+            .filter(l -> l.startsWith(CarimboCabecalhoLegenda.PREFIXO))
+            .map(String::strip)
+            .toList();
     }
 
     /** O endereço antigo da base, só pelo nome — lido uma vez, como migração. */
