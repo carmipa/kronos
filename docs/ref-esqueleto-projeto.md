@@ -26,8 +26,8 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 | fatias funcionais | **21** |
 | peers | **5** |
 | infra transversal | **2** |
-| classes em `src/main` | **516** |
-| classes em `src/test` | **489** |
+| classes em `src/main` | **514** |
+| classes em `src/test` | **491** |
 
 ---
 
@@ -36,7 +36,7 @@ gradlew test --tests "*CatracaEsqueletoDoProjetoAtualizadoTest*" -Dkronos.esquel
 ```mermaid
 graph TB
     G0["<b>Preparação</b><br/>analisadorMidia (21)<br/>legendasExtracao (25)<br/>trocaTipoLegenda (25)<br/>auditorConteudoLegendas (25)"]:::fatia
-    G1["<b>Tradução</b><br/>traducao (79)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
+    G1["<b>Tradução</b><br/>traducao (77)<br/>traducaoCorrige (17)<br/>raspagemCorrecao (11)<br/>correcaoLegendas (12)"]:::fatia
     G2["<b>Qualidade</b><br/>raspagemRevisao (55)<br/>revisaoLore (23)<br/>revisaoConcordancia (9)"]:::fatia
     G3["<b>Karaokê</b><br/>traducaoKaraoke (32)<br/>novoKaraoke (11)"]:::fatia
     G4["<b>Finalização</b><br/>remuxer (16)<br/>renomearArquivos (6)"]:::fatia
@@ -217,7 +217,7 @@ auditorConteudoLegendas/
 
 ### Tradução
 
-#### `traducao` — 79 classes
+#### `traducao` — 77 classes
 
 ```text
 traducao/
@@ -251,8 +251,6 @@ traducao/
 │   ├── exceptions/
 │   │   ├── DivergenciaLinhasException.java
 │   │   ├── EntradaJaTraduzidaException.java
-│   │   ├── LlmFalhaComunicacaoException.java
-│   │   ├── LmStudioOfflineException.java
 │   │   ├── MarcadorCorrompidoException.java
 │   │   ├── ObraDivergenteDoContextoException.java
 │   │   ├── RequisicaoRecusadaPeloLlmException.java
@@ -936,7 +934,7 @@ core/
 
 ---
 
-## Testes — 489 classes
+## Testes — 491 classes
 
 O teste pesa quase tanto quanto o código. As `Catraca*` e `Fronteira*` moram aqui.
 
@@ -1545,7 +1543,7 @@ telemetria/
 └── TelemetriaServiceRevisaoLoreTest.java
 ```
 
-#### `traducao` — 67 classes
+#### `traducao` — 69 classes
 
 ```text
 traducao/
@@ -1603,7 +1601,8 @@ traducao/
 │   │   ├── LimpezaTokenDeControleTest.java
 │   │   ├── LlmClientAdapterRespostaRevisaoTest.java
 │   │   ├── LoreAtivaContextoAdapterTest.java
-│   │   └── RespostaTruncadaNaoEhSucessoTest.java
+│   │   ├── RespostaTruncadaNaoEhSucessoTest.java
+│   │   └── RevisaoInterrompidaPreservaParadaTest.java
 │   ├── config/
 │   │   ├── ConfiguracaoSimplesE3bIT.java
 │   │   ├── ParidadeBindingEstilosIT.java
@@ -1624,7 +1623,8 @@ traducao/
     │   ├── ConsoleRedirectorNaoEmpilhaTest.java
     │   ├── ConsoleRedirectorTest.java
     │   ├── LogStreamServiceTest.java
-    │   └── ParadaDoOperadorNaoEhFalhaTest.java
+    │   ├── ParadaDoOperadorNaoEhFalhaTest.java
+    │   └── StatusLlmMostraModeloAtivoTest.java
     └── TradutorCLIAlucinacaoCaracterizacaoTest.java
 ```
 

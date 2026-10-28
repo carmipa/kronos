@@ -120,20 +120,6 @@ class DetectorCorrenteFrasePartidaTest {
     }
 
     @Test
-    @DisplayName("contarLigacoes mede a cobertura sem repetir a heurística fora do detector")
-    void contaLigacoes() {
-        List<String> textos = List.of(
-            "Mankind has set foot into a new era,",
-            "in which we shall build for ourselves worlds to live in,",
-            "beyond Mother Earth.",
-            "Understood.");
-
-        assertEquals(2, detector.contarLigacoes(textos));
-        assertEquals(0, detector.contarLigacoes(List.of("Understood.")));
-        assertEquals(0, detector.contarLigacoes(null));
-    }
-
-    @Test
     @DisplayName("Lista vazia ou nula não quebra")
     void entradaVaziaDevolveVazio() {
         assertTrue(detector.agrupar(List.of(), 1).isEmpty());

@@ -118,28 +118,6 @@ public class DetectorCorrenteFrasePartida {
     }
 
     /**
-     * PROPÓSITO DE NEGÓCIO: informa quantas ligações de frase partida existem na lista —
-     * usado pela telemetria para medir cobertura sem repetir a heurística fora daqui.
-     *
-     * <p>INVARIANTES DO DOMÍNIO: mesma heurística de {@link #agrupar}; uma corrente de K
-     * eventos conta K-1 ligações.
-     *
-     * <p>COMPORTAMENTO EM CASO DE FALHA: lista nula/vazia devolve 0.
-     */
-    public int contarLigacoes(List<String> textos) {
-        if (textos == null || textos.size() < 2) {
-            return 0;
-        }
-        int ligacoes = 0;
-        for (int i = 1; i < textos.size(); i++) {
-            if (ehContinuacao(textos.get(i - 1), textos.get(i))) {
-                ligacoes++;
-            }
-        }
-        return ligacoes;
-    }
-
-    /**
      * PROPÓSITO DE NEGÓCIO: decide se {@code seguinte} completa a frase iniciada em
      * {@code anterior}.
      *

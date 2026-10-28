@@ -1294,8 +1294,7 @@ public class ProcessarArquivoUseCase {
     }
 
     /** Resultado da mesclagem de três vias. */
-    private record Mescla(DocumentoLegenda documento, Set<Integer> preservadas, int atualizadas,
-            int conflitos, boolean cabecalhoPreservado, String exemploConflito) {}
+    private record Mescla(DocumentoLegenda documento, Set<Integer> preservadas) {}
 
     /**
      * PROPÓSITO DE NEGÓCIO: publica a legenda PT-BR sem destruir o que foi corrigido nela depois da
@@ -1425,7 +1424,7 @@ public class ProcessarArquivoUseCase {
             uiLogger.log("[ MESCLA ] " + resumo);
         }
         return new Mescla(new DocumentoLegenda(cabecalho, saida, gerado.quebraDeLinha(), gerado.comBom()),
-            preservadas, atualizadas, conflitos, cabecalhoPreservado, exemplo);
+            preservadas);
     }
 
     private static String chaveDaLinha(EventoLegenda evento) {

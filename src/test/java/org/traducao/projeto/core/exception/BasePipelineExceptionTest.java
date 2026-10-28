@@ -18,8 +18,6 @@ import org.traducao.projeto.qualidadeTraducao.domain.AlucinacaoDetectadaExceptio
 import org.traducao.projeto.legenda.domain.ArquivoLegendaException;
 import org.traducao.projeto.lore.domain.ContextoNaoEncontradoException;
 import org.traducao.projeto.traducao.domain.exceptions.DivergenciaLinhasException;
-import org.traducao.projeto.traducao.domain.exceptions.LlmFalhaComunicacaoException;
-import org.traducao.projeto.traducao.domain.exceptions.LmStudioOfflineException;
 import org.traducao.projeto.traducao.domain.exceptions.RespostaLlmVaziaException;
 import org.traducao.projeto.traducao.domain.exceptions.TradutorException;
 import org.traducao.projeto.traducaoCorrige.domain.exceptions.CorretorCacheException;
@@ -61,9 +59,7 @@ class BasePipelineExceptionTest {
             new ApiDadosAnimeException("falha ao obter metadata"),
             new AnimeNaoEncontradoException("anime não encontrado"),
             new ContextoNaoEncontradoException("contexto não encontrado"),
-            new LmStudioOfflineException("LM Studio offline"),
             new TradutorException("falha no tradutor"),
-            new LlmFalhaComunicacaoException("falha de comunicação com o LLM"),
             new RespostaLlmVaziaException("resposta vazia do LLM"),
             new ArquivoLegendaException("arquivo de legenda inválido"),
             new AlucinacaoDetectadaException("alucinação detectada"),
