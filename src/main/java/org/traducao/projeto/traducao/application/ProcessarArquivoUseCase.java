@@ -104,18 +104,6 @@ public class ProcessarArquivoUseCase {
         "Fala mantida sem tradução (tags corrompidas pelo LLM): ";
 
     /**
-     * PROPÓSITO DE NEGÓCIO: extrai {@code inicio,fim} do prefixo do evento, que é a chave
-     * ESTÁVEL para casar uma fala do dataset com a linha do {@code .ass} publicado.
-     *
-     * <p>INVARIANTES DO DOMÍNIO: o texto muda ao traduzir, o instante não — casar por índice
-     * mente quando o arquivo sai reordenado, e foi assim que uma auditoria acusou corrupção
-     * inexistente no Guilty Crown. O prefixo tem a forma
-     * {@code "Dialogue: 0,0:00:01.00,0:00:02.00,Estilo,,0,0,0,,"}: os campos 1 e 2 são os tempos.
-     *
-     * <p>COMPORTAMENTO EM CASO DE FALHA: prefixo nulo ou com menos de três campos devolve
-     * string vazia — o registro perde a chave de casamento mas não derruba a tradução.
-     */
-    /**
      * PROPÓSITO DE NEGÓCIO: condensa os nomes perdidos numa linha legível de log.
      *
      * <p>INVARIANTES DO DOMÍNIO: no máximo oito nomes distintos; o excedente vira contagem. Log de
@@ -216,9 +204,27 @@ public class ProcessarArquivoUseCase {
     private static final java.util.regex.Pattern PREFIXO_DE_TAGS_E_TEXTO =
         java.util.regex.Pattern.compile("^((?:\\{[^}]*\\})+)([^{]+)$");
 
+    /**
+     * PROPÓSITO DE NEGÓCIO: extrai {@code inicio,fim} do prefixo do evento, que é a chave
+     * ESTÁVEL para casar uma fala do dataset com a linha da legenda publicada.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o texto muda ao traduzir, o instante não — casar por índice
+     * mente quando o arquivo sai reordenado, e foi assim que uma auditoria acusou corrupção
+     * inexistente no Guilty Crown. No ASS o prefixo é
+     * {@code "Dialogue: 0,0:00:01.00,0:00:02.00,Estilo,,0,0,0,,"} e os campos 1 e 2 são os tempos.
+     * No SRT o prefixo é a linha de tempo {@code "00:01:02,345 --> 00:01:04,567"}, em que a vírgula
+     * é o decimal: cortá-la por vírgula dava {@code "345 --> 00:01:04,567"} (76 registros do
+     * Reconguista, auditoria de 28/10/2026). Ali a chave é a linha de tempo inteira.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: prefixo nulo ou sem os tempos devolve string vazia — o
+     * registro perde a chave de casamento mas não derruba a tradução.
+     */
     private static String instanteDe(EventoLegenda evento) {
         if (evento == null || evento.prefixo() == null) {
             return "";
+        }
+        if (evento.prefixo().contains("-->")) {
+            return evento.prefixo().strip();
         }
         String[] campos = evento.prefixo().split(",");
         return campos.length >= 3 ? campos[1] + "," + campos[2] : "";

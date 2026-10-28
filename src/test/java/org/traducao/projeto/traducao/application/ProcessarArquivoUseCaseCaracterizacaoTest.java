@@ -1559,6 +1559,23 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         assertTrue(depois.contains("; KRONOS traduziu: 2 fala(s)"), "o carimbo desta execucao entra:\n" + depois);
     }
 
+    /**
+     * 28/10/2026: a chave de casamento do dataset cortava o prefixo por vírgula, que no SRT é o
+     * decimal do tempo — "00:00:03,000 --> 00:00:04,000" virava "000 --> 00:00:04,000".
+     */
+    @Test
+    @DisplayName("dataset de SRT guarda a linha de tempo inteira como instante")
+    void instanteDoSrtEhALinhaDeTempo() throws Exception {
+        Path entrada = escreverSrt("ep.srt", "Hello there", "KEEPME stays");
+
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertNotNull(telemetriaCaptor.naoTraduzidas, "a fala pendente tem de ir ao dataset");
+        assertTrue(telemetriaCaptor.naoTraduzidas.stream()
+                .anyMatch(f -> f.instante().equals("00:00:03,000 --> 00:00:04,000")),
+            "instantes: " + telemetriaCaptor.naoTraduzidas.stream().map(f -> f.instante()).toList());
+    }
+
     /** Corretor ortográfico do caso de uso; {@code null} usa o real. */
     private org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda ortografiaTeste;
 
