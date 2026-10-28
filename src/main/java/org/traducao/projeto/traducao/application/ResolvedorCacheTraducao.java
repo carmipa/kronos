@@ -21,9 +21,12 @@ import java.util.regex.Pattern;
  *
  * <h2>Invariantes do domínio</h2>
  * <ul>
- *   <li>O arquivo de cache mora em {@code <diretorioCache>/<anime>/<base>.cache.json},
- *       preservando a extensão do formato via {@link ResolvedorSaidaLegenda} e o mesmo
- *       nome-base do episódio.</li>
+ *   <li>O arquivo de cache mora em {@code <diretorioCache>/<anime>/<base>.cache.json}, com o
+ *       nome-base do episódio SEM a extensão (via {@link ResolvedorSaidaLegenda}). Consequência
+ *       declarada: {@code Ep01.ass} e {@code Ep01.srt} da mesma obra dividiriam o cache, e o
+ *       segundo a traduzir substituiria o do primeiro. O endereço não muda por isso — mudar
+ *       deixaria órfãos todos os caches existentes —, e a colisão foi medida em 28/10/2026:
+ *       0 nomes-base com os dois formatos entre 428 no acervo.</li>
  *   <li>A proveniência carimba os seis campos canônicos (schema, contexto congelado do job,
  *       hash do prompt desse contexto, modelo, idiomas) — qualquer troca de lore/modelo/
  *       idioma muda o carimbo e invalida o cache antigo. O contexto chega por PARÂMETRO;
@@ -87,7 +90,8 @@ public class ResolvedorCacheTraducao {
      * da pasta do anime, para que cada episódio tenha seu banco bilíngue próprio.
      *
      * <p>INVARIANTES DO DOMÍNIO: o cache mora em {@code <diretorioCache>/<anime>/
-     * <base>.cache.json}, preservando a extensão do formato e o nome-base do episódio.
+     * <base>.cache.json}, com o nome-base do episódio sem a extensão (ver a colisão declarada
+     * no Javadoc da classe).
      *
      * <p>COMPORTAMENTO EM CASO DE FALHA: função pura, sem I/O; caminho sem pasta-avó
      * reconhecível usa {@code "Desconhecido"} como anime.
