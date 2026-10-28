@@ -1254,7 +1254,9 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             enforcadorTermos, new EnforcadorGlossarioFala(), new DetectorIdiomaFonteService(), new NormalizadorAspasService(),
             new NormalizadorAcentosComuns(),
             new org.traducao.projeto.qualidadeTraducao.application.CorretorHomografoComOriginal(),
-            new org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda(), new NormalizadorCartaoDataService(), guardaContextoObra, contextoCongelado,
+            ortografiaTeste != null ? ortografiaTeste
+                : new org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda(),
+            new NormalizadorCartaoDataService(), guardaContextoObra, contextoCongelado,
             new org.traducao.projeto.qualidadeTraducao.application.nomeProprio.DetectorNomeProprioTraduzido(
                 new org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda()));
     }
@@ -1364,6 +1366,41 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         assertTrue(ortografia.contains("INDISPONÍVEL") || ortografia.contains("corrigida")
                 || ortografia.contains("0 fala corrigida"),
             "a linha de ortografia precisa dizer o estado, nao so existir: " + ortografia);
+    }
+
+    /** Corretor ortográfico do caso de uso; {@code null} usa o real. */
+    private org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda ortografiaTeste;
+
+    /**
+     * 28/10/2026: a 2.1 chamava o dicionário fala a fala, sem o aquecimento em lote que a 3.3 usa
+     * — 258,5 s frio contra 30,8 s aquecido no filme de Sidonia (09/10), mesma saída. O espião
+     * registra que o lote chega ANTES de qualquer correção por fala, com todas as traduções.
+     */
+    @Test
+    @DisplayName("a 2.1 aquece o dicionario com todas as traducoes antes de corrigir fala a fala")
+    void aqueceODicionarioEmLote() throws Exception {
+        List<String> eventos = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+        ortografiaTeste = new org.traducao.projeto.core.texto.dicionarioOrtografia.CorretorOrtograficoLegenda() {
+            @Override
+            public boolean aquecerComTextos(java.util.Collection<String> textos) {
+                eventos.add("aquecer:" + textos.size());
+                return super.aquecerComTextos(textos);
+            }
+
+            @Override
+            public String corrigir(String texto, java.util.Set<String> intocaveis) {
+                eventos.add("corrigir");
+                return super.corrigir(texto, intocaveis);
+            }
+        };
+        ProcessarArquivoUseCase uc = montar(new FakeLlmPort());
+        Path entrada = escreverAss("ep.ass", "Hello there", "How are you", "See you later");
+
+        uc.processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertEquals("aquecer:3", eventos.get(0), "o lote vem primeiro, com as 3 traducoes: " + eventos);
+        assertEquals(1, eventos.stream().filter(e -> e.startsWith("aquecer")).count(), "um lote so: " + eventos);
+        assertEquals(3, eventos.stream().filter("corrigir"::equals).count(), "CONTROLE: a correcao por fala continua");
     }
 
     /**

@@ -901,6 +901,13 @@ public class ProcessarArquivoUseCase {
         // atravessarem o acervo sem ninguém notar.
         int falasComHomografoCorrigido = 0;
         int falasComHomografoIntocado = 0;
+        // AQUECIMENTO EM LOTE, como a 3.3 faz desde b8e4014c. O corretor consulta o dicionário
+        // por palavra, e sem o lote cada palavra nova paga um processo externo. Medido em
+        // 09/10/2026 no filme de Sidonia: 258,5 s frio contra 30,8 s aquecido, 0 de 1405 saídas
+        // diferentes — aquecer só antecipa as consultas, não muda nenhuma resposta.
+        corretorOrtografico.aquecerComTextos(traducoesValidadas.values().stream()
+            .filter(t -> t != null && !t.isBlank())
+            .toList());
         for (Map.Entry<String, String> traducao : traducoesValidadas.entrySet()) {
             String traduzido = traducao.getValue();
             if (traduzido != null && !traduzido.isBlank()) {
