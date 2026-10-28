@@ -15,7 +15,6 @@ import org.traducao.projeto.core.presentation.web.LogStreamService;
 import org.traducao.projeto.traducaoKaraoke.application.TraduzirKaraokeUseCase;
 import org.traducao.projeto.traducaoKaraoke.domain.TraducaoKaraokeException;
 
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -54,9 +53,14 @@ public class TraducaoKaraokeController {
         if (erro != null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Map.of("error", erro)).build();
         }
+        // Convertido AQUI, na thread da requisição, pelo dono único do caminho da tela (aspas do
+        // "Copiar como caminho", relativo ancorado). Até 28/10/2026 era Paths.get cru dentro da
+        // tarefa: a guarda aprovava, a tela dizia "iniciada" e a tarefa morria sem deixar rastro.
+        java.nio.file.Path pasta = org.traducao.projeto.core.io.GuardaCaminhoEntrada.caminhoDaInterface(
+            request.caminhoOrigem());
         CompletableFuture.runAsync(() -> {
             try {
-                useCase.simular(Paths.get(request.caminhoOrigem()), request.contextoId());
+                useCase.simular(pasta, request.contextoId());
             } catch (TraducaoKaraokeException e) {
                 logStream.publicarLog(TraduzirKaraokeUseCase.CANAL_LOG, "[ERRO] " + e.getMessage());
             } catch (Exception e) {
@@ -76,10 +80,12 @@ public class TraducaoKaraokeController {
         if (erro != null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Map.of("error", erro)).build();
         }
+        java.nio.file.Path pasta = org.traducao.projeto.core.io.GuardaCaminhoEntrada.caminhoDaInterface(
+            request.caminhoOrigem());
         filaExecucao.submeter(() -> {
             logStream.definirCanalAtual(TraduzirKaraokeUseCase.CANAL_LOG);
             try {
-                useCase.aplicar(Paths.get(request.caminhoOrigem()), request.contextoId());
+                useCase.aplicar(pasta, request.contextoId());
             } catch (TraducaoKaraokeException e) {
                 logStream.publicarLog(TraduzirKaraokeUseCase.CANAL_LOG, "[ERRO] " + e.getMessage());
             } catch (Exception e) {

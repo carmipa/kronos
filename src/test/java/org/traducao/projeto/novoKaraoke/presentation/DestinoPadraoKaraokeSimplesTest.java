@@ -61,7 +61,9 @@ class DestinoPadraoKaraokeSimplesTest {
     @DisplayName("caminho informado pelo operador vence o padrao")
     void informadoVenceOPadrao() {
         Path entrada = entradaObra();
-        Path escolhido = Path.of("saida", "minha-pasta");
+        // Absoluto: relativo é ancorado na raiz operacional pelo dono único do caminho da tela
+        // (GuardaCaminhoEntrada.caminhoDaInterface, desde 28/10/2026 também no Passo 2).
+        Path escolhido = Path.of("saida", "minha-pasta").toAbsolutePath();
 
         assertEquals(escolhido,
             NovoKaraokeController.resolverDestino(entrada, escolhido.toString()));

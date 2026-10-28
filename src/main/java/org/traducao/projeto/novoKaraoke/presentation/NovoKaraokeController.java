@@ -15,7 +15,6 @@ import org.traducao.projeto.core.execucao.FilaExecucaoPipeline;
 import org.traducao.projeto.core.io.GuardaCaminhoEntrada;
 import org.traducao.projeto.core.presentation.web.LogStreamService;
 
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -67,7 +66,9 @@ public class NovoKaraokeController {
         if (erroValidacao != null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Map.of("error", erroValidacao)).build();
         }
-        java.nio.file.Path origem = Paths.get(request.caminhoOrigem());
+        // Dono único do caminho da tela (aspas do Explorer, relativo ancorado): até 28/10/2026 o
+        // Paths.get cru respondia 500 depois de a guarda aprovar o mesmo texto.
+        java.nio.file.Path origem = GuardaCaminhoEntrada.caminhoDaInterface(request.caminhoOrigem());
         java.nio.file.Path destino = resolverDestino(origem, request.caminhoDestino());
         Runnable trabalho = () -> {
             try {
@@ -122,9 +123,10 @@ public class NovoKaraokeController {
      */
     static java.nio.file.Path resolverDestino(java.nio.file.Path origem, String informado) {
         if (informado != null && !informado.trim().isEmpty()) {
-            return Paths.get(informado.trim());
+            return GuardaCaminhoEntrada.caminhoDaInterface(informado);
         }
         java.nio.file.Path pai = origem.toAbsolutePath().normalize().getParent();
+        // (o padrão não passa pela tela, então não tem aspas a tirar)
         return (pai != null ? pai : origem).resolve(PASTA_SIMPLIFICADA_PADRAO);
     }
 

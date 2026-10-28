@@ -196,7 +196,10 @@ public class ConversorKaraokeUseCase {
         }
         Path origemNorm = pastaOrigem.toAbsolutePath().normalize();
         Path destinoNorm = pastaDestino.toAbsolutePath().normalize();
-        if (origemNorm.equals(destinoNorm)) {
+        // Compara o lugar REAL, não o texto: destino que é junção, subst ou link para a origem
+        // passava na comparação textual e o achatamento regravava a ENTRADA (auditoria de
+        // 28/10/2026, reproduzido com SHA antes e depois).
+        if (origemNorm.equals(destinoNorm) || lugarReal(origemNorm).equals(lugarReal(destinoNorm))) {
             throw new NovoKaraokeException(
                 "A pasta de destino deve ser DIFERENTE da origem: os arquivos originais são preservados para auditoria.");
         }
@@ -206,6 +209,31 @@ public class ConversorKaraokeUseCase {
             } catch (IOException e) {
                 throw new NovoKaraokeException("Não foi possível criar a pasta de destino: " + destinoNorm, e);
             }
+        }
+    }
+
+    /**
+     * PROPÓSITO DE NEGÓCIO: o lugar do disco para onde o caminho aponta, para que "a entrada nunca
+     * é alterada" valha também quando o destino é junção, {@code subst} ou link para a origem.
+     *
+     * <p>INVARIANTES DO DOMÍNIO: o destino pode ainda não existir — resolve o ancestral mais próximo
+     * que existe e acrescenta o resto do caminho.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: sem ancestral resolvível (unidade ausente), devolve o
+     * caminho normalizado como veio — a comparação textual continua valendo.
+     */
+    static Path lugarReal(Path caminho) {
+        Path existente = caminho;
+        while (existente != null && !Files.exists(existente)) {
+            existente = existente.getParent();
+        }
+        if (existente == null) {
+            return caminho;
+        }
+        try {
+            return existente.toRealPath().resolve(existente.relativize(caminho)).normalize();
+        } catch (IOException e) {
+            return caminho;
         }
     }
 
