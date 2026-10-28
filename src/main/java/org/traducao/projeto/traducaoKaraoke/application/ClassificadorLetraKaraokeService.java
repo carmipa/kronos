@@ -31,9 +31,13 @@ public class ClassificadorLetraKaraokeService {
     private static final Pattern PADRAO_REMOVE_TAGS_ASS = Pattern.compile("\\{[^}]*\\}");
     private static final Pattern ESCRITA_JAPONESA_PATTERN =
         Pattern.compile("[\\p{IsHiragana}\\p{IsKatakana}\\p{IsHan}]");
-    // "rom" cobre abreviações reais de fansub como o estilo "ED-ROM" (86).
-    private static final Pattern ESTILO_JAPONES_ROMAJI_PATTERN = Pattern.compile(
-        "(?i)\\b(rom|romaji|jp|jpn|japanese|japones|japon[eê]s|kana|kanji)\\b");
+    /**
+     * Só a abreviação {@code rom} ("ED-ROM", 86), que o dono no peer {@code legenda} não cobre. O
+     * resto do critério de estilo romaji é PERGUNTADO a ele ({@code eEstiloDeRomaji}): até 28/10/2026
+     * esta classe tinha regex própria com fronteira {@code \b}, que não casa {@code ED_S2_roma},
+     * {@code OP Roma}, {@code ED_Romaji1} nem {@code Romanji} — a linha com inglês ia ao LLM.
+     */
+    private static final Pattern ESTILO_ROM_ABREVIADO = Pattern.compile("(?i)(?<!\\p{L})rom(?!\\p{L})");
     // Mesma decomposição silábica Hepburn do DetectorEfeitoKaraokeService.
     private static final Pattern PALAVRA_ROMAJI_PATTERN = Pattern.compile(
         "^(?:n|(?:([kgsztdnhbpmyrwfjv])\\1?|sh|ch|ts|ky|gy|ny|hy|my|ry|by|py)?[aeiou])+$");
@@ -277,7 +281,7 @@ public class ClassificadorLetraKaraokeService {
 
         // O nome do estilo é a evidência mais confiável: fansubs rotulam as
         // camadas ("OP - Romaji" / "OP - English"). Ele decide antes do texto.
-        if (estilo != null && ESTILO_JAPONES_ROMAJI_PATTERN.matcher(estilo).find()) {
+        if (estilo != null && (detector.eEstiloDeRomaji(estilo) || ESTILO_ROM_ABREVIADO.matcher(estilo).find())) {
             return ClasseLinhaKaraoke.ORIGINAL_JAPONES;
         }
         // Dono único desde 08/10/2026: a auditoria (1.4) faz a mesma pergunta e precisa da MESMA
