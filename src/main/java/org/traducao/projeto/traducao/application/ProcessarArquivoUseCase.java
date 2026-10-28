@@ -1196,10 +1196,10 @@ public class ProcessarArquivoUseCase {
         // Registro do que o cache gerou nesta publicação: é a BASE da mesclagem de três vias da
         // próxima reexecução. Mora ao lado do cache da obra, fora da pasta de saída — nada ali pode
         // ser confundido com legenda pelo remux.
-        Path basePublicada = arquivoCache.getParent().resolve(".publicado")
-            .resolve(arquivoSaida.getFileName().toString());
+        Path basePublicada = basePorPastaDeSaida(arquivoCache, arquivoSaida);
         ResultadoPublicacao publicacao = publicar(arquivoSaida, documentoFinal, ehSrt,
-            permitirRetraducao && arquivoSaida.equals(arquivoSaidaFinal), avisos, basePublicada);
+            permitirRetraducao && arquivoSaida.equals(arquivoSaidaFinal), avisos, basePublicada,
+            baseLegadaPorNome(arquivoCache, arquivoSaida));
         Path backupSobrescrita = publicacao.backup();
         // A6 DO ADITIVO: a aprovação tem de alcançar a ÚLTIMA transformação, e a última aqui é a
         // gravação. Tudo o que este método valida acontece ANTES da terminologia, da normalização
@@ -1319,17 +1319,20 @@ public class ProcessarArquivoUseCase {
      * publicada, e a próxima reexecução cai no caminho sem base.
      */
     private ResultadoPublicacao publicar(Path destino, DocumentoLegenda gerado, boolean ehSrt,
-            boolean substituicaoPedida, List<String> avisos, Path base) {
+            boolean substituicaoPedida, List<String> avisos, Path base, Path baseLegada) {
         if (!Files.exists(destino)) {
             escreverLegenda(destino, gerado, ehSrt);
-            registrarBase(base, gerado, ehSrt);
+            registrarBase(base, gerado, ehSrt, destino);
             return ResultadoPublicacao.NADA;
         }
-        Mescla mescla = substituicaoPedida ? null : mesclar(destino, gerado, ehSrt, base);
+        // MIGRAÇÃO: antes de 28/10/2026 a base era só pelo nome do arquivo. Ela vale UMA vez, até a
+        // primeira publicação gravar a base desta pasta de saída.
+        Path baseParaMesclar = base != null && Files.isRegularFile(base) ? base : baseLegada;
+        Mescla mescla = substituicaoPedida ? null : mesclar(destino, gerado, ehSrt, baseParaMesclar);
         DocumentoLegenda aPublicar = mescla != null ? mescla.documento() : gerado;
         Path backup = publicarPreservandoAnterior(destino, aPublicar, ehSrt, substituicaoPedida, avisos,
             mescla != null);
-        registrarBase(base, gerado, ehSrt);
+        registrarBase(base, gerado, ehSrt, destino);
         return new ResultadoPublicacao(backup, mescla != null ? mescla.preservadas() : Set.of());
     }
 
@@ -1416,13 +1419,47 @@ public class ProcessarArquivoUseCase {
         return texto.length() > 60 ? texto.substring(0, 60) + "…" : texto;
     }
 
-    private void registrarBase(Path base, DocumentoLegenda gerado, boolean ehSrt) {
+    /**
+     * PROPÓSITO DE NEGÓCIO: endereço da base da mescla de três vias PARA ESTA PASTA DE SAÍDA
+     * (INV-MESCLA-001). A base era só {@code .publicado/<nome>}: duas pastas de saída para a
+     * mesma entrada (a padrão e uma escolhida na tela, ou o reuso entre modelos) dividiam a base, e
+     * a correção da 2.3 publicada numa virava "correção feita no arquivo" na outra — nunca chegava
+     * lá, e o console dizia "mantida" (auditoria de 28/10/2026).
+     *
+     * <p>INVARIANTES DO DOMÍNIO: a pasta vira um identificador estável (SHA-256 do caminho absoluto
+     * normalizado, em minúsculas porque o Windows não distingue caixa); o caminho legível fica em
+     * {@code ORIGEM.txt} ao lado, para quem abrir a pasta.
+     *
+     * <p>COMPORTAMENTO EM CASO DE FALHA: não lança; sem pasta-mãe, usa a raiz {@code .publicado}.
+     */
+    static Path basePorPastaDeSaida(Path arquivoCache, Path arquivoSaida) {
+        Path pasta = arquivoSaida.toAbsolutePath().normalize().getParent();
+        Path publicado = arquivoCache.getParent().resolve(".publicado");
+        if (pasta == null) {
+            return publicado.resolve(arquivoSaida.getFileName().toString());
+        }
+        return publicado.resolve(ProvenienciaCache.hashDe(pasta.toString().toLowerCase(java.util.Locale.ROOT)).substring(0, 12))
+            .resolve(arquivoSaida.getFileName().toString());
+    }
+
+    /** O endereço antigo da base, só pelo nome — lido uma vez, como migração. */
+    private static Path baseLegadaPorNome(Path arquivoCache, Path arquivoSaida) {
+        return arquivoCache.getParent().resolve(".publicado").resolve(arquivoSaida.getFileName().toString());
+    }
+
+    private void registrarBase(Path base, DocumentoLegenda gerado, boolean ehSrt, Path destino) {
         if (base == null) {
             return;
         }
         try {
             Files.createDirectories(base.getParent());
             escreverLegenda(base, gerado, ehSrt);
+            Path origem = base.getParent().resolve("ORIGEM.txt");
+            if (!base.getParent().getFileName().toString().equals(".publicado") && !Files.exists(origem)) {
+                Files.writeString(origem, "pasta de saida desta base: "
+                    + destino.toAbsolutePath().normalize().getParent() + System.lineSeparator(),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            }
         } catch (RuntimeException | java.io.IOException naoDeu) {
             log.warn("Registro da publicação {} não gravado: {}", base, naoDeu.getMessage());
             uiLogger.log("[ MESCLA ] registro da publicação NÃO gravado (" + naoDeu.getMessage()

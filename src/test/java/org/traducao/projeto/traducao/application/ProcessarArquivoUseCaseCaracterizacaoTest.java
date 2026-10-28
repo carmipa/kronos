@@ -106,6 +106,8 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
     // application.yml usa. O padrão do harness (lote de 20, sem agrupamento) é o histórico das
     // caracterizações existentes e continua valendo para elas.
     private int tamanhoLoteTeste = 20;
+    /** Pasta de saída (sob a raiz do teste) que o {@code montar} configura. */
+    private String pastaSaidaTeste = "saida";
     private boolean agruparFraseTeste = false;
     private FallbackTraducaoMaquinaPort fallbackPort = portaFallback(original -> Optional.empty());
 
@@ -950,8 +952,10 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
 
     private void apagarRegistroDaPublicacao() throws IOException {
         try (var s = Files.walk(raiz)) {
-            List<Path> bases = s.filter(p -> p.getParent() != null
-                && p.getParent().getFileName().toString().equals(".publicado")).toList();
+            // A base mora em .publicado/<pasta de saida>/ desde 28/10/2026 (INV-MESCLA-001).
+            List<Path> bases = s.filter(Files::isRegularFile)
+                .filter(p -> p.toString().contains(java.io.File.separator + ".publicado" + java.io.File.separator))
+                .filter(p -> !p.getFileName().toString().equals("ORIGEM.txt")).toList();
             assertFalse(bases.isEmpty(), "a publicacao anterior tinha de ter deixado o registro");
             for (Path b : bases) {
                 Files.delete(b);
@@ -1238,7 +1242,7 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
     void traducaoSemLoreNaoDespejaCacheNemBaseDaTraducaoComLore() throws Exception {
         Path entrada = escreverAss("ep.ass", "Hello there", "Where is Captain Bright?");
         Path cacheComLore = raiz.resolve("cache").resolve("AnimeTeste").resolve("ep.cache.json");
-        Path baseComLore = raiz.resolve("cache").resolve("AnimeTeste").resolve(".publicado").resolve("ep_PT-BR.ass");
+        Path baseComLore = ProcessarArquivoUseCase.basePorPastaDeSaida(cacheComLore, raiz.resolve("saida").resolve("ep_PT-BR.ass"));
 
         montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
         String cacheEditado = Files.readString(cacheComLore, StandardCharsets.UTF_8)
@@ -1291,7 +1295,7 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
 
         TradutorProperties props = new TradutorProperties(
             raiz.resolve("entrada").toString(),
-            raiz.resolve("saida").toString(),
+            raiz.resolve(pastaSaidaTeste).toString(),
             raiz.resolve("cache").toString(),
             tamanhoLoteTeste, List.of(), "en", "pt-BR");
         props.setAgruparFrasePartida(agruparFraseTeste);
@@ -1499,6 +1503,35 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         assertTrue(telemetriaCaptor.ultima.pendenciasPorCausa().stream()
                 .anyMatch(p -> p.causaRaiz().equals("RESPOSTA_TRUNCADA")),
             "a causa chega ao KPI: " + telemetriaCaptor.ultima.pendenciasPorCausa());
+    }
+
+    /**
+     * 28/10/2026 (INV-MESCLA-001): a base da mescla era só pelo NOME, e duas pastas de saída para
+     * a mesma entrada a dividiam. Publicar em A, corrigir no cache (2.3), publicar em B e voltar a
+     * A: a base já tinha a correção, o arquivo de A não, e a regra "mudou só no arquivo" mantinha
+     * o texto velho — a correção nunca chegava a A.
+     */
+    @Test
+    @DisplayName("correcao do cache chega as DUAS pastas de saida da mesma entrada")
+    void correcaoDoCacheChegaAsDuasPastasDeSaida() throws Exception {
+        Path entrada = escreverAss("ep.ass", "Hello there", "How are you");
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+        Path cache = raiz.resolve("cache").resolve("AnimeTeste").resolve("ep.cache.json");
+        Files.writeString(cache, Files.readString(cache, StandardCharsets.UTF_8)
+            .replaceFirst("\"traduzido\" : \"fala traduzida\"", "\"traduzido\" : \"Bom dia ajustado.\""),
+            StandardCharsets.UTF_8);
+        assertTrue(Files.readString(cache, StandardCharsets.UTF_8).contains("Bom dia ajustado."),
+            "o ensaio precisa conseguir editar o cache");
+
+        pastaSaidaTeste = "saida-b";
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+        pastaSaidaTeste = "saida";
+        montar(new FakeLlmPort()).processar(entrada, false, gerenciadorMontado.snapshotAtivo());
+
+        assertTrue(Files.readString(raiz.resolve("saida-b").resolve("ep_PT-BR.ass"), StandardCharsets.UTF_8)
+            .contains("Bom dia ajustado."), "CONTROLE: a pasta B nasce com a correcao");
+        assertTrue(Files.readString(raiz.resolve("saida").resolve("ep_PT-BR.ass"), StandardCharsets.UTF_8)
+            .contains("Bom dia ajustado."), "a correcao do cache tem de chegar a pasta A tambem");
     }
 
     /** Corretor ortográfico do caso de uso; {@code null} usa o real. */
