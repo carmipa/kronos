@@ -266,6 +266,15 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             return f;
         }
 
+        /** Nesta chamada o operador aperta "Sair" durante a requisição, como o adaptador vê. */
+        private int interrompeNaChamada = Integer.MAX_VALUE;
+
+        static FakeLlmPort queInterrompeNaChamada(int chamada) {
+            FakeLlmPort f = new FakeLlmPort(false, false);
+            f.interrompeNaChamada = chamada;
+            return f;
+        }
+
         /** Fala que contém isto volta como o adaptador devolve uma resposta TRUNCADA esgotada. */
         private String gatilhoTruncar;
 
@@ -312,6 +321,10 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
             tamanhosDeLote.add(lote.linhasOriginais().size());
             if (chamada >= caiNaChamada) {
                 return new TraducaoLote(lote.idLote(), null, false, "Connection refused (dublê: LM Studio caiu)");
+            }
+            if (chamada >= interrompeNaChamada) {
+                Thread.currentThread().interrupt();
+                return new TraducaoLote(lote.idLote(), null, false, "Tradução interrompida (dublê: Sair)");
             }
             if (gatilhoTruncar != null && lote.linhasOriginais().stream().anyMatch(l -> l.contains(gatilhoTruncar))) {
                 return TraducaoLote.recusadaPeloServidor(lote.idLote(), "Erro ao traduzir o lote " + lote.idLote()
@@ -1164,6 +1177,28 @@ class ProcessarArquivoUseCaseCaracterizacaoTest {
         assertTrue(telemetriaCaptor.ultima.errosOcorridos().stream()
                 .anyMatch(a -> a.contains("corrente de frase partida reprovada")),
             "a causa tem de ser dita: " + telemetriaCaptor.ultima.errosOcorridos());
+    }
+
+    /**
+     * 28/10/2026: o "Sair" apertado durante a retradução individual da corrente reprovada virava
+     * pendência, e o arquivo seguia para a publicação como se nada tivesse sido pedido.
+     */
+    @Test
+    @DisplayName("parada durante a retraducao da corrente encerra o arquivo como parada, sem publicar")
+    void paradaNaRetraducaoDaCorrenteEncerraComoParada() throws Exception {
+        tamanhoLoteTeste = 1;
+        agruparFraseTeste = true;
+        Path entrada = escreverAss("ep.ass", METADE_1, METADE_2);
+        FakeLlmPort llm = FakeLlmPort.queInterrompeNaChamada(2);
+        try {
+            TraducaoParcialException ex = assertThrows(TraducaoParcialException.class,
+                () -> montar(llm, new ConsoleUILoggerSilencioso()).processar(entrada, false, gerenciadorMontado.snapshotAtivo()));
+            assertTrue(ex.interrompidaPeloUsuario(), "a parada tem de chegar ao controller como parada");
+        } finally {
+            Thread.interrupted();
+        }
+        assertEquals(List.of(2), llm.tamanhosDeLote.subList(0, 1), "a corrente foi junta");
+        assertFalse(Files.exists(raiz.resolve("saida").resolve("ep_PT-BR.ass")), "nada publicado como final");
     }
 
     /**

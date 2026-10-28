@@ -482,14 +482,20 @@ public class TradutorLotesService {
 
         Map<String, String> mascaradoPorRepresentante = new HashMap<>();
         coletarMascaradoPorRepresentante(resultados, chunksRepresentantes, mascaradoPorRepresentante, procedencia);
-        if (propriedades.agruparFrasePartida()) {
-            retraduzirCorrentesReprovadas(chunksRepresentantes, textoMascaradoPorOriginal,
+        boolean paradaPedida = propriedades.agruparFrasePartida()
+            && retraduzirCorrentesReprovadas(chunksRepresentantes, textoMascaradoPorOriginal,
                 mascaradoPorRepresentante, promptCongelado, procedencia, partesPorLinhaEnviada);
-        }
         procedencia.transferirPara(desfecho, textosPendentes, representanteDeOriginal);
-        return expandirParaCamadas(
+        Map<String, String> traduzidas = expandirParaCamadas(
             textosPendentes, representanteDeOriginal, mascaradoPorRepresentante, tagsPorTexto,
             quebrasPorOriginal, semTagsPorOriginal, avisos, desfecho);
+        if (paradaPedida) {
+            // O mesmo caminho da parada no laço principal: o caso de uso salva o parcial no cache
+            // e o lote sai [PARADO]/CANCELADO, em vez de o arquivo seguir para a publicação.
+            throw new TraducaoParcialException("Tradução interrompida pelo usuário.", traduzidas, null)
+                .marcarInterrompidaPeloUsuario();
+        }
+        return traduzidas;
     }
 
     /**
@@ -584,14 +590,17 @@ public class TradutorLotesService {
      * tradução. A barra de progresso não contabiliza esta passada extra; o total exibido pode
      * ficar aquém do executado quando há correntes reprovadas.
      */
-    private void retraduzirCorrentesReprovadas(
+    /**
+     * @return {@code true} quando o operador pediu a parada durante a retradução individual
+     */
+    private boolean retraduzirCorrentesReprovadas(
             List<List<String>> chunksRepresentantes, Map<String, String> textoMascaradoPorOriginal,
             Map<String, String> mascaradoPorRepresentante, String promptCongelado,
             ProcedenciaPorRepresentante procedencia, Map<String, List<String>> partesPorLinhaEnviada) {
         List<String> aRefazer = correntesReprovadas(chunksRepresentantes, textoMascaradoPorOriginal,
             mascaradoPorRepresentante);
         if (aRefazer.isEmpty()) {
-            return;
+            return false;
         }
         uiLogger.log("[ WARN ] " + aRefazer.size()
             + " fala(s) de frase partida voltaram ao fluxo individual (guarda de deslocamento).");
@@ -621,8 +630,12 @@ public class TradutorLotesService {
             if (e instanceof InterruptedException
                     || (e instanceof TraducaoParcialException p && p.interrompidaPeloUsuario())) {
                 Thread.currentThread().interrupt();
+                // PARADA PEDIDA NÃO É PENDÊNCIA (auditoria de 28/10/2026): devolvida ao chamador,
+                // que encerra o arquivo pelo caminho da parada em vez de seguir para a publicação.
+                return true;
             }
         }
+        return false;
     }
 
     /**
