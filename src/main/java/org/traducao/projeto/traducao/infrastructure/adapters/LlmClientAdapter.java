@@ -542,6 +542,14 @@ public class LlmClientAdapter implements LlmPort {
                         break;
                     }
                 }
+            } catch (InterruptedException ie) {
+                // O "Sair" chega aqui enquanto o post bloqueia. O catch genérico abaixo o engolia:
+                // o flag sumia, o laço repetia a chamada e o chamador seguia para a próxima fala
+                // como se o modelo só não tivesse respondido (auditoria de 28/10/2026). Mesmo
+                // tratamento do traduzir(): religa o flag e desiste já.
+                Thread.currentThread().interrupt();
+                log.warn("Chamada LLM interrompida (cancelamento cooperativo) — abortando retries.");
+                break;
             } catch (Exception e) {
                 log.warn("Falha na chamada LLM (tentativa {}/{}): {}",
                     tentativa, MAX_TENTATIVAS_REVISAO, e.getMessage());
