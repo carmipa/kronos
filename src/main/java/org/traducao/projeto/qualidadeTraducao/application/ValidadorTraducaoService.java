@@ -1495,7 +1495,7 @@ public class ValidadorTraducaoService {
         if (trocou(original, traduzido, presente, ausente) == null) {
             return null;
         }
-        return Pattern.compile(INICIO_DE_TERMO + FronteiraTermoAss.corpo(ausente) + "(?![\\p{L}\\p{N}])")
+        return padraoTermo(ausente, false)
             .matcher(traduzido).replaceAll(r -> Matcher.quoteReplacement(
                 FronteiraTermoAss.substituirPreservandoQuebra(r.group(), presente)));
     }
@@ -1534,9 +1534,7 @@ public class ValidadorTraducaoService {
     /** Fronteira de palavra sobre o termo inteiro, IGNORANDO a caixa — só para troca de entidade. */
     private static boolean contemTermoIgnorandoCaixa(String texto, String termo) {
         return texto != null && termo != null && !termo.isBlank()
-            && Pattern.compile(INICIO_DE_TERMO + FronteiraTermoAss.corpo(termo) + "(?![\\p{L}\\p{N}])",
-                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)
-                .matcher(texto).find();
+            && padraoTermo(termo, true).matcher(texto).find();
     }
 
     /** Remove as ocorrências do termo por fronteira de palavra, preservando o resto do texto. */
@@ -1544,15 +1542,30 @@ public class ValidadorTraducaoService {
         if (texto == null || termo == null || termo.isBlank()) {
             return texto == null ? "" : texto;
         }
-        return Pattern.compile(INICIO_DE_TERMO + FronteiraTermoAss.corpo(termo) + "(?![\\p{L}\\p{N}])")
-            .matcher(texto).replaceAll(" ");
+        return padraoTermo(termo, false).matcher(texto).replaceAll(" ");
     }
 
     /** Fronteira de palavra sobre o termo inteiro, sensível à caixa (separa "Four" de "four"). */
     private static boolean contemTermo(String texto, String termo) {
         return texto != null && termo != null && !termo.isBlank()
-            && Pattern.compile(INICIO_DE_TERMO + FronteiraTermoAss.corpo(termo) + "(?![\\p{L}\\p{N}])")
-                .matcher(texto).find();
+            && padraoTermo(termo, false).matcher(texto).find();
+    }
+
+    /**
+     * Padrões de termo já compilados, por termo e caixa. O validador roda várias vezes por
+     * tentativa e de novo no portão final, e cada chamada recompilava um {@link Pattern} por termo
+     * da lore (auditoria de 28/10/2026). Os termos são limitados pelas lores, então o mapa não
+     * cresce sem fim; o padrão é o mesmo de antes, caractere a caractere.
+     */
+    private static final java.util.concurrent.ConcurrentHashMap<String, Pattern> PADROES_DE_TERMO =
+        new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static Pattern padraoTermo(String termo, boolean ignorarCaixa) {
+        return PADROES_DE_TERMO.computeIfAbsent((ignorarCaixa ? "i\u0000" : "s\u0000") + termo,
+            chave -> ignorarCaixa
+                ? Pattern.compile(INICIO_DE_TERMO + FronteiraTermoAss.corpo(termo) + "(?![\\p{L}\\p{N}])",
+                    Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)
+                : Pattern.compile(INICIO_DE_TERMO + FronteiraTermoAss.corpo(termo) + "(?![\\p{L}\\p{N}])"));
     }
 
     /**
@@ -1595,10 +1608,7 @@ public class ValidadorTraducaoService {
             .toList();
         String resultado = texto;
         for (String termo : ordenados) {
-            Pattern padrao = Pattern.compile(
-                INICIO_DE_TERMO + FronteiraTermoAss.corpo(termo) + "(?![\\p{L}\\p{N}])",
-                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-            Matcher matcher = padrao.matcher(resultado);
+            Matcher matcher = padraoTermo(termo, true).matcher(resultado);
             if (matcher.find()) {
                 resultado = matcher.reset().replaceAll(" ");
             }
